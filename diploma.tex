@@ -17,6 +17,7 @@
 
 \usepackage{color}
 \usepackage{soul}
+\usepackage{array}
 
 \usepackage[
 backend=biber,
@@ -206,7 +207,7 @@ sorting=nty,
 	licenco, ki je enaka tej.
 	Podrobnosti licence so dostopne na spletni strani \href{http://creativecommons.si}{creativecommons.si} ali na Inštitutu za
 	intelektualno lastnino, Streliška 1, 1000 Ljubljana.
-																																																																												
+																																																																																																																																																																																																																		
 	\vspace*{1cm}
 	\begin{center}% 0.66 / 0.89 = 0.741573033707865
 		\CcImageCc{0.741573033707865}\hspace*{1ex}\CcImageBy{1}\hspace*{1ex}\CcImageSa{1}%
@@ -357,7 +358,7 @@ Moderni računalniki vsebujejo mnogo različnih komponent in se povezujejo na ra
 Pri takem obsegu in kompleksnosti računalniških sistemov je praktično nepredstavljivo, da bi vsak programer poznal vse podrobnosti delovanja vseh komponent.
 Zato se je pojavila potreba po programu, katerega naloga je upravljanje z viri sistema in abstrakcija dostopa do le teh -- \textbf{operacijski sistem}.
 
-Večina procesorjev ima dva načina delovanja: \textbf{uporabniški} in \textbf{jedrni} (oz. privilegiran) način.
+Večina modernih procesorjev ima vsaj dva načina delovanja: \textbf{uporabniški} in \textbf{jedrni} (oz. privilegiran) način.
 Operacijski sistem se (večinoma) izvaja v jedrnem načinu, kjer ima dostop do vseh virov sistema in lahko izvede kateri koli ukaz v ukaznem naboru procesorja.
 Preostanek programske opreme pa se izvaja v uporabniškem načinu, kjer ima dostop le do omejenega ukaznega nabora.
 
@@ -428,15 +429,113 @@ Ker je sistemskih klicev ogromno, jih bomo v nadaljevanju razdelili na šest kat
 
 \section{Procesni nadzor}
 
+Procesni nadzor je ena ključnih funkcij večopravilnega operacijskega sistema.
+Ta kategorija vključuje sistemske klice za:
+\begin{itemize}
+	\item ustvarjanje in uničevanje procesov,
+	\item nalaganje in izvajanje programov,
+	\item pridobivanje in nastavljanje atributov procesov,
+	\item sinhronizacijo procesov,
+	\item dodeljevanje in sproščanje pomnilnika. \cite{Silberschatz_Galvin_Gagne_2018}
+\end{itemize}
+
+\begin{center}
+	\begin{tabular}{ c|c|c }
+		Function       & Linux & Windows \\
+		\hline
+		Create Process &       &         \\
+		Kill Process   &       &         \\
+		Close File     &       &         \\
+		Close File     &       &         \\
+	\end{tabular}
+\end{center}
+
 \section{Upravljanje datotek}
+
+Ta kategorija vključuje sistemske klice za:
+\begin{itemize}
+	\item ustvarjanje in brisanje datotek,
+	\item odpiranje in zapiranje datotek,
+	\item branje, pisanje in premikanje datotek,
+	\item pridobivanje in nastavljanje atributov datotek. \cite{Silberschatz_Galvin_Gagne_2018}
+\end{itemize}
+
+\begin{center}
+	\begin{tabular}{ p{3.7cm}|p{2.5cm}|p{6cm} }
+		Funkcija           & Linux                                                                                          & Windows                                                           \\
+		\hline
+		Ustvari            & \verb|creat|\newline\verb|mkdir|                                                               & \verb|CreateFile|\newline\verb|CreateDirectory|                   \\
+		Premakni *         & \verb|rename|                                                                                  & \verb|MoveFile|                                                   \\
+		Odstrani *         & \verb|unlink|\newline\verb|rmdir|                                                              & \verb|DeleteFile|\newline\verb|RemoveDirectory|                   \\
+		Odpri              & \verb|open|                                                                                    & \verb|CreateFile|                                                 \\
+		Zapri              & \verb|close|                                                                                   & \verb|CloseHandle|                                                \\
+		Beri               & \verb|read|                                                                                    & \verb|ReadFile|                                                   \\
+		Piši              & \verb|write|                                                                                   & \verb|WriteFile|                                                  \\
+		Premakni kazalnik  & \verb|lseek|                                                                                   & \verb|SetFilePointer|                                             \\
+		Pot bližnjice     & \verb|readlink|                                                                                & \verb|GetFinalPathNameByHandle|                                   \\
+		Ustvari bližnjico & \verb|link|\newline\verb|symlink|                                                              & \verb|CreateHardLink|\newline\verb|CreateSymbolicLink|            \\
+		Zakleni            & \verb|flock|                                                                                   & \verb|LockFile|                                                   \\
+		Odkleni            & \verb|flock|                                                                                   & \verb|UnlockFile|                                                 \\
+		Pridobi atribute   & \verb|fstat|\newline\verb|stat|\newline\verb|lstat|\newline\verb|utime|\newline\verb|getxattr| & \verb|GetFileInformationByHandle|\newline\verb|GetFileAttributes| \\
+		Nastavi atribute   & \verb|setxattr|                                                                                & \verb|SetFileInformationByHandle|\newline\verb|SetFileAttributes| \\
+	\end{tabular}
+\end{center}
 
 \section{Upravljanje naprav}
 
+Ta kategorija vključuje sistemske klice za:
+\begin{itemize}
+	\item zahtevanje in sprostitev naprav,
+	\item branje, pisanje in premikanje naprav,
+	\item pridobivanje in nastavljanje atributov naprav,
+	\item logično povezovanje naprav. \cite{Silberschatz_Galvin_Gagne_2018}
+\end{itemize}
+
 \section{Vzdrževanje informacij o sistemu}
+
+Ta kategorija vključuje sistemske klice za:
+\begin{itemize}
+	\item pridobivanje in nastavljanje časa in datuma,
+	\item pridobivanje in nastavljanje sistemskih parametrov,
+	\item pridobivanje in nastavljanje atributov procesov, datotek in naprav. \cite{Silberschatz_Galvin_Gagne_2018}
+\end{itemize}
 
 \section{Komunikacija med procesi}
 
+Ta kategorija vključuje sistemske klice za:
+\begin{itemize}
+	\item ustvarjanje in uničevanje komunikacijskih poti,
+	\item pošiljanje in prejemanje sporočil,
+	\item prenos statusov,
+	\item povezovanje oddaljenih naprav. \cite{Silberschatz_Galvin_Gagne_2018}
+\end{itemize}
+
 \section{Zaščita}
+
+Ta kategorija vključuje sistemske klice za pridobivanje in nastavljanje pravic nad datotekami. \cite{Silberschatz_Galvin_Gagne_2018}
+
+\chapter{Praktična primerjava}
+
+\section{Metodologija}
+
+Primerjavo izvajamo na identičnih virtualnih sistemih, na Proxmox gostitelju (QEMU), s sledečo konfiguracijo:
+\begin{itemize}
+	\item i440fx sistemski emulator (UEFI BIOS)
+	\item 4 jedra procesorja (Intel\textsuperscript{\textregistered} Core\textsuperscript{\texttrademark} i7-12700H)
+	\item 8 GB pomnilnika (Corsair\textsuperscript{\textregistered} Vengeance\textsuperscript{\textregistered} LPX 64GB DDR4 3200 MHz C16)
+	\item 100 GB diska (Crucial\textsuperscript{\textregistered} P5 Plus Gen4 NVMe SSD)
+\end{itemize}
+
+Za operacijska sistema uporabljamo:
+\begin{itemize}
+	\item Windows 10 Professional, verzija 22H2
+	\item Ubuntu Desktop 22.04 LTS
+\end{itemize}
+Operacijska sistema sta bila izbrana na podlagi popularnosti in razširjenosti v času pisanja, oba imata namreč največji tržni delež v svoji kategoriji.
+
+\section{Meritve}
+
+\chapter{Zaključek}
 
 %\cleardoublepage
 %\addcontentsline{toc}{chapter}{Literatura}
