@@ -207,7 +207,7 @@ sorting=nty,
 	licenco, ki je enaka tej.
 	Podrobnosti licence so dostopne na spletni strani \href{http://creativecommons.si}{creativecommons.si} ali na Inštitutu za
 	intelektualno lastnino, Streliška 1, 1000 Ljubljana.
-																																																																																																																																																																																																																		
+																																																																																																																																																																																																																																																	
 	\vspace*{1cm}
 	\begin{center}% 0.66 / 0.89 = 0.741573033707865
 		\CcImageCc{0.741573033707865}\hspace*{1ex}\CcImageBy{1}\hspace*{1ex}\CcImageSa{1}%
@@ -440,13 +440,11 @@ Ta kategorija vključuje sistemske klice za:
 \end{itemize}
 
 \begin{center}
-	\begin{tabular}{ c|c|c }
-		Function       & Linux & Windows \\
+	\begin{tabular}{ p{3.7cm}|p{2.5cm}|p{6cm} }
+		Function & Linux   & Windows \\
 		\hline
-		Create Process &       &         \\
-		Kill Process   &       &         \\
-		Close File     &       &         \\
-		Close File     &       &         \\
+		Ustvari  & \verb|| & \verb|| \\
+		Ustavi   & \verb|| & \verb|| \\
 	\end{tabular}
 \end{center}
 
@@ -481,6 +479,8 @@ Ta kategorija vključuje sistemske klice za:
 	\end{tabular}
 \end{center}
 
+t.i. opisnik datoteke (\textit{angl. file descriptor -- abbr. fd})
+
 \section{Upravljanje naprav}
 
 Ta kategorija vključuje sistemske klice za:
@@ -491,6 +491,21 @@ Ta kategorija vključuje sistemske klice za:
 	\item logično povezovanje naprav. \cite{Silberschatz_Galvin_Gagne_2018}
 \end{itemize}
 
+Tu pričnemo opažati drastične razlike med arhitekturo jeder Linux in Windows. Osredotočimo se na upravljanje pomnilnika, saj je to ena izmed naprav, ki je skupna obema jedroma, medtem ko so druge odvisne od strojne opreme.
+
+Linux za upravljanje z napravami namreč uporablja datotečni sistem, kar pomeni, da lahko naprave odpiramo in z njimi komuniciramo kot z običajnimi datotekami.
+Za večino naprednejših operacij pa nam ponuja sistemski klic \verb|mmap|, ki nam omogoča preslikavo datoteke v pomnilnik in s tem direkten dostop do njenih vsebin.
+Na primer za ustvarjanje navideznega pomnilnika (v Windows funkcija \verb|VirtualAlloc|), odpremo datoteko \verb|/dev/zero| in jo preslikamo v pomnilnik z \verb|mmap|.
+Za dodeljevanje pomnilnika iz kopice (\textit{angl. heap}), pa lahko uporabimo sistemski klic \verb|brk| ali funkcijo \verb|sbrk|, ki preprosto premakne konec ``podatkovnega prostora'' procesa, ki ga potem lahko uporabimo za poljubne podatke, vendar nam dokumentacija priporoča uporabo funkcije standardne C knjižnice -- \verb|malloc|, ki pa je precej bolj kompleksna in odvisna od implementacije knjižnice.
+Pri direktnem nadzoru naprave oz. ``posebne datoteke'' pa nam Linux ponuja funkcije \verb|ioctl| in \verb|fcntl|, ki nam omogočata pošiljanje ukazov napravi.
+
+Windows pa za upravljanje z napravami uporablja mnoge posebne funkcije, ki so del Windows API-ja.
+Za navidezni pomnilnik na primer ponuja funkcijo \verb|VirtualAlloc|, za dodeljevanja pomnilnika iz kopice pa funkcije \verb|GlobalAlloc|, \verb|LocalAlloc| in \verb|HeapAlloc| / \verb|HeapCreate|, pri čemer je \verb|HeapAlloc| najbolj osnovna, druge pa nam omogočajo napredne funkcionalnosti kot premikanje dodeljenega pomnilnika in podobno.
+Podobno kot Linux, pa nam tudi Windows ponuja funkcijo za preslikavo datoteke v pomnilnik -- \verb|CreateFileMapping| in \verb|MapViewOfFile|.
+
+Predvsem iz primera z dodeljevanjem pomnilnika iz kopice lahko vidimo, da Windows API ponuja več funkcij za isto stvar, kar je posledica večje kompleksnosti in abstrakcije, ki jo ponuja Windows.
+To je lahko v nekaterih primerih prednost, saj več abstrakcije (običajno) pomeni boljšo uporabniško izkušnjo (npr. ne potrebujemo sami slediti naslovom v pomnilniku), spet v drugih pa slabost, saj skrije podrobnosti implementacije in nam prepušča manj kontrole.
+
 \section{Vzdrževanje informacij o sistemu}
 
 Ta kategorija vključuje sistemske klice za:
@@ -499,6 +514,14 @@ Ta kategorija vključuje sistemske klice za:
 	\item pridobivanje in nastavljanje sistemskih parametrov,
 	\item pridobivanje in nastavljanje atributov procesov, datotek in naprav. \cite{Silberschatz_Galvin_Gagne_2018}
 \end{itemize}
+
+\begin{center}
+	\begin{tabular}{ p{3.7cm}|p{2.5cm}|p{6cm} }
+		Function      & Linux   & Windows \\
+		\hline
+		Pridobi Datum & \verb|| & \verb|| \\
+	\end{tabular}
+\end{center}
 
 \section{Komunikacija med procesi}
 
@@ -510,9 +533,25 @@ Ta kategorija vključuje sistemske klice za:
 	\item povezovanje oddaljenih naprav. \cite{Silberschatz_Galvin_Gagne_2018}
 \end{itemize}
 
+\begin{center}
+	\begin{tabular}{ p{3.7cm}|p{2.5cm}|p{6cm} }
+		Function          & Linux   & Windows \\
+		\hline
+		Ustvari vtičnico & \verb|| & \verb|| \\
+	\end{tabular}
+\end{center}
+
 \section{Zaščita}
 
 Ta kategorija vključuje sistemske klice za pridobivanje in nastavljanje pravic nad datotekami. \cite{Silberschatz_Galvin_Gagne_2018}
+
+\begin{center}
+	\begin{tabular}{ p{3.7cm}|p{2.5cm}|p{6cm} }
+		Function       & Linux   & Windows \\
+		\hline
+		Create Process & \verb|| & \verb|| \\
+	\end{tabular}
+\end{center}
 
 \chapter{Praktična primerjava}
 
