@@ -18,6 +18,9 @@
 \usepackage{color}
 \usepackage{soul}
 \usepackage{array}
+\usepackage{tikz}
+
+\tikzstyle{arrow} = [thick,->,>=stealth]
 
 \usepackage[
 backend=biber,
@@ -207,7 +210,7 @@ sorting=nty,
 	licenco, ki je enaka tej.
 	Podrobnosti licence so dostopne na spletni strani \href{http://creativecommons.si}{creativecommons.si} ali na Inštitutu za
 	intelektualno lastnino, Streliška 1, 1000 Ljubljana.
-																																																																																																																																																																																																																																																	
+																																																																																																																																																																																																																																																																																																																													
 	\vspace*{1cm}
 	\begin{center}% 0.66 / 0.89 = 0.741573033707865
 		\CcImageCc{0.741573033707865}\hspace*{1ex}\CcImageBy{1}\hspace*{1ex}\CcImageSa{1}%
@@ -367,6 +370,16 @@ Upravljanje z viri je tako uporabniku kot tudi programerju skrito in v večini t
 Abstrakcija dostopa do strojne opreme pa je implementirana s \textbf{sistemskimi klici}.
 \cite{Tanenbaum_Bos_2023}
 
+\section{Pregled operacijskih sistemov}
+
+\subsection{Linux}
+
+TODO: "everything is a file", razvoj Linux jedra, opisnik datoteke (\textit{angl. file descriptor -- abbr. fd}), virtualni datotečni sistem, POSIX standard
+
+\subsection{Windows}
+
+TODO: ANSI in Unicode ukazi, omemba teže NT jedra v imenu kompatibilnosti, razvoj (zgodovina) NT jedra
+
 \section{Sistemski klici}
 
 Sistemski klici so vmesnik do storitev, ki jih ponuja jedro operacijskega sistema, kot na primer ustvarjanje procesov, branje in pisanje datotek, komunikacijo med procesi, itd.
@@ -429,8 +442,33 @@ Ker je sistemskih klicev ogromno, jih bomo v nadaljevanju razdelili na šest kat
 
 \section{Procesni nadzor}
 
-Procesni nadzor je ena ključnih funkcij večopravilnega operacijskega sistema.
-Ta kategorija vključuje sistemske klice za:
+Proces je program (strojna koda) v izvajanju, katerega status predstavljajo programski števec in vsebina procesorskih registrov.
+Proces ima tudi svoj prostor v pomnilniku, ki je običajno razdeljen na več segmentov:
+\begin{itemize}
+	\item \textbf{podatkovni} (\textit{angl. data}) -- vsebuje vrednosti globalnih spremenljivk,
+	\item \textbf{programski} (\textit{angl. text}) -- vsebuje strojno kodo programa,
+	\item \textbf{sklad} (\textit{angl. stack}) -- vsebuje vrednosti lokalnih spremenljivk in povratne naslove funkcij in
+	\item \textbf{kopica} (\textit{angl. heap}) -- dinamično dodeljen pomnilnik. \cite{Silberschatz_Galvin_Gagne_2018}
+\end{itemize}
+
+\begin{figure}[h!]
+	\begin{center}
+		\begin{tikzpicture}
+			\filldraw[fill=blue!20!white] (0, 0) rectangle (4, 8);
+			\draw node at (-1, 0) {0};
+			\draw node at (-1, 8) {max};
+			\filldraw[fill=gray!40!white] (0, 8) rectangle (4, 6.5) node[pos=.5] {stack};
+			\draw[arrow] (2, 6.5) -- (2, 5.8);
+			\draw[arrow] (2, 3.5) -- (2, 4.2);
+			\filldraw[fill=gray!40!white] (0, 2) rectangle (4, 3.5) node[pos=.5] {heap};
+			\filldraw[fill=gray!40!white] (0, 1) rectangle (4, 2) node[pos=.5] {data};
+			\filldraw[fill=gray!40!white] (0, 0) rectangle (4, 1) node[pos=.5] {text};
+		\end{tikzpicture}
+	\end{center}
+	\caption{Segmenti pomnilnika procesa}
+\end{figure}
+
+Sistemski klici za procesni nadzor skrbijo za:
 \begin{itemize}
 	\item ustvarjanje in uničevanje procesov,
 	\item nalaganje in izvajanje programov,
@@ -439,14 +477,31 @@ Ta kategorija vključuje sistemske klice za:
 	\item dodeljevanje in sproščanje pomnilnika. \cite{Silberschatz_Galvin_Gagne_2018}
 \end{itemize}
 
-\begin{center}
-	\begin{tabular}{ p{3.7cm}|p{2.5cm}|p{6cm} }
-		Function & Linux   & Windows \\
-		\hline
-		Ustvari  & \verb|| & \verb|| \\
-		Ustavi   & \verb|| & \verb|| \\
-	\end{tabular}
-\end{center}
+\begin{table}[h!]
+	\begin{center}
+		\begin{tabular}{ p{3.7cm}|p{2.5cm}|p{6cm} }
+			Function          & Linux                                                  & Windows                                                                                                                                                                         \\
+			\hline
+			Ustvari proces    & \verb|fork|\newline\verb|vfork|                        & \verb|CreateProcess|\newline\verb|CreateProcessAsUser|\newline\verb|CreateProcessWithLogonW|\newline\verb|CreateProcessWithTokenW|                                              \\
+			Ustavi proces     & \verb|exit|                                            & \verb|ExitProcess|                                                                                                                                                              \\
+			Ubij proces       & \verb|kill|                                            & \verb|TerminateProcess|                                                                                                                                                         \\
+			Naloži program   & \verb|execve|                                          & \textit{naloženo pri ustvarjanju}                                                                                                                                              \\
+			Sinhronizacija    & \verb|wait|\newline\verb|waitpid|\newline\verb|waitid| & \verb|WaitForSingleObject|\newline\verb|WaitForMultipleObjects|                                                                                                                 \\
+			Pridobivanje info & \verb|getpid|\newline\verb|getppid|                    & \verb|GetCurrentProcess|\newline\verb|GetCurrentProcessId|\newline\verb|GetCommandLine|\newline\verb|GetCurrentProcessorNumber|\newline\verb|GetEnvironmentVariable|\newline... \\
+		\end{tabular}
+	\end{center}
+	\label{tab:process_management}
+	\caption{Povzetek sistemskih klicev za procesni nadzor}
+\end{table}
+
+V tabeli \ref{tab:process_management} vidimo, da je velik del sistemskih klicev za procesni nadzor simetričen med obema operacijskima sistemoma.
+Opazimo pa, da Windows ne ponuja sistemskih klicev za nalaganje programov, saj se to zgodi ob ustvarjanju procesa, medtem ko Linux ustvari nov proces s kloniranjem trenutnega procesa in nato omogoča nalaganje drugega programa.
+Prav tako opazimo, da Windows ponuja več sistemskih klicev za pridobivanje informacij o procesu, Linux pa te informacije hrani v virtualnem datotečnem sistemu in te informacije za dan proces pridobivamo iz datotek v imeniku \verb|/proc/{pid}/|.
+
+Do glavnih razlik pa pride pri dodeljevanju in sproščanju pomnilnika. Pri lokalnih in globalnih spremenljivkah ni razlik, namreč globalne so shranjene v segmentu podatkov, lokalne pa se nalagajo na sklad.
+Seveda pa sklad ni neomejen in zahteva vnaprej definirane velikosti spremenljivk (ob prevajanju v strojno kodo), zato za dinamične spremenljivke uporabljamo kopico.
+Za zasedanje kopice pa v Linuxu uporabljamo sistemski klic \verb|brk| in funkcijo \verb|sbrk|, ki premakne konec podatkovnega prostora procesa, kar je precej zapleten proces, namreč od nas zahteva, da sledimo zasedenemu prostoru in ga ročno čistimo ter upravljamo. Linux dokumentacija namesto priporoča uporabo funkcije standardne C knjižnice -- \verb|malloc|, ki pa je precej bolj kompleksna in odvisna od implementacije knjižnice.
+V kontrastu nam Windows API ponuja funkcije \verb|GlobalAlloc|, \verb|LocalAlloc|, \verb|HeapAlloc| / \verb|HeapCreate| in \verb|VirtualAlloc| ter pripadajoče sprostitvene funkcije, brez potrebe po zunanji knjižnici in ročnem upravljanju podatkovnega prostora.
 
 \section{Upravljanje datotek}
 
@@ -479,8 +534,6 @@ Ta kategorija vključuje sistemske klice za:
 	\end{tabular}
 \end{center}
 
-t.i. opisnik datoteke (\textit{angl. file descriptor -- abbr. fd})
-
 \section{Upravljanje naprav}
 
 Ta kategorija vključuje sistemske klice za:
@@ -494,17 +547,15 @@ Ta kategorija vključuje sistemske klice za:
 Tu pričnemo opažati drastične razlike med arhitekturo jeder Linux in Windows. Osredotočimo se na upravljanje pomnilnika, saj je to ena izmed naprav, ki je skupna obema jedroma, medtem ko so druge odvisne od strojne opreme.
 
 Linux za upravljanje z napravami namreč uporablja datotečni sistem, kar pomeni, da lahko naprave odpiramo in z njimi komuniciramo kot z običajnimi datotekami.
+Pri direktnem nadzoru naprave oz. ``posebne datoteke'' nam Linux ponuja funkcijo \verb|ioctl|, ki nam omogoča pošiljanje ukazov napravi.
 Za večino naprednejših operacij pa nam ponuja sistemski klic \verb|mmap|, ki nam omogoča preslikavo datoteke v pomnilnik in s tem direkten dostop do njenih vsebin.
-Na primer za ustvarjanje navideznega pomnilnika (v Windows funkcija \verb|VirtualAlloc|), odpremo datoteko \verb|/dev/zero| in jo preslikamo v pomnilnik z \verb|mmap|.
-Za dodeljevanje pomnilnika iz kopice (\textit{angl. heap}), pa lahko uporabimo sistemski klic \verb|brk| ali funkcijo \verb|sbrk|, ki preprosto premakne konec ``podatkovnega prostora'' procesa, ki ga potem lahko uporabimo za poljubne podatke, vendar nam dokumentacija priporoča uporabo funkcije standardne C knjižnice -- \verb|malloc|, ki pa je precej bolj kompleksna in odvisna od implementacije knjižnice.
-Pri direktnem nadzoru naprave oz. ``posebne datoteke'' pa nam Linux ponuja funkcije \verb|ioctl| in \verb|fcntl|, ki nam omogočata pošiljanje ukazov napravi.
+TODO -- Drivers \cite{Corbet_Kroah-Hartman_Rubini_2005}
 
 Windows pa za upravljanje z napravami uporablja mnoge posebne funkcije, ki so del Windows API-ja.
-Za navidezni pomnilnik na primer ponuja funkcijo \verb|VirtualAlloc|, za dodeljevanja pomnilnika iz kopice pa funkcije \verb|GlobalAlloc|, \verb|LocalAlloc| in \verb|HeapAlloc| / \verb|HeapCreate|, pri čemer je \verb|HeapAlloc| najbolj osnovna, druge pa nam omogočajo napredne funkcionalnosti kot premikanje dodeljenega pomnilnika in podobno.
-Podobno kot Linux, pa nam tudi Windows ponuja funkcijo za preslikavo datoteke v pomnilnik -- \verb|CreateFileMapping| in \verb|MapViewOfFile|.
+TODO -- Drivers
 
-Predvsem iz primera z dodeljevanjem pomnilnika iz kopice lahko vidimo, da Windows API ponuja več funkcij za isto stvar, kar je posledica večje kompleksnosti in abstrakcije, ki jo ponuja Windows.
-To je lahko v nekaterih primerih prednost, saj več abstrakcije (običajno) pomeni boljšo uporabniško izkušnjo (npr. ne potrebujemo sami slediti naslovom v pomnilniku), spet v drugih pa slabost, saj skrije podrobnosti implementacije in nam prepušča manj kontrole.
+Vidimo, da Windows API ponuja več funkcij in različnih abstrakcij, kar pomeni večjo kompleksnost.
+To je lahko v nekaterih primerih prednost, saj več abstrakcije (običajno) pomeni boljšo uporabniško izkušnjo, spet v drugih pa slabost, saj skrije podrobnosti implementacije in nam prepušča manj nadzora.
 
 \section{Vzdrževanje informacij o sistemu}
 
