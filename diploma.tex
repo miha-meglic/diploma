@@ -19,8 +19,26 @@
 \usepackage{soul}
 \usepackage{array}
 \usepackage{tikz}
+\usepackage{listings}
 
 \tikzstyle{arrow} = [thick,->,>=stealth]
+
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+\lstset{
+	backgroundcolor=\color{backcolour},   
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\footnotesize,
+	breaklines=true,
+	tabsize=4,
+	numbers=left
+}
 
 \usepackage[
 backend=biber,
@@ -210,7 +228,7 @@ sorting=nty,
 	licenco, ki je enaka tej.
 	Podrobnosti licence so dostopne na spletni strani \href{http://creativecommons.si}{creativecommons.si} ali na Inštitutu za
 	intelektualno lastnino, Streliška 1, 1000 Ljubljana.
-																																																																																																																																																																																																																																																																																																																																																																																											
+																																																																																																																																																																																																																																																																																																																																																																																																																																	
 	\vspace*{1cm}
 	\begin{center}% 0.66 / 0.89 = 0.741573033707865
 		\CcImageCc{0.741573033707865}\hspace*{1ex}\CcImageBy{1}\hspace*{1ex}\CcImageSa{1}%
@@ -723,8 +741,40 @@ Za operacijska sistema uporabljamo:
 \end{itemize}
 Operacijska sistema sta bila izbrana na podlagi popularnosti in razširjenosti v času pisanja, oba imata namreč največji tržni delež v svoji kategoriji.
 
-Merili bomo čas izvajanja in število ukazov, ki jih moramo izvesti, da pridemo do želenega rezultata.
-Pri tem bomo za meritev časa program izvedli dvajsetkrat in izračunali povprečje, da se izognemo naključnim napakam.
+Merimo čas izvajanja in število ukazov, ki se morajo izvesti, da pridemo do želenega rezultata.
+Za meritev časa program izvedemo dvajsetkrat in izračunamo povprečje, da se izognemo naključnim napakam.
+
+\section{Programi}
+
+\subsection{Procesni nadzor}
+
+\subsection{Upravljanje datotek}
+
+\textbf{Scenarij:}
+\begin{enumerate}
+	\item Ustvari datoteko \texttt{test.txt} v korenskem imeniku.
+	\item Zapiši 500 znakov, vsakega posebej.
+	\item Premakni kazalnik v sredino datoteke.
+	\item Zapiši še 500 znakov, vsakega posebej.
+	\item Premakni kazalnik na začetek datoteke.
+	\item Preberi 100 znakov in jih izpiši.
+	\item Izpiši atribute datoteke.
+	\item Izbriši datoteko.
+\end{enumerate}
+
+\textbf{Linux program:}
+\lstinputlisting[language=C++]{code/linux/02_files.c}
+
+\textbf{Windows program:}
+\lstinputlisting[language=C++]{code/windows/02_files.cpp}
+
+\subsection{Upravljanje naprav}
+
+\subsection{Vzdrževanje informacij o sistemu}
+
+\subsection{Komunikacija med procesi}
+
+\subsection{Zaščita}
 
 \section{Meritve}
 
