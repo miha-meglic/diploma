@@ -210,7 +210,7 @@ sorting=nty,
 	licenco, ki je enaka tej.
 	Podrobnosti licence so dostopne na spletni strani \href{http://creativecommons.si}{creativecommons.si} ali na Inštitutu za
 	intelektualno lastnino, Streliška 1, 1000 Ljubljana.
-																																																																																																																																																																																																																																																																																																																																											
+																																																																																																																																																																																																																																																																																																																																																																											
 	\vspace*{1cm}
 	\begin{center}% 0.66 / 0.89 = 0.741573033707865
 		\CcImageCc{0.741573033707865}\hspace*{1ex}\CcImageBy{1}\hspace*{1ex}\CcImageSa{1}%
@@ -481,7 +481,7 @@ Ker je sistemskih klicev ogromno, jih bomo v nadaljevanju razdelili na šest kat
 	\item \textbf{zaščita} -- upravljanje pravic nad datotekami. \cite{Silberschatz_Galvin_Gagne_2018}
 \end{itemize}
 
-\section{Procesni nadzor}
+\section{Procesni nadzor} \label{sec:process_control}
 
 Proces je program (strojna koda) v izvajanju, katerega status predstavljajo programski števec in vsebina procesorskih registrov.
 Proces ima tudi svoj prostor v pomnilniku, ki je običajno razdeljen na več segmentov:
@@ -546,7 +546,20 @@ V kontrastu nam Windows API ponuja funkcije \verb|GlobalAlloc|, \verb|LocalAlloc
 
 \section{Upravljanje datotek}
 
-Ta kategorija vključuje sistemske klice za:
+Za večino uporabnikov je datotečni sistem najbolj viden aspekt operacijskega sistema.
+Omogoča hrambo in dostop do podatkov zako za programe operacijskega sistem in uporabnike le tega.
+Datotečni sistem je sestavljen iz dveh delov -- datotek in imenikov (oz. imeniške strukture).
+Večina datotečnih sistemov biva na sekundarnih pomnilniških napravah, kar bomo podrobneje obravnavali v poglavju \ref{sec:device_management:data_storage}.
+Datotečni sistem je odgovoren za hrambo atributov datotek (npr. ime, tip, lokacija, zaščita, velikost, čas zadnje spremembe, itd.) in upravljanje z njimi.
+
+Ko odpremo datoteko, operacijski sistem vrne kazalec na datoteko (Linux: \textit{angl. file descriptor}, Windows: \textit{handle}), ki ga uporabljamo za branje in pisanje datoteke.
+Poleg tega pa sistem spremlja tudi število odprtih kazalcev na datoteko, logično lokacijo datoteke in pravice dostopa.
+\cite{Silberschatz_Galvin_Gagne_2018}
+
+V UNIX in Linux sistemih je datotečni sistem prerasel svoj prvotni namen in se uporablja tudi za predstavitev naprav, sistemskih virov, ipd.
+Primer tega smo videli že v poglavju \ref{sec:process_control}, kjer smo omenili, da se informacije o procesih pridobivajo iz datotek v imeniku \verb|/proc|.
+
+V grobem lahko sistemske klice za upravljanje datotek razdelimo na sledeče kategorije:
 \begin{itemize}
 	\item ustvarjanje in brisanje datotek,
 	\item odpiranje in zapiranje datotek,
@@ -601,6 +614,24 @@ TODO -- Drivers
 
 Vidimo, da Windows API ponuja več funkcij in različnih abstrakcij, kar pomeni večjo kompleksnost.
 To je lahko v nekaterih primerih prednost, saj več abstrakcije (običajno) pomeni boljšo uporabniško izkušnjo, spet v drugih pa slabost, saj skrije podrobnosti implementacije in nam prepušča manj nadzora.
+
+\subsection{Naprave za hrambo podatkov} \label{sec:device_management:data_storage}
+
+Masovni pomnilniki (\textit{angl. mass storage}) so naprave, ki omogočajo trajno shranjevanje podatkov -- obstojni pomnilnik (\textit{angl. nonvolatile memory}).
+Masovni pomnilnik v modernih sistemih je sekundarni hranilnik, ki ga običajno sestavljajo konvencionalni (magnetni) trdi diski, SSD diski, USB ključki, optični mediji, itd.
+Preden je masovna naprava pripravljena za uporabo preko datotečnega sistema, jo moramo najprej razdeliti na eno ali več particij (\textit{angl. partition}), kreirati nosilce (\textit{angl. volume}) -- pri nekaterih datotečnih sistemih je ta korak impliciten, in na koncu formatirati z želenim datotečnim sistemom.
+Ko je naprava pripravljena, lahko datotečni sistem uporabljamo za shranjevanje podatkov.
+\cite{Silberschatz_Galvin_Gagne_2018}
+
+Linux jedro nam ponuja sistemski klic \verb|mount|, ki nam omogoča povezavo datotečnega sistema z obstoječo potjo v datotečnem sistemu, in klic \verb|umount|, ki nam omogoča zapiranje povezave.
+Postopek je relativno preprost, ker Linux uporablja VFS, ki nam omogoča enoten način dostopa do datotek, ne glede na datotečni sistem. To pomeni tudi da imamo samo en korenski imenik \verb|\|.
+Vse ostale operacije nad napravo se izvajajo preko datotečnega sistema s klici opisanimi v tabeli \ref{tab:file_management}.
+
+Windows pristop pa je nekoliko bolj zapleten, saj ima vsak nosilec svoj korenski imenik, ki je označen z črko diska (npr. \verb|C:\|, \verb|D:\|, ...), poleg tega pa sistem dovoljuje tudi povezavo nosilca v prazen imenik znotraj obstoječega korenskega imenika (kot Linux).
+Za povezavo nosilca nam Windows API ponuja funkcijo \verb|SetVolumeMountPoint|, za odstranitev pa \verb|DeleteVolumeMountPoint|.
+Poleg tega nam omogoča tudi poimenovanje nosilca z ukazom \verb|SetVolumeLabel| in druge funkcije za pridobivanje informacij o nosilcu, kot so \verb|GetVolumeInformation|, \verb|FindFirstVolume|, \verb|FindNextVolume|, \verb|FindFirstVolumeMountPoint|, \verb|FindNextVolumeMountPoint|, \verb|GetVolumeInformation|, ...
+
+Vidimo torej, da je Windows API bolj kompleksen in ponuja več funkcij za upravljanje z pomnilniki, med tem ko Linux uporablja peščico sistemskih klicev in se za večino operacij zanaša na VFS.
 
 \section{Vzdrževanje informacij o sistemu}
 
