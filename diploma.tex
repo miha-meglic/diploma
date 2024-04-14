@@ -210,7 +210,7 @@ sorting=nty,
 	licenco, ki je enaka tej.
 	Podrobnosti licence so dostopne na spletni strani \href{http://creativecommons.si}{creativecommons.si} ali na Inštitutu za
 	intelektualno lastnino, Streliška 1, 1000 Ljubljana.
-																																																																																																																																																																																																																																																																																																																													
+																																																																																																																																																																																																																																																																																																																																											
 	\vspace*{1cm}
 	\begin{center}% 0.66 / 0.89 = 0.741573033707865
 		\CcImageCc{0.741573033707865}\hspace*{1ex}\CcImageBy{1}\hspace*{1ex}\CcImageSa{1}%
@@ -376,6 +376,23 @@ Abstrakcija dostopa do strojne opreme pa je implementirana s \textbf{sistemskimi
 
 TODO: "everything is a file", razvoj Linux jedra, opisnik datoteke (\textit{angl. file descriptor -- abbr. fd}), virtualni datotečni sistem, POSIX standard
 
+\subsubsection{Linux Virtual File System}
+
+Navidezni datotečni sistem (\textit{angl. Virtual File System -- abbr. VFS}) je programska plast v jedru, ki omogoča uporabnikom in uporabniškim programom dostop do različnih datotečnih sistemov.
+Deluje pa tudi kot abstrakcija znotraj jedra, ki omogoča sobivanje različnih datotečnih sistemov.
+
+VFS implementira vse funkcionalnosti, ki jih pričakujemo od datotečnega sistema, kot so branje in pisanje datotek, ustvarjanje in brisanje datotek, itd.
+Pot do imenika, ki je podana omenjenim ukazom, se v VFS preko predpomnilnika imeniških vnosov (\textit{angl. dentry cache / dcache}) pretvori v imeniški vnos (\textit{angl. dentry}).
+Ta mehanizem omogoča zelo hitro prevedbo poti v imeniški vnos, saj se izognemo branju iz diska, če seveda je imeniški vnos na voljo v predpomnilniku.
+
+Vsak imeniški vnos vsebuje kazalec na indeksno vozlišče (\textit{angl. inode}). Indeksna vozlišča so objekti datotečnega sistema (npr. datoteke, imeniki, naprave), ki bivajo na disku (za datotečne sisteme blokovnih naprav) ali v pomnilniku (za pseudo datotečne sisteme).
+Indeksna vozlišča, ki bivajo na disku se, po potrebi, kopirajo v pomnilnik, spremembe pa se zapišejo nazaj na disk.
+Eno indeksno vozlišče lahko pripada več imeniškim vnosom, kar omogoča, da se datoteka prikaže na več različnih mestih v imeniku.
+\cite{Kernel_docs_LVFS}
+
+VFS omogoča UNIX koncept ``everything is a file'', kjer je osnovna ideja, da se vsi sistemski resursi (npr. naprave, procesi, omrežje) predstavijo kot datoteke.
+To omogoča enoten način dostopa do sistemskih virov, kar olajša uporabo in razvoj programske opreme in zmanjša število potrebnih sistemskih klicev.
+
 \subsection{Windows}
 
 TODO: ANSI in Unicode ukazi, omemba teže NT jedra v imenu kompatibilnosti, razvoj (zgodovina) NT jedra
@@ -490,11 +507,11 @@ Sistemski klici za procesni nadzor skrbijo za:
 			Pridobivanje info & \verb|getpid|\newline\verb|getppid|                    & \verb|GetCurrentProcess|\newline\verb|GetCurrentProcessId|\newline\verb|GetCommandLine|\newline\verb|GetCurrentProcessorNumber|\newline\verb|GetEnvironmentVariable|\newline... \\
 		\end{tabular}
 	\end{center}
-	\label{tab:process_management}
+	\label{tab:process_control}
 	\caption{Povzetek sistemskih klicev za procesni nadzor}
 \end{table}
 
-V tabeli \ref{tab:process_management} vidimo, da je velik del sistemskih klicev za procesni nadzor simetričen med obema operacijskima sistemoma.
+V tabeli \ref{tab:process_control} vidimo, da je velik del sistemskih klicev za procesni nadzor simetričen med obema operacijskima sistemoma.
 Opazimo pa, da Windows ne ponuja sistemskih klicev za nalaganje programov, saj se to zgodi ob ustvarjanju procesa, medtem ko Linux ustvari nov proces s kloniranjem trenutnega procesa in nato omogoča nalaganje drugega programa.
 Prav tako opazimo, da Windows ponuja več sistemskih klicev za pridobivanje informacij o procesu, Linux pa te informacije hrani v virtualnem datotečnem sistemu in te informacije za dan proces pridobivamo iz datotek v imeniku \verb|/proc/{pid}/|.
 
@@ -513,26 +530,30 @@ Ta kategorija vključuje sistemske klice za:
 	\item pridobivanje in nastavljanje atributov datotek. \cite{Silberschatz_Galvin_Gagne_2018}
 \end{itemize}
 
-\begin{center}
-	\begin{tabular}{ p{3.7cm}|p{2.5cm}|p{6cm} }
-		Funkcija           & Linux                                                                                          & Windows                                                           \\
-		\hline
-		Ustvari            & \verb|creat|\newline\verb|mkdir|                                                               & \verb|CreateFile|\newline\verb|CreateDirectory|                   \\
-		Premakni *         & \verb|rename|                                                                                  & \verb|MoveFile|                                                   \\
-		Odstrani *         & \verb|unlink|\newline\verb|rmdir|                                                              & \verb|DeleteFile|\newline\verb|RemoveDirectory|                   \\
-		Odpri              & \verb|open|                                                                                    & \verb|CreateFile|                                                 \\
-		Zapri              & \verb|close|                                                                                   & \verb|CloseHandle|                                                \\
-		Beri               & \verb|read|                                                                                    & \verb|ReadFile|                                                   \\
-		Piši              & \verb|write|                                                                                   & \verb|WriteFile|                                                  \\
-		Premakni kazalnik  & \verb|lseek|                                                                                   & \verb|SetFilePointer|                                             \\
-		Pot bližnjice     & \verb|readlink|                                                                                & \verb|GetFinalPathNameByHandle|                                   \\
-		Ustvari bližnjico & \verb|link|\newline\verb|symlink|                                                              & \verb|CreateHardLink|\newline\verb|CreateSymbolicLink|            \\
-		Zakleni            & \verb|flock|                                                                                   & \verb|LockFile|                                                   \\
-		Odkleni            & \verb|flock|                                                                                   & \verb|UnlockFile|                                                 \\
-		Pridobi atribute   & \verb|fstat|\newline\verb|stat|\newline\verb|lstat|\newline\verb|utime|\newline\verb|getxattr| & \verb|GetFileInformationByHandle|\newline\verb|GetFileAttributes| \\
-		Nastavi atribute   & \verb|setxattr|                                                                                & \verb|SetFileInformationByHandle|\newline\verb|SetFileAttributes| \\
-	\end{tabular}
-\end{center}
+\begin{table}[h!]
+	\begin{center}
+		\begin{tabular}{ p{3.7cm}|p{2.5cm}|p{6cm} }
+			Funkcija           & Linux                                                                                          & Windows                                                           \\
+			\hline
+			Ustvari            & \verb|creat|\newline\verb|mkdir|                                                               & \verb|CreateFile|\newline\verb|CreateDirectory|                   \\
+			Premakni *         & \verb|rename|                                                                                  & \verb|MoveFile|                                                   \\
+			Odstrani *         & \verb|unlink|\newline\verb|rmdir|                                                              & \verb|DeleteFile|\newline\verb|RemoveDirectory|                   \\
+			Odpri              & \verb|open|                                                                                    & \verb|CreateFile|                                                 \\
+			Zapri              & \verb|close|                                                                                   & \verb|CloseHandle|                                                \\
+			Beri               & \verb|read|                                                                                    & \verb|ReadFile|                                                   \\
+			Piši              & \verb|write|                                                                                   & \verb|WriteFile|                                                  \\
+			Premakni kazalnik  & \verb|lseek|                                                                                   & \verb|SetFilePointer|                                             \\
+			Pot bližnjice     & \verb|readlink|                                                                                & \verb|GetFinalPathNameByHandle|                                   \\
+			Ustvari bližnjico & \verb|link|\newline\verb|symlink|                                                              & \verb|CreateHardLink|\newline\verb|CreateSymbolicLink|            \\
+			Zakleni            & \verb|flock|                                                                                   & \verb|LockFile|                                                   \\
+			Odkleni            & \verb|flock|                                                                                   & \verb|UnlockFile|                                                 \\
+			Pridobi atribute   & \verb|fstat|\newline\verb|stat|\newline\verb|lstat|\newline\verb|utime|\newline\verb|getxattr| & \verb|GetFileInformationByHandle|\newline\verb|GetFileAttributes| \\
+			Nastavi atribute   & \verb|setxattr|                                                                                & \verb|SetFileInformationByHandle|\newline\verb|SetFileAttributes| \\
+		\end{tabular}
+	\end{center}
+	\label{tab:file_management}
+	\caption{Povzetek sistemskih klicev za upravljanje datotek}
+\end{table}
 
 \section{Upravljanje naprav}
 
@@ -566,13 +587,17 @@ Ta kategorija vključuje sistemske klice za:
 	\item pridobivanje in nastavljanje atributov procesov, datotek in naprav. \cite{Silberschatz_Galvin_Gagne_2018}
 \end{itemize}
 
-\begin{center}
-	\begin{tabular}{ p{3.7cm}|p{2.5cm}|p{6cm} }
-		Function      & Linux   & Windows \\
-		\hline
-		Pridobi Datum & \verb|| & \verb|| \\
-	\end{tabular}
-\end{center}
+\begin{table}[h!]
+	\begin{center}
+		\begin{tabular}{ p{3.7cm}|p{2.5cm}|p{6cm} }
+			Function      & Linux   & Windows \\
+			\hline
+			Pridobi Datum & \verb|| & \verb|| \\
+		\end{tabular}
+	\end{center}
+	\label{tab:information_maintenance}
+	\caption{Povzetek sistemskih klicev za vzdrževanje informacij o sistemu}
+\end{table}
 
 \section{Komunikacija med procesi}
 
@@ -584,25 +609,33 @@ Ta kategorija vključuje sistemske klice za:
 	\item povezovanje oddaljenih naprav. \cite{Silberschatz_Galvin_Gagne_2018}
 \end{itemize}
 
-\begin{center}
-	\begin{tabular}{ p{3.7cm}|p{2.5cm}|p{6cm} }
-		Function          & Linux   & Windows \\
-		\hline
-		Ustvari vtičnico & \verb|| & \verb|| \\
-	\end{tabular}
-\end{center}
+\begin{table}[h!]
+	\begin{center}
+		\begin{tabular}{ p{3.7cm}|p{2.5cm}|p{6cm} }
+			Function          & Linux   & Windows \\
+			\hline
+			Ustvari vtičnico & \verb|| & \verb|| \\
+		\end{tabular}
+	\end{center}
+	\label{tab:communications}
+	\caption{Povzetek sistemskih klicev za komunikacijo med procesi}
+\end{table}
 
 \section{Zaščita}
 
 Ta kategorija vključuje sistemske klice za pridobivanje in nastavljanje pravic nad datotekami. \cite{Silberschatz_Galvin_Gagne_2018}
 
-\begin{center}
-	\begin{tabular}{ p{3.7cm}|p{2.5cm}|p{6cm} }
-		Function       & Linux   & Windows \\
-		\hline
-		Create Process & \verb|| & \verb|| \\
-	\end{tabular}
-\end{center}
+\begin{table}[h!]
+	\begin{center}
+		\begin{tabular}{ p{3.7cm}|p{2.5cm}|p{6cm} }
+			Function       & Linux   & Windows \\
+			\hline
+			Create Process & \verb|| & \verb|| \\
+		\end{tabular}
+	\end{center}
+	\label{tab:protection}
+	\caption{Povzetek sistemskih klicev za zaščito}
+\end{table}
 
 \chapter{Praktična primerjava}
 
@@ -618,10 +651,13 @@ Primerjavo izvajamo na identičnih virtualnih sistemih, na Proxmox gostitelju (Q
 
 Za operacijska sistema uporabljamo:
 \begin{itemize}
-	\item Windows 10 Professional, verzija 22H2
-	\item Ubuntu Desktop 22.04 LTS
+	\item Windows 10 Professional, verzija 22H2, privzeto particioniranje
+	\item Ubuntu Desktop 22.04 LTS, privzeto particioniranje (brez LVM)
 \end{itemize}
 Operacijska sistema sta bila izbrana na podlagi popularnosti in razširjenosti v času pisanja, oba imata namreč največji tržni delež v svoji kategoriji.
+
+Merili bomo čas izvajanja in število ukazov, ki jih moramo izvesti, da pridemo do želenega rezultata.
+Pri tem bomo za meritev časa program izvedli dvajsetkrat in izračunali povprečje, da se izognemo naključnim napakam.
 
 \section{Meritve}
 
