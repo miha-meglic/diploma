@@ -374,7 +374,31 @@ Abstrakcija dostopa do strojne opreme pa je implementirana s \textbf{sistemskimi
 
 \subsection{Linux}
 
-TODO: "everything is a file", razvoj Linux jedra, opisnik datoteke (\textit{angl. file descriptor -- abbr. fd}), virtualni datotečni sistem, POSIX standard
+Linux izgleda in se obnaša podobno kot kateri koli drug UNIX sistem, saj je bil eden izmed glavnih ciljev pri razvoju skladnost s standardi POSIX in Single UNIX.
+Razvoj sistema se je začel leta 1991, ko je Finski študent Linus Torvalds začel razvijati majhno jedro za procesor 80386 -- prvi pravi 32-bitni procesor v Intelovem naboru.
+
+Zgodaj v razvoju je bila Linux izvorna koda javno objavljena in je kmalu pritegnila veliko skupnost programerjev, ki so prispevali k razvoju jedra in programske opreme.
+Sistem je hitro zrasel iz majhne nepopolne replike UNIX sistema v popolnoma funkcionalen moderen operacijski sistem.
+
+Seveda pa je pomembno omeniti, da je Linux samo jedro operacijskega sistema.
+Za celoten operacijski sistem pa potrebujemo še uporabniško programsko opremo, ki ji danes pravimo distribucija.
+Ta vsebuje vse standardne komponente Linux sistema in doda administrativna orodja, ki poenostavijo namestitev, nadgradnjo in vzdrževanje sistema ter omogočajo delo z datotečnim sistemom, kreiranje in upravljanje uporabniških računov, administracijo omrežij in mnogo več.
+Prav tako ponuja programe, ki nam omogočajo namestitev dodatnih programov in orodij, ki jih uporabnik potrebuje.
+Veliko izmed teh programov je bilo razvitih v sklopu odprtokodnih projektov, kot so GNU, BSD, X Window System, itd.
+\cite{Silberschatz_Galvin_Gagne_2018}
+
+\subsubsection{Linux jedro}
+
+Prvo Linux jedro (verzija 0.01) je bilo javno izdano 14. maja 1991. Ni podpiralo omrežij in delovalo je le na procesorjih kompatibilnih z Intel 80386.
+Podpora za strojno opremo je bila zelo omejena in podprt je bila samo Minix datotečni sistem.
+
+Naslednji mejnik, Linux 1.0, je bil izdan 14. marca 1994. Dodana je bila podpora za TCP/IP omrežne protokole in BSD kompatibilna implementacija vtičnic (\textit{angl. socket}).
+Drastično je bila izboljšana tudi podpora za strojno opremo, dodana je bila podpora disketne pogone, CD-ROM naprave, zvočne kartice, miške in mednarodne tipkovnice.
+Prav tako je bila dodana podpora za več procesorjev, vendar še vedno omejena na Intel procesorje.
+Omembe vredni so še podpora za deljen pomnilnik, semaforje, sporočilne vrste in, kot že omenjeno, medprocesno komunikacijo.
+
+V sledečih verzija je bila sčasoma dodana podpora za nove arhitekture procesorjev, kot so DEC Alpha, Sun SPARC in MIPS ter kasneje še PowerPC, ARM in mnoge druge.
+\cite{Silberschatz_Galvin_Gagne_2018}
 
 \subsubsection{Linux Virtual File System}
 
