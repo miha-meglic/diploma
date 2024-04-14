@@ -210,7 +210,7 @@ sorting=nty,
 	licenco, ki je enaka tej.
 	Podrobnosti licence so dostopne na spletni strani \href{http://creativecommons.si}{creativecommons.si} ali na Inštitutu za
 	intelektualno lastnino, Streliška 1, 1000 Ljubljana.
-																																																																																																																																																																																																																																																																																																																																																																											
+																																																																																																																																																																																																																																																																																																																																																																																			
 	\vspace*{1cm}
 	\begin{center}% 0.66 / 0.89 = 0.741573033707865
 		\CcImageCc{0.741573033707865}\hspace*{1ex}\CcImageBy{1}\hspace*{1ex}\CcImageSa{1}%
@@ -629,7 +629,7 @@ Vse ostale operacije nad napravo se izvajajo preko datotečnega sistema s klici 
 
 Windows pristop pa je nekoliko bolj zapleten, saj ima vsak nosilec svoj korenski imenik, ki je označen z črko diska (npr. \verb|C:\|, \verb|D:\|, ...), poleg tega pa sistem dovoljuje tudi povezavo nosilca v prazen imenik znotraj obstoječega korenskega imenika (kot Linux).
 Za povezavo nosilca nam Windows API ponuja funkcijo \verb|SetVolumeMountPoint|, za odstranitev pa \verb|DeleteVolumeMountPoint|.
-Poleg tega nam omogoča tudi poimenovanje nosilca z ukazom \verb|SetVolumeLabel| in druge funkcije za pridobivanje informacij o nosilcu, kot so \verb|GetVolumeInformation|, \verb|FindFirstVolume|, \verb|FindNextVolume|, \verb|FindFirstVolumeMountPoint|, \verb|FindNextVolumeMountPoint|, \verb|GetVolumeInformation|, ...
+Poleg tega nam omogoča tudi poimenovanje nosilca z ukazom \verb|SetVolumeLabel| in druge funkcije za pridobivanje informacij o nosilcu, kot so \verb|GetDriveType|, \verb|FindFirstVolume|, \verb|FindNextVolume|, \verb|FindFirstVolumeMountPoint|,\newline\verb|FindNextVolumeMountPoint|, \verb|GetVolumeInformation|, ...
 
 Vidimo torej, da je Windows API bolj kompleksen in ponuja več funkcij za upravljanje z pomnilniki, med tem ko Linux uporablja peščico sistemskih klicev in se za večino operacij zanaša na VFS.
 
