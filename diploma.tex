@@ -210,7 +210,7 @@ sorting=nty,
 	licenco, ki je enaka tej.
 	Podrobnosti licence so dostopne na spletni strani \href{http://creativecommons.si}{creativecommons.si} ali na Inštitutu za
 	intelektualno lastnino, Streliška 1, 1000 Ljubljana.
-																																																																																																																																																																																																																																																																																																																																																																																			
+																																																																																																																																																																																																																																																																																																																																																																																											
 	\vspace*{1cm}
 	\begin{center}% 0.66 / 0.89 = 0.741573033707865
 		\CcImageCc{0.741573033707865}\hspace*{1ex}\CcImageBy{1}\hspace*{1ex}\CcImageSa{1}%
@@ -412,7 +412,7 @@ Ta mehanizem omogoča zelo hitro prevedbo poti v imeniški vnos, saj se izognemo
 Vsak imeniški vnos vsebuje kazalec na indeksno vozlišče (\textit{angl. inode}). Indeksna vozlišča so objekti datotečnega sistema (npr. datoteke, imeniki, naprave), ki bivajo na disku (za datotečne sisteme blokovnih naprav) ali v pomnilniku (za pseudo datotečne sisteme).
 Indeksna vozlišča, ki bivajo na disku se, po potrebi, kopirajo v pomnilnik, spremembe pa se zapišejo nazaj na disk.
 Eno indeksno vozlišče lahko pripada več imeniškim vnosom, kar omogoča, da se datoteka prikaže na več različnih mestih v imeniku.
-\cite{Kernel_docs_LVFS}
+\cite{Linux_kernel_docs_LVFS}
 
 VFS omogoča UNIX koncept ``everything is a file'', kjer je osnovna ideja, da se vsi sistemski resursi (npr. naprave, procesi, omrežje) predstavijo kot datoteke.
 To omogoča enoten način dostopa do sistemskih virov, kar olajša uporabo in razvoj programske opreme in zmanjša število potrebnih sistemskih klicev.
@@ -602,18 +602,30 @@ Ta kategorija vključuje sistemske klice za:
 	\item logično povezovanje naprav. \cite{Silberschatz_Galvin_Gagne_2018}
 \end{itemize}
 
-Tu pričnemo opažati drastične razlike med arhitekturo jeder Linux in Windows. Osredotočimo se na upravljanje pomnilnika, saj je to ena izmed naprav, ki je skupna obema jedroma, medtem ko so druge odvisne od strojne opreme.
+Tu pričnemo opažati drastične razlike med arhitekturo jeder Linux in Windows.
 
-Linux za upravljanje z napravami namreč uporablja datotečni sistem, kar pomeni, da lahko naprave odpiramo in z njimi komuniciramo kot z običajnimi datotekami.
+Linux za upravljanje z napravami namreč uporablja datotečni sistem (VFS), kar pomeni, da lahko naprave odpiramo in z njimi komuniciramo kot z običajnimi datotekami.
 Pri direktnem nadzoru naprave oz. ``posebne datoteke'' nam Linux ponuja funkcijo \verb|ioctl|, ki nam omogoča pošiljanje ukazov napravi.
 Za večino naprednejših operacij pa nam ponuja sistemski klic \verb|mmap|, ki nam omogoča preslikavo datoteke v pomnilnik in s tem direkten dostop do njenih vsebin.
-TODO -- Drivers \cite{Corbet_Kroah-Hartman_Rubini_2005}
+
+Za delovanje naprav, ki jih jedro ne podpira, lahko v obeh sistemih uporabimo gonilnike.
+Gonilniki so diskretne ``črne škatle'', ki skrijejo podrobnosti implementacije naprave in nam ponudijo enoten vmesnik za upravljanje z napravo.
+Uporabniški programi z napravo komunicirajo preko nabora standardiziranih klicev, ki so neodvisni od implementacije gonilnika.
+Gonilnik pa nato poveže te klice z dejanskimi operacijami, ki jih mora izvesti naprava.
+Programski vmesnik je zastavljen tako, da so lahko gonilniki pripravljeni ločeno in se potem dinamično povežejo z jedrom.
+Taka modularnost pomeni, da je pisanje Linux gonilnikov precej enostavno.
+\cite{Corbet_Kroah-Hartman_Rubini_2005}
 
 Windows pa za upravljanje z napravami uporablja mnoge posebne funkcije, ki so del Windows API-ja.
-TODO -- Drivers
+Za direktni dostop do naprave pa nam podobno kot Linux ponuja funkcijo \verb|DeviceIoControl|, ki nam omogoča pošiljanje ukazov napravi.
 
-Vidimo, da Windows API ponuja več funkcij in različnih abstrakcij, kar pomeni večjo kompleksnost.
-To je lahko v nekaterih primerih prednost, saj več abstrakcije (običajno) pomeni boljšo uporabniško izkušnjo, spet v drugih pa slabost, saj skrije podrobnosti implementacije in nam prepušča manj nadzora.
+Za gonilnike pa Windows uporablja drugačen pristop.
+Sistem namreč podpira več različnih modelov, t. i. ``minidriver model'', za implementacijo gonilnikov, ki so ločeni po kategorijah naprav.
+Vsaka kategorija ima svoj vmesnik, ki ga mora gonilnik implementirati.
+Uporabniški programi potem komunicirajo z gonilnikom preko tega vmesnika, gonilnik pa nato poskrbi za komunikacijo z napravo.
+\cite{MS_Learn_driver_model_2023}
+
+Vidimo, da sam pristop do uporabe naprav ni bistveno drugačen med sistemoma, vendar pa Windows ponuja več različnih načinov za implementacijo gonilnikov, kar istočasno pomeni večjo kompleksnost in potencialno boljšo uporabniško izkušnjo.
 
 \subsection{Naprave za hrambo podatkov} \label{sec:device_management:data_storage}
 
@@ -631,7 +643,7 @@ Windows pristop pa je nekoliko bolj zapleten, saj ima vsak nosilec svoj korenski
 Za povezavo nosilca nam Windows API ponuja funkcijo \verb|SetVolumeMountPoint|, za odstranitev pa \verb|DeleteVolumeMountPoint|.
 Poleg tega nam omogoča tudi poimenovanje nosilca z ukazom \verb|SetVolumeLabel| in druge funkcije za pridobivanje informacij o nosilcu, kot so \verb|GetDriveType|, \verb|FindFirstVolume|, \verb|FindNextVolume|, \verb|FindFirstVolumeMountPoint|,\newline\verb|FindNextVolumeMountPoint|, \verb|GetVolumeInformation|, ...
 
-Vidimo torej, da je Windows API bolj kompleksen in ponuja več funkcij za upravljanje z pomnilniki, med tem ko Linux uporablja peščico sistemskih klicev in se za večino operacij zanaša na VFS.
+Zelo podrobno kot za ostale naprave, vidimo, da je Windows API bolj kompleksen in ponuja več funkcij za upravljanje z pomnilniki, med tem ko Linux uporablja peščico sistemskih klicev in se za večino operacij zanaša na VFS.
 
 \section{Vzdrževanje informacij o sistemu}
 
