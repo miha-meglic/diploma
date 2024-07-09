@@ -228,7 +228,7 @@ sorting=nty,
 	licenco, ki je enaka tej.
 	Podrobnosti licence so dostopne na spletni strani \href{http://creativecommons.si}{creativecommons.si} ali na Inštitutu za
 	intelektualno lastnino, Streliška 1, 1000 Ljubljana.
-																																																																																																																																																																																																																																																																																																																																																																																																																																																																		
+																																																																																																																																																																																																																																																																																																																																																																																																																																																																																
 	\vspace*{1cm}
 	\begin{center}% 0.66 / 0.89 = 0.741573033707865
 		\CcImageCc{0.741573033707865}\hspace*{1ex}\CcImageBy{1}\hspace*{1ex}\CcImageSa{1}%
@@ -458,6 +458,16 @@ Kljub temu, da iz uporabniške oz. programske strani sistemski klici izgledajo k
 	\item Procesor preklopi nazaj v uporabniški način in nadaljuje izvajanje uporabniškega procesa. \cite{Tanenbaum_Bos_2023}
 \end{enumerate}
 
+Ker je sistemskih klicev ogromno, jih bomo v nadaljevanju razdelili na šest kategorij, in sicer:
+\begin{itemize}
+	\item \textbf{procesni nadzor} -- upravljanje procesov,
+	\item \textbf{upravljanje datotek} -- branje in pisanje datotek,
+	\item \textbf{upravljanje naprav} -- upravljanje z vhodno-izhodnimi napravami,
+	\item \textbf{vzdrževanje informacij o sistemu} -- pridobivanje in urejanje informacij o sistemu,
+	\item \textbf{komunikacija med procesi} -- dvosmerna med procesna komunikacija,
+	\item \textbf{zaščita} -- upravljanje pravic nad datotekami. \cite{Silberschatz_Galvin_Gagne_2018}
+\end{itemize}
+
 Preden pa se podamo v primerjave posameznih sistemskih klicev, si poglejmo še, kakšne so implementacijske razlike med sistemskimi klici v Linuxu in Windowsu.
 Tu še enkrat poudarjam, da so razlike med sistemskimi klici odvisne od arhitekture procesorja.
 V vseh konkretnih primerih bom uporabljal ukazni nabor in imena registrov arhitekture \textbf{x86}.
@@ -487,19 +497,9 @@ Ker Windows ne izpostavi sistemskih klicev direktno, se lahko le-te spreminjajo 
 To pomeni, da je težko zagotovo reči ali je neka funkcija implementirana v uporabniškem ali jedrnem načinu.
 \cite{Tanenbaum_Bos_2023}
 
-\chapter{Primerjava sistemskih klicev}
+\chapter{Procesni nadzor} \label{sec:process_control}
 
-Ker je sistemskih klicev ogromno, jih bomo v nadaljevanju razdelili na šest kategorij, in sicer:
-\begin{itemize}
-	\item \textbf{procesni nadzor} -- upravljanje procesov,
-	\item \textbf{upravljanje datotek} -- branje in pisanje datotek,
-	\item \textbf{upravljanje naprav} -- upravljanje z vhodno-izhodnimi napravami,
-	\item \textbf{vzdrževanje informacij o sistemu} -- pridobivanje in urejanje informacij o sistemu,
-	\item \textbf{komunikacija med procesi} -- dvosmerna med procesna komunikacija,
-	\item \textbf{zaščita} -- upravljanje pravic nad datotekami. \cite{Silberschatz_Galvin_Gagne_2018}
-\end{itemize}
-
-\section{Procesni nadzor} \label{sec:process_control}
+\section{Primerjava sistemskih klicev}
 
 Proces je program (strojna koda) v izvajanju, katerega status predstavljajo programski števec in vsebina procesorskih registrov.
 Proces ima tudi svoj prostor v pomnilniku, ki je običajno razdeljen na več segmentov:
@@ -562,7 +562,41 @@ Seveda pa sklad ni neomejen in zahteva vnaprej definirane velikosti spremenljivk
 Za zasedanje kopice pa v Linuxu uporabljamo sistemski klic \verb|brk| in funkcijo \verb|sbrk|, ki premakne konec podatkovnega prostora procesa, kar je precej zapleten proces, namreč od nas zahteva, da sledimo zasedenemu prostoru in ga ročno čistimo ter upravljamo. Linux dokumentacija namesto priporoča uporabo funkcije standardne C knjižnice -- \verb|malloc|, ki pa je precej bolj kompleksna in odvisna od implementacije knjižnice.
 V kontrastu nam Windows API ponuja funkcije \verb|GlobalAlloc|, \verb|LocalAlloc|, \verb|HeapAlloc| / \verb|HeapCreate| in \verb|VirtualAlloc| ter pripadajoče sprostitvene funkcije, brez potrebe po zunanji knjižnici in ročnem upravljanju podatkovnega prostora.
 
-\section{Upravljanje datotek}
+\section{Praktična primerjava}
+
+\subsection{Metodologija} \label{ssec:process_control:methodology}
+
+Primerjavo izvajamo na identičnih virtualnih sistemih, na Proxmox gostitelju (QEMU), s sledečo konfiguracijo:
+\begin{itemize}
+	\item i440fx sistemski emulator (UEFI BIOS)
+	\item 4 jedra procesorja (Intel\textsuperscript{\textregistered} Core\textsuperscript{\texttrademark} i7-12700H)
+	\item 8 GB pomnilnika (Corsair\textsuperscript{\textregistered} Vengeance\textsuperscript{\textregistered} LPX 64GB DDR4 3200 MHz C16)
+	\item 100 GB diska (Crucial\textsuperscript{\textregistered} P5 Plus Gen4 NVMe SSD)
+\end{itemize}
+
+Za operacijska sistema uporabljamo:
+\begin{itemize}
+	\item Windows 10 Professional, verzija 22H2, privzeto particioniranje
+	\item Ubuntu Desktop 22.04 LTS, privzeto particioniranje (brez LVM)
+\end{itemize}
+Operacijska sistema sta bila izbrana na podlagi popularnosti in razširjenosti v času pisanja, oba imata namreč največji tržni delež v svoji kategoriji.
+
+Merimo čas izvajanja in število ukazov, ki se morajo izvesti, da pridemo do želenega rezultata.
+Za meritev časa program izvedemo dvajsetkrat in izračunamo povprečje, da se izognemo naključnim napakam.
+
+\subsection{Scenarij}
+
+\begin{enumerate}
+	\item ...
+\end{enumerate}
+
+\subsection{Programi}
+
+\subsection{Meritve}
+
+\chapter{Upravljanje datotek}
+
+\section{Primerjava sistemskih klicev}
 
 Za večino uporabnikov je datotečni sistem najbolj viden aspekt operacijskega sistema.
 Omogoča hrambo in dostop do podatkov zako za programe operacijskega sistem in uporabnike le tega.
@@ -610,7 +644,38 @@ V grobem lahko sistemske klice za upravljanje datotek razdelimo na sledeče kate
 	\caption{Povzetek sistemskih klicev za upravljanje datotek}
 \end{table}
 
-\section{Upravljanje naprav}
+\section{Praktična primerjava}
+
+\subsection{Metodologija}
+
+Enaka kot v poglavju \ref{ssec:process_control:methodology}.
+
+\subsection{Scenarij}
+
+\begin{enumerate}
+	\item Ustvari datoteko \texttt{test.txt} v korenskem imeniku.
+	\item Zapiši 500 znakov, vsakega posebej.
+	\item Premakni kazalnik v sredino datoteke.
+	\item Zapiši še 500 znakov, vsakega posebej.
+	\item Premakni kazalnik na začetek datoteke.
+	\item Preberi 100 znakov in jih izpiši.
+	\item Izpiši atribute datoteke.
+	\item Izbriši datoteko.
+\end{enumerate}
+
+\subsection{Programi}
+
+\textbf{Linux program:}
+\lstinputlisting[language=C++]{code/linux/02_files.c}
+
+\textbf{Windows program:}
+\lstinputlisting[language=C++]{code/windows/02_files.cpp}
+
+\subsection{Meritve}
+
+\chapter{Upravljanje naprav}
+
+\section{Primerjava sistemskih klicev}
 
 Ta kategorija vključuje sistemske klice za:
 \begin{itemize}
@@ -663,7 +728,25 @@ Poleg tega nam omogoča tudi poimenovanje nosilca z ukazom \verb|SetVolumeLabel|
 
 Zelo podrobno kot za ostale naprave, vidimo, da je Windows API bolj kompleksen in ponuja več funkcij za upravljanje z pomnilniki, med tem ko Linux uporablja peščico sistemskih klicev in se za večino operacij zanaša na VFS.
 
-\section{Vzdrževanje informacij o sistemu}
+\section{Praktična primerjava}
+
+\subsection{Metodologija}
+
+Enaka kot v poglavju \ref{ssec:process_control:methodology}.
+
+\subsection{Scenarij}
+
+\begin{enumerate}
+	\item serial port access / usb list / ala lspci
+\end{enumerate}
+
+\subsection{Programi}
+
+\subsection{Meritve}
+
+\chapter{Vzdrževanje informacij o sistemu}
+
+\section{Primerjava sistemskih klicev}
 
 Mnogo sistemskih klicev je namenjenih izključno prenosu informacij med uporabniškim programom in operacijskim sistemom.
 Večina operacijskih sistemov na primer ponuja klic za pridobitev sistemskega časa in datuma.
@@ -697,37 +780,29 @@ Ta kategorija vključuje sistemske klice za:
 	\caption{Povzetek sistemskih klicev za vzdrževanje informacij o sistemu}
 \end{table} 
 
-\section{Komunikacija med procesi}
+\section{Praktična primerjava}
 
-Ta kategorija vključuje sistemske klice za:
-\begin{itemize}
-	\item ustvarjanje in uničevanje komunikacijskih poti,
-	\item pošiljanje in prejemanje sporočil,
-	\item prenos statusov,
-	\item povezovanje oddaljenih naprav. \cite{Silberschatz_Galvin_Gagne_2018}
-\end{itemize}
+\subsection{Metodologija}
 
-To je vredno omeniti, da Windows API implementira funkcije za komunikacijo s standardnimi Internetnimi protokoli kot sta FTP in HTTP, medtem ko Linux jedro prepušča to implementacijo uporabniškim aplikacijam.
+Enaka kot v poglavju \ref{ssec:process_control:methodology}.
 
-\begin{table}[h!]
-	\begin{center}
-		\begin{tabular}{ p{3.7cm}|p{2.5cm}|p{6cm} }
-			Function                           & Linux                                                                 & Windows \\
-			\hline
-			Ustvari vtičnico                  & \verb|socket|                                                         & \verb|| \\
-			Ustvari par vtičnic               & \verb|socketpair|                                                     & \verb|| \\
-			Pridobi atribute\newline vtičnice & \verb|getsockopt|\newline\verb|getsockname|\newline\verb|getpeername| & \verb|| \\
-			Nastavi atribute\newline vtičnice & \verb|setsockopt|                                                     & \verb|| \\
-			Poveži vtičnico                  & \verb|bind|                                                           & \verb|| \\
-			Sprejmi povezavo                   & \verb|accept|                                                         & \verb|| \\
-			Vzpostavi povezavo                 & \verb|connect|                                                        & \verb|| \\
-		\end{tabular}
-	\end{center}
-	\label{tab:communications}
-	\caption{Povzetek sistemskih klicev za komunikacijo med procesi}
-\end{table}
+\subsection{Scenarij}
 
-\section{Zaščita}
+\begin{enumerate}
+	\item Pridobi in izpiši: ime, čas, število logičnih jeder in količino pomnilnika sistema
+	\item Ustvari nov proces, ki ustvari 5 niti, vsaka šteje do naključnega števila sekund
+	\item Ubij proces po 5 sekundah
+	\item Ustvari še 3 procese, ki izračunajo deseto število Fibonaccijevega zaporedja (89)
+	\item Počakaj in sprejmi rezultate procesov in jih preveri
+\end{enumerate}
+
+\subsection{Programi}
+
+\subsection{Meritve}
+
+\chapter{Varnost in zaščita}
+
+\section{Primerjava sistemskih klicev}
 
 Ta kategorija vključuje sistemske klice za pridobivanje in nastavljanje pravic nad datotekami. \cite{Silberschatz_Galvin_Gagne_2018}
 
@@ -743,62 +818,14 @@ Ta kategorija vključuje sistemske klice za pridobivanje in nastavljanje pravic 
 	\caption{Povzetek sistemskih klicev za zaščito}
 \end{table}
 
-\chapter{Praktična primerjava}
+\section{Praktična primerjava}
 
-\section{Metodologija}
+\subsection{Metodologija}
 
-Primerjavo izvajamo na identičnih virtualnih sistemih, na Proxmox gostitelju (QEMU), s sledečo konfiguracijo:
-\begin{itemize}
-	\item i440fx sistemski emulator (UEFI BIOS)
-	\item 4 jedra procesorja (Intel\textsuperscript{\textregistered} Core\textsuperscript{\texttrademark} i7-12700H)
-	\item 8 GB pomnilnika (Corsair\textsuperscript{\textregistered} Vengeance\textsuperscript{\textregistered} LPX 64GB DDR4 3200 MHz C16)
-	\item 100 GB diska (Crucial\textsuperscript{\textregistered} P5 Plus Gen4 NVMe SSD)
-\end{itemize}
+Enaka kot v poglavju \ref{ssec:process_control:methodology}.
 
-Za operacijska sistema uporabljamo:
-\begin{itemize}
-	\item Windows 10 Professional, verzija 22H2, privzeto particioniranje
-	\item Ubuntu Desktop 22.04 LTS, privzeto particioniranje (brez LVM)
-\end{itemize}
-Operacijska sistema sta bila izbrana na podlagi popularnosti in razširjenosti v času pisanja, oba imata namreč največji tržni delež v svoji kategoriji.
+\subsection{Scenarij}
 
-Merimo čas izvajanja in število ukazov, ki se morajo izvesti, da pridemo do želenega rezultata.
-Za meritev časa program izvedemo dvajsetkrat in izračunamo povprečje, da se izognemo naključnim napakam.
-
-\section{Programi}
-
-\subsection{Procesni nadzor}
-
-\subsection{Upravljanje datotek}
-
-\textbf{Scenarij:}
-\begin{enumerate}
-	\item Ustvari datoteko \texttt{test.txt} v korenskem imeniku.
-	\item Zapiši 500 znakov, vsakega posebej.
-	\item Premakni kazalnik v sredino datoteke.
-	\item Zapiši še 500 znakov, vsakega posebej.
-	\item Premakni kazalnik na začetek datoteke.
-	\item Preberi 100 znakov in jih izpiši.
-	\item Izpiši atribute datoteke.
-	\item Izbriši datoteko.
-\end{enumerate}
-
-\textbf{Linux program:}
-\lstinputlisting[language=C++]{code/linux/02_files.c}
-
-\textbf{Windows program:}
-\lstinputlisting[language=C++]{code/windows/02_files.cpp}
-
-\subsection{Upravljanje naprav}
-
-\textbf{Scenarij:}
-\begin{enumerate}
-	\item Pridobi informacije o sistemskem disku
-\end{enumerate}
-
-\subsection{Vzdrževanje informacij o sistemu}
-
-\textbf{Scenarij:}
 \begin{enumerate}
 	\item Pridobi in izpiši: ime, čas, število logičnih jeder in količino pomnilnika sistema
 	\item Ustvari nov proces, ki ustvari 5 niti, vsaka šteje do naključnega števila sekund
@@ -807,21 +834,9 @@ Za meritev časa program izvedemo dvajsetkrat in izračunamo povprečje, da se i
 	\item Počakaj in sprejmi rezultate procesov in jih preveri
 \end{enumerate}
 
-\subsection{Komunikacija med procesi}
+\subsection{Programi}
 
-\textbf{Scenarij:}
-\begin{enumerate}
-	\item 
-\end{enumerate}
-
-\subsection{Zaščita}
-
-\textbf{Scenarij:}
-\begin{enumerate}
-	\item 
-\end{enumerate}
-
-\section{Meritve}
+\subsection{Meritve}
 
 \chapter{Zaključek}
 
