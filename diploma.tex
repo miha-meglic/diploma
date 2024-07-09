@@ -228,7 +228,7 @@ sorting=nty,
 	licenco, ki je enaka tej.
 	Podrobnosti licence so dostopne na spletni strani \href{http://creativecommons.si}{creativecommons.si} ali na Inštitutu za
 	intelektualno lastnino, Streliška 1, 1000 Ljubljana.
-																																																																																																																																																																																																																																																																																																																																																																																																																																	
+																																																																																																																																																																																																																																																																																																																																																																																																																																																																		
 	\vspace*{1cm}
 	\begin{center}% 0.66 / 0.89 = 0.741573033707865
 		\CcImageCc{0.741573033707865}\hspace*{1ex}\CcImageBy{1}\hspace*{1ex}\CcImageSa{1}%
@@ -591,8 +591,8 @@ V grobem lahko sistemske klice za upravljanje datotek razdelimo na sledeče kate
 			Funkcija           & Linux                                                                                          & Windows                                                           \\
 			\hline
 			Ustvari            & \verb|creat|\newline\verb|mkdir|                                                               & \verb|CreateFile|\newline\verb|CreateDirectory|                   \\
-			Premakni *         & \verb|rename|                                                                                  & \verb|MoveFile|                                                   \\
-			Odstrani *         & \verb|unlink|\newline\verb|rmdir|                                                              & \verb|DeleteFile|\newline\verb|RemoveDirectory|                   \\
+			Premakni           & \verb|rename|                                                                                  & \verb|MoveFile|                                                   \\
+			Odstrani           & \verb|unlink|\newline\verb|rmdir|                                                              & \verb|DeleteFile|\newline\verb|RemoveDirectory|                   \\
 			Odpri              & \verb|open|                                                                                    & \verb|CreateFile|                                                 \\
 			Zapri              & \verb|close|                                                                                   & \verb|CloseHandle|                                                \\
 			Beri               & \verb|read|                                                                                    & \verb|ReadFile|                                                   \\
@@ -665,6 +665,10 @@ Zelo podrobno kot za ostale naprave, vidimo, da je Windows API bolj kompleksen i
 
 \section{Vzdrževanje informacij o sistemu}
 
+Mnogo sistemskih klicev je namenjenih izključno prenosu informacij med uporabniškim programom in operacijskim sistemom.
+Večina operacijskih sistemov na primer ponuja klic za pridobitev sistemskega časa in datuma.
+Spet drug set takih klicev se uporablja za razhroščevanje.
+
 Ta kategorija vključuje sistemske klice za:
 \begin{itemize}
 	\item pridobivanje in nastavljanje časa in datuma,
@@ -674,15 +678,24 @@ Ta kategorija vključuje sistemske klice za:
 
 \begin{table}[h!]
 	\begin{center}
-		\begin{tabular}{ p{3.7cm}|p{2.5cm}|p{6cm} }
-			Function      & Linux   & Windows \\
+		\begin{tabular}{ p{3cm}|p{2.9cm}|p{6.3cm} }
+			Function                          & Linux                                           & Windows                                                                                                            \\
 			\hline
-			Pridobi Datum & \verb|| & \verb|| \\
+			Pridobi ime\newline sistema       & \verb|gethostname|                              & \verb|GetComputerName|                                                                                             \\
+			Spremeni ime\newline sistema      & \verb|sethostname|                              & \verb|SetComputerName|                                                                                             \\
+			Pridobi info\newline sistema      & \verb|uname|                                    & \verb|GetSystemInfo|\newline\verb|GetLogicalProcessorInformation|\newline\verb|GetPhysicallyInstalledSystemMemory| \\
+			Pridobi čas                      & \verb|gettimeofday|\newline\verb|clock_gettime| & \verb|GetSystemTime|\newline\verb|GetLocalTime|                                                                    \\
+			Nastavi čas                      & \verb|settimeofday|\newline\verb|clock_settime| & \verb|SetSystemTime|\newline\verb|SetLocalTime|                                                                    \\
+			Pridobi atribute\newline datoteke & \verb|stat|\newline\verb|fstat|                 & \verb|GetFileAttributes|\newline\verb|GetFileInformationByHandle|                                                  \\
+			Ustvari proces                    & \verb|fork|                                     & \verb|CreateProcess|                                                                                               \\
+			Naloži proces                    & \verb|exec|                                     & \verb|CreateProcess|                                                                                               \\
+			Ubij proces                       & \verb|kill|                                     & \verb|ExitProcess|                                                                                                 \\
+			Ustvari nit                       & \verb|clone|                                    & \verb|CreateThread|                                                                                                \\
 		\end{tabular}
 	\end{center}
 	\label{tab:information_maintenance}
 	\caption{Povzetek sistemskih klicev za vzdrževanje informacij o sistemu}
-\end{table}
+\end{table} 
 
 \section{Komunikacija med procesi}
 
@@ -694,12 +707,20 @@ Ta kategorija vključuje sistemske klice za:
 	\item povezovanje oddaljenih naprav. \cite{Silberschatz_Galvin_Gagne_2018}
 \end{itemize}
 
+To je vredno omeniti, da Windows API implementira funkcije za komunikacijo s standardnimi Internetnimi protokoli kot sta FTP in HTTP, medtem ko Linux jedro prepušča to implementacijo uporabniškim aplikacijam.
+
 \begin{table}[h!]
 	\begin{center}
 		\begin{tabular}{ p{3.7cm}|p{2.5cm}|p{6cm} }
-			Function          & Linux   & Windows \\
+			Function                           & Linux                                                                 & Windows \\
 			\hline
-			Ustvari vtičnico & \verb|| & \verb|| \\
+			Ustvari vtičnico                  & \verb|socket|                                                         & \verb|| \\
+			Ustvari par vtičnic               & \verb|socketpair|                                                     & \verb|| \\
+			Pridobi atribute\newline vtičnice & \verb|getsockopt|\newline\verb|getsockname|\newline\verb|getpeername| & \verb|| \\
+			Nastavi atribute\newline vtičnice & \verb|setsockopt|                                                     & \verb|| \\
+			Poveži vtičnico                  & \verb|bind|                                                           & \verb|| \\
+			Sprejmi povezavo                   & \verb|accept|                                                         & \verb|| \\
+			Vzpostavi povezavo                 & \verb|connect|                                                        & \verb|| \\
 		\end{tabular}
 	\end{center}
 	\label{tab:communications}
@@ -770,11 +791,35 @@ Za meritev časa program izvedemo dvajsetkrat in izračunamo povprečje, da se i
 
 \subsection{Upravljanje naprav}
 
+\textbf{Scenarij:}
+\begin{enumerate}
+	\item Pridobi informacije o sistemskem disku
+\end{enumerate}
+
 \subsection{Vzdrževanje informacij o sistemu}
+
+\textbf{Scenarij:}
+\begin{enumerate}
+	\item Pridobi in izpiši: ime, čas, število logičnih jeder in količino pomnilnika sistema
+	\item Ustvari nov proces, ki ustvari 5 niti, vsaka šteje do naključnega števila sekund
+	\item Ubij proces po 5 sekundah
+	\item Ustvari še 3 procese, ki izračunajo deseto število Fibonaccijevega zaporedja (89)
+	\item Počakaj in sprejmi rezultate procesov in jih preveri
+\end{enumerate}
 
 \subsection{Komunikacija med procesi}
 
+\textbf{Scenarij:}
+\begin{enumerate}
+	\item 
+\end{enumerate}
+
 \subsection{Zaščita}
+
+\textbf{Scenarij:}
+\begin{enumerate}
+	\item 
+\end{enumerate}
 
 \section{Meritve}
 
