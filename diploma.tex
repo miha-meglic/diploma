@@ -228,7 +228,7 @@ sorting=nty,
 	licenco, ki je enaka tej.
 	Podrobnosti licence so dostopne na spletni strani \href{http://creativecommons.si}{creativecommons.si} ali na Inštitutu za
 	intelektualno lastnino, Streliška 1, 1000 Ljubljana.
-																																																																																																																																																																																																																																																																																																																																																																																																																																																																																
+																																																																																																																																																																																																																																																																																																																																																																																																																																																																																								
 	\vspace*{1cm}
 	\begin{center}% 0.66 / 0.89 = 0.741573033707865
 		\CcImageCc{0.741573033707865}\hspace*{1ex}\CcImageBy{1}\hspace*{1ex}\CcImageSa{1}%
@@ -546,6 +546,9 @@ Sistemski klici za procesni nadzor skrbijo za:
 			Ubij proces       & \verb|kill|                                            & \verb|TerminateProcess|                                                                                                                                                         \\
 			Naloži program   & \verb|execve|                                          & \textit{naloženo pri ustvarjanju}                                                                                                                                              \\
 			Sinhronizacija    & \verb|wait|\newline\verb|waitpid|\newline\verb|waitid| & \verb|WaitForSingleObject|\newline\verb|WaitForMultipleObjects|                                                                                                                 \\
+			Ustvari nit       & \verb|clone|                                           & \verb|CreateThread|                                                                                                                                                             \\
+			Ubij nit          & \verb|kill|                                            & \verb|TerminateThread|                                                                                                                                                          \\
+			Počakaj          & \verb|nanosleep|                                       & \verb|Sleep|                                                                                                                                                                    \\
 			Pridobivanje info & \verb|getpid|\newline\verb|getppid|                    & \verb|GetCurrentProcess|\newline\verb|GetCurrentProcessId|\newline\verb|GetCommandLine|\newline\verb|GetCurrentProcessorNumber|\newline\verb|GetEnvironmentVariable|\newline... \\
 		\end{tabular}
 	\end{center}
@@ -587,7 +590,15 @@ Za meritev časa program izvedemo dvajsetkrat in izračunamo povprečje, da se i
 \subsection{Scenarij}
 
 \begin{enumerate}
-	\item ...
+	\item Ustvari proces, ki
+	      \begin{enumerate}
+	      	\item ustvari celoštevilsko spremenljivko z vrednostjo 0
+	      	\item ustvari 8 niti, ki vsako sekundo povečajo spremenljivko in izpišejo novo vrednost
+	      	\item ubije niti po 8 sekundah
+	      \end{enumerate}
+	\item Počakaj proces, da se zaključi
+	\item Ustvari še 3 procese, ki izračunajo deseto število Fibonaccijevega zaporedja (89)
+	\item Počakaj procese, da se zaključijo, sprejmi rezultate procesov in jih preveri
 \end{enumerate}
 
 \subsection{Programi}
@@ -790,10 +801,6 @@ Enaka kot v poglavju \ref{ssec:process_control:methodology}.
 
 \begin{enumerate}
 	\item Pridobi in izpiši: ime, čas, število logičnih jeder in količino pomnilnika sistema
-	\item Ustvari nov proces, ki ustvari 5 niti, vsaka šteje do naključnega števila sekund
-	\item Ubij proces po 5 sekundah
-	\item Ustvari še 3 procese, ki izračunajo deseto število Fibonaccijevega zaporedja (89)
-	\item Počakaj in sprejmi rezultate procesov in jih preveri
 \end{enumerate}
 
 \subsection{Programi}
