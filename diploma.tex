@@ -228,7 +228,7 @@ sorting=nty,
 	licenco, ki je enaka tej.
 	Podrobnosti licence so dostopne na spletni strani \href{http://creativecommons.si}{creativecommons.si} ali na Inštitutu za
 	intelektualno lastnino, Streliška 1, 1000 Ljubljana.
-																																																																																																																																																																																																																																																																																																																																																																																																																																																																																								
+																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																						
 	\vspace*{1cm}
 	\begin{center}% 0.66 / 0.89 = 0.741573033707865
 		\CcImageCc{0.741573033707865}\hspace*{1ex}\CcImageBy{1}\hspace*{1ex}\CcImageSa{1}%
@@ -375,22 +375,43 @@ A proper abstract should contain around 100 words which makes this one way too s
 
 \chapter{Teorija}
 
-Moderni računalniki vsebujejo mnogo različnih komponent in se povezujejo na razno razne vhodno izhodne naprave.
+Moderni računalniki vsebujejo mnogo različnih komponent -- centralno procesno enoto, pomnilnik in vhodno-izhodne naprave.
 Pri takem obsegu in kompleksnosti računalniških sistemov je praktično nepredstavljivo, da bi vsak programer poznal vse podrobnosti delovanja vseh komponent.
 Zato se je pojavila potreba po programu, katerega naloga je upravljanje z viri sistema in abstrakcija dostopa do le teh -- \textbf{operacijski sistem}.
+\cite{Tanenbaum_Bos_2023}
 
-Večina modernih procesorjev ima vsaj dva načina delovanja: \textbf{uporabniški} in \textbf{jedrni} (oz. privilegiran) način.
-Operacijski sistem se (večinoma) izvaja v jedrnem načinu, kjer ima dostop do vseh virov sistema in lahko izvede kateri koli ukaz v ukaznem naboru procesorja.
-Preostanek programske opreme pa se izvaja v uporabniškem načinu, kjer ima dostop le do omejenega ukaznega nabora.
+\section{Operacijski sistem}
 
-Kot smo že omenili, je naloga operacijskega sistema upravljanje z viri sistema in abstrakcija dostopa do strojne opreme.
+Operacijski sistem iz uporabnikove perspektive stoji med aplikacijami in strojno opremo, kot vidimo na sliki \ref{fig:computer_system_components}.
+\cite{Silberschatz_Galvin_Gagne_2018}
+
+\begin{figure}[h!]
+	\begin{center}
+		\begin{tikzpicture}[node distance=1.8cm]
+			\tikzstyle{node} = [rectangle, draw=black, fill=blue!15!white, align=center, minimum height=1cm, minimum width=3cm];
+			\node (user) [node] {uporabnik};
+			\node (application) [node, minimum width=7cm, fill=gray!40!white, below of=user] {aplikacije\\\footnotesize{(brskalniki, urejevalniki besedila, \dots)}};
+			\node (os) [node, minimum width=7cm, below of=application] {operacijski sistem};
+			\node (hardware) [node, minimum width=7cm, fill=gray!40!white, below of=os] {strojna oprema\\\footnotesize{(CPU, pomnilnik, I/O naprave, \dots)}};
+			\draw [thick,<->,>=stealth] (user) -- (application);
+			\draw [thick,<->,>=stealth] ([xshift=2cm]application.south) -- ([xshift=2cm]os.north);
+			\draw [thick,<->,>=stealth] (application) -- (os);
+			\draw [thick,<->,>=stealth] ([xshift=-2cm]application.south) -- ([xshift=-2cm]os.north);
+			\draw [thick,<->,>=stealth] ([xshift=2cm]os.south) -- ([xshift=2cm]hardware.north);
+			\draw [thick,<->,>=stealth] (os) -- (hardware);
+			\draw [thick,<->,>=stealth] ([xshift=-2cm]os.south) -- ([xshift=-2cm]hardware.north);
+		\end{tikzpicture}
+	\end{center}
+	\caption{Abstrakten pogled komponent računalniškega sistema\cite{Silberschatz_Galvin_Gagne_2018}}
+	\label{fig:computer_system_components}
+\end{figure}
+
+Glavna naloga operacijskega sistema upravljanje z viri sistema in abstrakcija dostopa do strojne opreme.
 Upravljanje z viri je tako uporabniku kot tudi programerju skrito in v večini transparentno, saj se izvaja avtomatsko in v ozadju.
 Abstrakcija dostopa do strojne opreme pa je implementirana s \textbf{sistemskimi klici}.
 \cite{Tanenbaum_Bos_2023}
 
-\section{Pregled operacijskih sistemov}
-
-\subsection{Linux}
+\section{Operacijski sistem Linux}
 
 Linux izgleda in se obnaša podobno kot kateri koli drug UNIX sistem, saj je bil eden izmed glavnih ciljev pri razvoju skladnost s standardi POSIX in Single UNIX.
 Razvoj sistema se je začel leta 1991, ko je Finski študent Linus Torvalds začel razvijati majhno jedro za procesor 80386 -- prvi pravi 32-bitni procesor v Intelovem naboru.
@@ -405,7 +426,7 @@ Prav tako ponuja programe, ki nam omogočajo namestitev dodatnih programov in or
 Veliko izmed teh programov je bilo razvitih v sklopu odprtokodnih projektov, kot so GNU, BSD, X Window System, itd.
 \cite{Silberschatz_Galvin_Gagne_2018}
 
-\subsubsection{Linux jedro}
+\subsection{Linux jedro}
 
 Prvo Linux jedro (verzija 0.01) je bilo javno izdano 14. maja 1991. Ni podpiralo omrežij in delovalo je le na procesorjih kompatibilnih z Intel 80386.
 Podpora za strojno opremo je bila zelo omejena in podprt je bila samo Minix datotečni sistem.
@@ -418,7 +439,7 @@ Omembe vredni so še podpora za deljen pomnilnik, semaforje, sporočilne vrste i
 V sledečih verzija je bila sčasoma dodana podpora za nove arhitekture procesorjev, kot so DEC Alpha, Sun SPARC in MIPS ter kasneje še PowerPC, ARM in mnoge druge.
 \cite{Silberschatz_Galvin_Gagne_2018}
 
-\subsubsection{Linux Virtual File System}
+\subsection{Linux Virtual File System}
 
 Navidezni datotečni sistem (\textit{angl. Virtual File System -- abbr. VFS}) je programska plast v jedru, ki omogoča uporabnikom in uporabniškim programom dostop do različnih datotečnih sistemov.
 Deluje pa tudi kot abstrakcija znotraj jedra, ki omogoča sobivanje različnih datotečnih sistemov.
@@ -435,44 +456,152 @@ Eno indeksno vozlišče lahko pripada več imeniškim vnosom, kar omogoča, da s
 VFS omogoča UNIX koncept ``everything is a file'', kjer je osnovna ideja, da se vsi sistemski resursi (npr. naprave, procesi, omrežje) predstavijo kot datoteke.
 To omogoča enoten način dostopa do sistemskih virov, kar olajša uporabo in razvoj programske opreme in zmanjša število potrebnih sistemskih klicev.
 
-\subsection{Windows}
+\section{Operacijski sistem Windows}
 
-TODO: ANSI in Unicode ukazi, omemba teže NT jedra v imenu kompatibilnosti, razvoj (zgodovina) NT jedra
+Razvoj Windows se je začel leta 1988 pod okriljem Microsoft in IBM. Cilj je bil razviti NT (\textit{``New Technology''}) operacijski sistem s podporo za OS/2 in POSIX aplikacijska vmesnika, vendar je tekom razvoja nastal svoj 32-bitni Windows API, pod imenom Win32.
+V NT verziji 4.0, ki se je uporabljala v Windows 95, je jedro vsebovalo spletni strežnik in brskalnik, skupaj z vso grafično logiko in uporabniškim vmesnikom. Te spremembe so bile uvedene z namenom izboljšanja učinkovitosti, stranski učinek pa je bila zmanjšana zanesljivost sistema.
+V Windows 2000 so dodali podporo za Active Directory, ``plug-and-play'' naprave in porazdeljen datotečni sistem. Prav tako so izboljšali omrežno podporo ter podprli več različnih procesorjev, vendar samo Intel (in kompatibilne) procesorje, in več sistemskega pomnilnika.
+Naslednji večji skok v razvoju je bil Windows XP, ki je na trg nastopil z prenovljenim grafičnim okoljem in samodejnim odpravljanjem težav z aplikacijami in samim operacijskim sistemom.
+S temi spremembami je Windows XP zagotavljal boljše omrežne storitve, podporo za več naprav ter ogromno izboljšavo v zmogljivosti, zanesljivosti in varnosti. Prav tako je bila prva izdaja s podporo za 64-bitne sisteme.
+Leta 2006 je bil izdan Windows Vista, ki kljub mnogim izboljšavam, zaradi težav z nekompatibilnostmi in počasnim odzivnim časom, ni požel velikega uspeha. Med najbolj ključnimi izboljšavami je bil premik grafične implementacije v ``desktop window manager'', ki se je izvajal kot uporabniški proces.
+Naslednji večji skok je nastopil z Windows 7, ki je bil izdan leta 2009, in je odpravil večino težav svojega predhodnika.
+
+Windows 7 deluje na podlagi client-server arhitekture, ki implementira dve ``osebnosti'', Win32 in POSIX. V tej arhitekturi se uporabniški procesi imenujejo podsistemi (\textit{angl. subsystems}).
+Podsistemi so omogočali spremembe in izboljšave na eni izmed ``osebnosti'', brez vpliva na drugo. Kljub podpori za POSIX podsistem pa je Win32 postajal vedno bolj popularen, medtem pa je virtualizacija postala primaren način sobivanja operacijskih sistemov na enem računalniku.
+\cite{Silberschatz_Galvin_Gagne_2018}
+
+Glavna cilji pri razvoju Windows NT so bila:
+\begin{itemize}
+	\item Razširljivost
+	      \begin{description}
+	      	\item Koda mora biti napisana tako, da lahko brez težav raste in prilagodi zahtevam na trgu.
+	      \end{description}
+	\item Prenosnost
+	      \begin{description}
+	      	\item Sistem se mora izvajati na različnih arhitekturah in ohranjati možnost prehoda na nove arhitekture.
+	      \end{description}
+	\item Zanesljivost in robustnost
+	      \begin{description}
+	      	\item Sistem se mora zaščititi pred internimi napakami in zunanjimi vplivi. Aplikacije ne morejo škodovati OS ali drugim aplikacijam.
+	      \end{description}
+	\item Kompatibilnost
+	      \begin{description}
+	      	\item Kljub temu, da Windows NT razširja funkcionalnosti obstoječih tehnologij, naj bodo programski vmesniki kompatibilni s starejšimi verzijami Windows in MS-DOS. Prav tako naj dobro sodeluje z drugimi sistemi kot UNIX, OS/2 ub NetWare.
+	      \end{description}
+	\item Zmogljivost
+	      \begin{description}
+	      	\item Upoštevajoč druge zahteve, naj bo sistem kar se da zmogljiv in hiter na vsaki platformi.
+	      \end{description}
+\end{itemize}
+
+Seveda so se te cilji spreminjali tekom razvoja.\cite{Yosifovich_Russinovich_Solomon_Ionescu_2017}
 
 \section{Sistemski klici}
 
 Sistemski klici so vmesnik do storitev, ki jih ponuja jedro operacijskega sistema, kot na primer ustvarjanje procesov, branje in pisanje datotek, komunikacijo med procesi, itd.
-Ker torej sistemski klici prehajajo med uporabniškim in jedrnim načinom procesorja, je njihova implementacija odvisna od arhitekture procesorja in njegovega nabora ukazov.
+Ker torej sistemski klici prehajajo med uporabniškim in jedrnim načinom procesorja (več o tem v poglavju \ref{sec:syscall_execution}), je njihova implementacija odvisna od arhitekture procesorja in njegovega nabora ukazov.
 
 Ker pa jih uporabniški programi potrebujejo dokaj pogosto, so v večini operacijskih sistemov izpostavljeni preko knjižnice ali API-ja.
 Najbolj pogosto uporabljena API-ja za aplikacijske programerje sta \textbf{POSIX}, za sisteme, ki sledijo POSIX standardu, npr. Unix, Linux in macOS, in \textbf{Windows API}, za Windows sisteme.
 Programer do API-ja dostopa preko knjižnice, ki jo ponuja operacijski sistem -- npr. libc za programski jezik C, v primeru Linuxa.
 Tu je omembe vredno tudi, da imena funkcij v knjižnici niso nujno enaka imenom sistemskih klicev, ki jih uporablja sistem.
-\cite{Silberschatz_Galvin_Gagne_2018}
-
-Kljub temu, da iz uporabniške oz. programske strani sistemski klici izgledajo kot navadne funkcije, je njihova implementacija popolnoma drugačna:
-\begin{enumerate}
-	\item Uporabniški proces (oz. knjižnica, ki jo uporablja) shrani številko sistemskega klica in argumente funkcije v registre procesorja -- registri se razlikujejo glede na arhitekturo in OS.
-	\item Uporabniški proces sproži past, ki preklopi procesor v jedrni način in požene prekinitveni servisni program (ISR), ki ga je definiral operacijski sistem.
-	\item Jedro izvede zahtevan sistemski klic in vrne rezultat -- rezultat se zapiše v register iz katerega ga uporabniški program lahko prebere.
-	\item Procesor preklopi nazaj v uporabniški način in nadaljuje izvajanje uporabniškega procesa. \cite{Tanenbaum_Bos_2023}
-\end{enumerate}
 
 Ker je sistemskih klicev ogromno, jih bomo v nadaljevanju razdelili na šest kategorij, in sicer:
 \begin{itemize}
-	\item \textbf{procesni nadzor} -- upravljanje procesov,
-	\item \textbf{upravljanje datotek} -- branje in pisanje datotek,
-	\item \textbf{upravljanje naprav} -- upravljanje z vhodno-izhodnimi napravami,
-	\item \textbf{vzdrževanje informacij o sistemu} -- pridobivanje in urejanje informacij o sistemu,
-	\item \textbf{komunikacija med procesi} -- dvosmerna med procesna komunikacija,
-	\item \textbf{zaščita} -- upravljanje pravic nad datotekami. \cite{Silberschatz_Galvin_Gagne_2018}
+	\item \textbf{upravljanje procesov}
+	      \begin{description}
+	      	\item 
+	      \end{description}
+	\item \textbf{upravljanje datotek}
+	      \begin{description}
+	      	\item 
+	      \end{description}
+	\item \textbf{upravljanje naprav}
+	      \begin{description}
+	      	\item 
+	      \end{description}
+	\item \textbf{vzdrževanje informacij o sistemu}
+	      \begin{description}
+	      	\item 
+	      \end{description}
+	\item \textbf{komunikacija med procesi}
+	      \begin{description}
+	      	\item 
+	      \end{description}
+	\item \textbf{zaščita}
+	      \begin{description}
+	      	\item 
+	      \end{description}
 \end{itemize}
+\cite{Silberschatz_Galvin_Gagne_2018}
 
-Preden pa se podamo v primerjave posameznih sistemskih klicev, si poglejmo še, kakšne so implementacijske razlike med sistemskimi klici v Linuxu in Windowsu.
-Tu še enkrat poudarjam, da so razlike med sistemskimi klici odvisne od arhitekture procesorja.
-V vseh konkretnih primerih bom uporabljal ukazni nabor in imena registrov arhitekture \textbf{x86}.
+% Preden pa se podamo v primerjave posameznih sistemskih klicev, si poglejmo še, kakšne so implementacijske razlike med sistemskimi klici v Linuxu in Windowsu.
+% Tu še enkrat poudarjam, da so razlike med sistemskimi klici odvisne od arhitekture procesorja.
+% V vseh konkretnih primerih bom uporabljal ukazni nabor in imena registrov arhitekture \textbf{x86}.
 
-\subsection{Linux -- POSIX API}
+\section{Izvedba sistemskega klica} \label{sec:syscall_execution}
+
+Kot smo že povedali, imajo operacijski sistemi dve glavni funkciji: upravljanje sistemskih virov in zagotavljanje abstrakcij za uporabniške aplikacije.
+Upravljanje virov je v večini primerov transparentno uporabnikom in se izvaja v ozadju. Zato je vmesnik med programi in operacijskim sistemom predvsem osredotočen na abstrakcije sistema.
+Da lahko res razumemo kaj operacijski sistemi počnejo, si moramo pobližje pogledati ta vmesnik.
+\cite{Tanenbaum_Bos_2023}
+
+Moderne procesorske arhitekture definirajo več privilegijskih nivojev ali obročev.
+Vzemimo za primer arhitekturo x86, ki implementira 4 nivoje oz. obroče (številčene od 0 do 3) kot prikazuje slika \ref{fig:privilege_levels_x86}.
+Večja številka pomeni manj privilegijev.
+Srednji obroč oz. nivo 0 se uporablja za najbolj kritično programsko opremo, običajno jedro operacijskega sistema.
+Zunanji obroči oz. nivoji 1 do 3 pa se uporabljajo za manj kritično programsko opremo.
+Kako operacijski sistem koristi nivoje izvajanja je odvisno od implementacije.
+Sistemi, ki uporabljajo samo dva nivoja izvajanja, uporabljajo nivo 0 za jedro in nivo 3 za uporabniške programe.
+
+Procesor uporabi nivoje, da zaščiti segmente bolj privilegiranih procesov pred manj privilegiranimi.
+Prav tako ima procesor poseben nabor navodil, ki se imenujejo privilegirana navodila.
+Le-ta se lahko uporabljajo samo v nivoju 0.
+
+Kadar procesor zazna kršitev nivoja, sproži izjemo in tako obvesti jedro o napaki.
+\cite{Intel_2024}
+
+\begin{figure}[h!]
+	\begin{center}
+		\begin{tikzpicture}
+			\draw (0, 0) circle (1);
+			\draw (0, 0) circle (2);
+			\draw (0, 0) circle (3);
+			\draw (0, 0) circle (4);
+			\node [align=right] at (-6.5, -1.5) {
+				\shortstack[r]{\small{Operating}\\\small{System}\\\small{Kernel}}\\\\
+				\shortstack[r]{\small{Operating System}\\\small{Services}}\\\\
+				\small{Applications}
+			};
+			\node at (0, -.2) {Level 0};
+			\node at (0, -1.5) {Level 1};
+			\node at (0, -2.5) {Level 2};
+			\node at (0, -3.5) {Level 3};
+			\draw[->] (-4.5, .3) -- (0, .3);
+			\draw[->] (-4.5, -1.7) -- (0, -1.2);
+			\draw[->] (-4.5, -1.7) -- (0, -2.2);
+			\draw[->] (-4.5, -3.2) -- (0, -3.2);
+		\end{tikzpicture}
+	\end{center}
+	\caption{Nivoji zaščite v x86 arhitekturi\cite{Intel_2024}}
+	\label{fig:privilege_levels_x86}
+\end{figure}
+
+Ker pa je število nivojev in njihov namen drugačen od arhitekture do arhitekture, jih posplošimo dva nivoja delovanja: \textbf{uporabniški} in \textbf{jedrni} oz. privilegiran način.
+Kot že omenjeno, se jedro operacijskega sistema izvaja v jedrnem načinu, kjer ima dostop do vseh virov sistema in lahko izvede kateri koli ukaz v ukaznem naboru procesorja.
+Preostanek programske opreme pa se izvaja v uporabniškem načinu, kjer ima omejen dostop.
+\cite{Tanenbaum_Bos_2023}
+
+Ker je način izvedbe klica odvisen od arhitekture sistema in običajno zahteva implementacijo v zbirnem jeziku, večina operacijskih sistemov zagotavlja knjižnico v višje-nivojskem jeziku -- običajno C ali C++.
+Kljub temu, da iz uporabniške oz. programske strani sistemski klici v knjižnici izgledajo kot običajne funkcije, pa je njihova implementacija popolnoma drugačna:
+\begin{enumerate}
+	\item Uporabniški proces (oz. knjižnica, ki jo uporablja) shrani številko sistemskega klica in argumente funkcije v registre procesorja -- registri se razlikujejo glede na arhitekturo in OS.
+	\item Uporabniški proces proži past, ki preklopi procesor v jedrni način in požene prekinitveni servisni program (ISR), ki ga je definiral operacijski sistem.
+	\item Jedro izvede zahtevan sistemski klic kot katero koli drugo funkcijo in vrne rezultat -- rezultat se zapiše v register iz katerega ga uporabniški program lahko prebere.
+	\item Procesor preklopi nazaj v uporabniški način in nadaljuje izvajanje uporabniškega procesa.\cite{Tanenbaum_Bos_2023}
+\end{enumerate}
+
+\section{Programski vmesnik Linux -- POSIX API}
 
 Ker je Linux jedro odprtokodno, si lahko pogledamo tabelo sistemskih klicev, ki jih ponuja na \textbf{x86-64} arhitekturi.
 Ta je dostopna v datoteki \texttt{arch/x86} \texttt{/entry/syscalls/syscall\_64.tbl} v \href{https://github.com/torvalds/linux}{izvorni kodi jedra}.
@@ -483,7 +612,7 @@ V veliki večini te procedure zahtevajo uporabo sistemskih, vendar je potrebno p
 Lahko se zgodi, da neka procedura sploh ne zahteva uporabe sistemskih klicev, v katerem primeru je implementirana v uporabniškem načinu, ali pa zahteva uporabo več sistemskih klicev.
 V redkem primeru se lahko zgodi, da več funkcij uporablja isti, bolj splošen, sistemski klic.
 
-\subsection{Windows -- Windows API}
+\section{Programski vmesnik Windows -- Windows API}
 
 Windows je, v kontrastu z Linuxom, zaprtokodni operacijski sistem, zato je težje priti do podatkov o njegovi implementaciji.
 Ena izmed glavnih razlik je, da Windows omogoča dostop do sistemskih klicev izključno preko Windows API-ja.
@@ -494,10 +623,17 @@ Windows API izpostavi ogromno procedur, v rangu več tisoč, medtem ko POSIX API
 To je posledica več faktorjev -- pogosto več funkcij uporablja isti sistemski klic, veliko pa je tudi funkcij, ki so v celoti implementirane v uporabniškem načinu.
 
 Ker Windows ne izpostavi sistemskih klicev direktno, se lahko le-te spreminjajo med posameznimi verzijami operacijskega sistema.
-To pomeni, da je težko zagotovo reči ali je neka funkcija implementirana v uporabniškem ali jedrnem načinu.
+To pomeni, da je težko zagotovo reči ali je neka funkcija implementirana v jedru ali uporabniški knjižnici.
 \cite{Tanenbaum_Bos_2023}
 
-\chapter{Procesni nadzor} \label{sec:process_control}
+Windows se od večine operacijskih sistemov razlikuje po kodiranju internih znakovnih nizov. Uporablja namreč 13-bitno Unicode kodiranje.
+Ker pa mnogo aplikacij uporablja 8-bitno ANSI kodiranje, ima večina Windows funkcij dve verziji: tako, ki sprejema ANSI znake in tako, ki sprejema 16-bitne Unicode znake.
+8-bitne verzije funkcij so posledično rahlo počasnejše, saj se niz najprej pretvori v Unicode.
+\cite{Yosifovich_Russinovich_Solomon_Ionescu_2017}
+
+TODO: Nedokumentiran del API-ja (Ntoskrnl.exe, Win32k.sys), Ne-strukturirano procesno drevo, omemba teže NT jedra v imenu kompatibilnosti
+
+\chapter{Upravljanje procesov} \label{sec:process_control}
 
 \section{Primerjava sistemskih klicev}
 
@@ -507,7 +643,7 @@ Proces ima tudi svoj prostor v pomnilniku, ki je običajno razdeljen na več seg
 	\item \textbf{podatkovni} (\textit{angl. data}) -- vsebuje vrednosti globalnih spremenljivk,
 	\item \textbf{programski} (\textit{angl. text}) -- vsebuje strojno kodo programa,
 	\item \textbf{sklad} (\textit{angl. stack}) -- vsebuje vrednosti lokalnih spremenljivk in povratne naslove funkcij in
-	\item \textbf{kopica} (\textit{angl. heap}) -- dinamično dodeljen pomnilnik. \cite{Silberschatz_Galvin_Gagne_2018}
+	\item \textbf{kopica} (\textit{angl. heap}) -- dinamično dodeljen pomnilnik.\cite{Silberschatz_Galvin_Gagne_2018}
 \end{itemize}
 
 \begin{figure}[h!]
@@ -533,7 +669,7 @@ Sistemski klici za procesni nadzor skrbijo za:
 	\item nalaganje in izvajanje programov,
 	\item pridobivanje in nastavljanje atributov procesov,
 	\item sinhronizacijo procesov,
-	\item dodeljevanje in sproščanje pomnilnika. \cite{Silberschatz_Galvin_Gagne_2018}
+	\item dodeljevanje in sproščanje pomnilnika.\cite{Silberschatz_Galvin_Gagne_2018}
 \end{itemize}
 
 \begin{table}[h!]
@@ -552,8 +688,8 @@ Sistemski klici za procesni nadzor skrbijo za:
 			Pridobivanje info & \verb|getpid|\newline\verb|getppid|                    & \verb|GetCurrentProcess|\newline\verb|GetCurrentProcessId|\newline\verb|GetCommandLine|\newline\verb|GetCurrentProcessorNumber|\newline\verb|GetEnvironmentVariable|\newline... \\
 		\end{tabular}
 	\end{center}
-	\label{tab:process_control}
 	\caption{Povzetek sistemskih klicev za procesni nadzor}
+	\label{tab:process_control}
 \end{table}
 
 V tabeli \ref{tab:process_control} vidimo, da je velik del sistemskih klicev za procesni nadzor simetričen med obema operacijskima sistemoma.
@@ -627,7 +763,7 @@ V grobem lahko sistemske klice za upravljanje datotek razdelimo na sledeče kate
 	\item ustvarjanje in brisanje datotek,
 	\item odpiranje in zapiranje datotek,
 	\item branje, pisanje in premikanje datotek,
-	\item pridobivanje in nastavljanje atributov datotek. \cite{Silberschatz_Galvin_Gagne_2018}
+	\item pridobivanje in nastavljanje atributov datotek.\cite{Silberschatz_Galvin_Gagne_2018}
 \end{itemize}
 
 \begin{table}[h!]
@@ -651,8 +787,8 @@ V grobem lahko sistemske klice za upravljanje datotek razdelimo na sledeče kate
 			Nastavi atribute   & \verb|setxattr|                                                                                & \verb|SetFileInformationByHandle|\newline\verb|SetFileAttributes| \\
 		\end{tabular}
 	\end{center}
-	\label{tab:file_management}
 	\caption{Povzetek sistemskih klicev za upravljanje datotek}
+	\label{tab:file_management}
 \end{table}
 
 \section{Praktična primerjava}
@@ -693,7 +829,7 @@ Ta kategorija vključuje sistemske klice za:
 	\item zahtevanje in sprostitev naprav,
 	\item branje, pisanje in premikanje naprav,
 	\item pridobivanje in nastavljanje atributov naprav,
-	\item logično povezovanje naprav. \cite{Silberschatz_Galvin_Gagne_2018}
+	\item logično povezovanje naprav.\cite{Silberschatz_Galvin_Gagne_2018}
 \end{itemize}
 
 Tu pričnemo opažati drastične razlike med arhitekturo jeder Linux in Windows.
@@ -767,7 +903,7 @@ Ta kategorija vključuje sistemske klice za:
 \begin{itemize}
 	\item pridobivanje in nastavljanje časa in datuma,
 	\item pridobivanje in nastavljanje sistemskih parametrov,
-	\item pridobivanje in nastavljanje atributov procesov, datotek in naprav. \cite{Silberschatz_Galvin_Gagne_2018}
+	\item pridobivanje in nastavljanje atributov procesov, datotek in naprav.\cite{Silberschatz_Galvin_Gagne_2018}
 \end{itemize}
 
 \begin{table}[h!]
@@ -787,8 +923,8 @@ Ta kategorija vključuje sistemske klice za:
 			Ustvari nit                       & \verb|clone|                                    & \verb|CreateThread|                                                                                                \\
 		\end{tabular}
 	\end{center}
-	\label{tab:information_maintenance}
 	\caption{Povzetek sistemskih klicev za vzdrževanje informacij o sistemu}
+	\label{tab:information_maintenance}
 \end{table} 
 
 \section{Praktična primerjava}
@@ -811,7 +947,7 @@ Enaka kot v poglavju \ref{ssec:process_control:methodology}.
 
 \section{Primerjava sistemskih klicev}
 
-Ta kategorija vključuje sistemske klice za pridobivanje in nastavljanje pravic nad datotekami. \cite{Silberschatz_Galvin_Gagne_2018}
+Ta kategorija vključuje sistemske klice za pridobivanje in nastavljanje pravic nad datotekami.\cite{Silberschatz_Galvin_Gagne_2018}
 
 \begin{table}[h!]
 	\begin{center}
@@ -821,8 +957,8 @@ Ta kategorija vključuje sistemske klice za pridobivanje in nastavljanje pravic 
 			Create Process & \verb|| & \verb|| \\
 		\end{tabular}
 	\end{center}
-	\label{tab:protection}
 	\caption{Povzetek sistemskih klicev za zaščito}
+	\label{tab:protection}
 \end{table}
 
 \section{Praktična primerjava}
