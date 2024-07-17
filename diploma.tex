@@ -228,7 +228,7 @@ sorting=nty,
 	licenco, ki je enaka tej.
 	Podrobnosti licence so dostopne na spletni strani \href{http://creativecommons.si}{creativecommons.si} ali na Inštitutu za
 	intelektualno lastnino, Streliška 1, 1000 Ljubljana.
-																		
+																															
 	\vspace*{1cm}
 	\begin{center}% 0.66 / 0.89 = 0.741573033707865
 		\CcImageCc{0.741573033707865}\hspace*{1ex}\CcImageBy{1}\hspace*{1ex}\CcImageSa{1}%
@@ -312,11 +312,12 @@ Na tem mestu zapišite, komu se zahvaljujete za pomoč pri izdelavi diplomske na
 \chapter*{Seznam uporabljenih kratic}
 
 \noindent\begin{tabular}{p{0.11\textwidth}|p{.39\textwidth}|p{.39\textwidth}}    % po potrebi razširi prvo kolono tabele na račun drugih dveh!
-{\bf kratica} & {\bf angleško}                     & {\bf slovensko}                        \\
+{\bf kratica} & {\bf angleško}                     & {\bf slovensko}                         \\
 \hline
-{\bf OS}      & Operating System                    & operacijski sistem                     \\
-{\bf API}     & Application Programming Interface   & vmesnik uporabniškega programa        \\
-{\bf POSIX}   & Portable Operating System Interface & prenosni vmesnik za operacijski sistem \\
+{\bf OS}      & Operating System                    & operacijski sistem                      \\
+{\bf API}     & Application Programming Interface   & vmesnik uporabniškega programa         \\
+{\bf POSIX}   & Portable Operating System Interface & Prenosni Vmesnik za Operacijske Sisteme \\
+{\bf SUS}     & Single UNIX Specification           & Enotna UNIX specifikacija               \\
 \end{tabular}
 
 
@@ -414,7 +415,7 @@ Abstrakcija dostopa do strojne opreme pa je implementirana s \textbf{sistemskimi
 
 \section{Operacijski sistem Linux}
 
-Linux se obnaša podobno kot kateri koli drug UNIX sistem, saj je bil eden izmed glavnih ciljev pri razvoju skladnost s standardi POSIX in Single UNIX Specification.
+Linux se obnaša podobno kot kateri koli drug UNIX sistem, saj je bil eden izmed glavnih ciljev pri razvoju skladnost s standardi POSIX (\textit{angl. Portable Operating System Interface}) in SUS (\textit{angl. Single UNIX Specification}).
 
 Seveda pa je pomembno omeniti, da je Linux samo jedro operacijskega sistema.
 Za celoten operacijski sistem pa potrebujemo še uporabniško programsko opremo, ki ji danes pravimo distribucija.
@@ -423,8 +424,17 @@ Prav tako ponuja programe, ki nam omogočajo namestitev dodatnih programov in or
 Veliko izmed teh programov je bilo razvitih v sklopu odprtokodnih projektov, kot so GNU, BSD, X Window System, itd.
 \cite{Silberschatz_Galvin_Gagne_2018}
 
+SUS oz. Enotna UNIX specifikacija je delo podjetja X/Open. Namen je poenotiti vse UNIX-u podobne sisteme in zagotavljati medsebojno kompatibilnost in prenosljivost kode.
+Sestavlja jo pet dokumentov: Definicija sistemskih vmesnikov, Sistemski vmesniki in zaglavne datoteke, Ukazi in podporni programi, Omrežne storitve in X/Open Curses.
+\cite{SUS_2020}
 
-TODO: SUS standard
+Jedro SUS pa je POSIX oz. Prenosni Vmesnik za Operacijske Sisteme, ki ga vzdržuje delovna skupina Austin Group s člani iz ISO, IEEE in The Open Group.
+Standard je objavljen pod oznako IEEE 1003 in ISO/IEC 9945.
+Sestavljata ga dva dela: POSIX.1, ki vsebuje dejanske definicije sistemskih vmesnikov in storitev, in POSIX Testiranje Ustreznosti, ki definira teste za določanje konformnosti s POSIX.1.
+
+POSIX.1 standard, in posledično SUS, se osredotoča na prenosnost aplikacij med UNIX-podobnimi sistemi, definiranje vmesnika jedra in minimalno definicijo vmesnika.
+Ta standard je osnova za vse UNIX-podobne sisteme in omogoča enotno izkušnjo tako razvijalcem kot tudi uporabnikom.
+\cite{POSIX.1_2024}
 
 \subsection{Zgodovina}
 
@@ -763,14 +773,21 @@ Kljub temu, da iz uporabniške oz. programske strani sistemski klici v knjižnic
 
 \section{Programski vmesnik Linux -- POSIX API}
 
-Ker je Linux jedro odprtokodno, si lahko pogledamo tabelo sistemskih klicev, ki jih ponuja na \textbf{x86-64} arhitekturi.
-Ta je dostopna v datoteki \texttt{arch/x86} \texttt{/entry/syscalls/syscall\_64.tbl} v \href{https://github.com/torvalds/linux}{izvorni kodi jedra}.
+Linux API je implementiran preko glibc oz. GNU C knjižnice, ki zagotavlja API vmesnik po standardih ISO C11, POSIX.1-2008 in BSD ter druge OS-specifične API vmesnike.
+Prav tako je kompatibilna s starejšimi verzijami ISO C.
+Celotna GNU C knjižnica je odprtokodna pod licenčnimi pogoji LGPL 2.1.
+\cite{GNU_Manual}
+
+Ker pa je Linux jedro odprtokodno pod licenco GPL 2.0, si lahko pogledamo tudi celotno implementacijo jedra.
+Za nas je najbolj relevantna tabela sistemskih klicev.
+Ta je, za x86 64-bitno arhitekturo dostopna v datoteki \texttt{arch/x86} \texttt{/entry/syscalls/syscall\_64.tbl} v \href{https://github.com/torvalds/linux}{izvorni kodi jedra}.
 Tu lahko opazimo, da je arhitektura procesorja del poti do datoteke in če pogledamo v druge imenike v \texttt{arch}, lahko vidimo, da ima vsaka implementirana arhitektura med drugim tudi svojo tabelo sistemskih klicev.
 
-Omenili smo že, da Linux implementira POSIX standard, ki definira procedure, ki naj bi jih implementiral operacijski sistem.
-V veliki večini te procedure zahtevajo uporabo sistemskih, vendar je potrebno poudariti, da povezava ni nujno ena na ena.
-Lahko se zgodi, da neka procedura sploh ne zahteva uporabe sistemskih klicev, v katerem primeru je implementirana v uporabniškem načinu, ali pa zahteva uporabo več sistemskih klicev.
-V redkem primeru se lahko zgodi, da več funkcij uporablja isti, bolj splošen, sistemski klic.
+Kot smo že povedali Linux sledi standardu POSIX, ki definira procedure aplikacijskega vmesnika.
+V veliki večini te procedure zahtevajo uporabo sistemskih klicev, vendar je potrebno poudariti, da povezava ni nujno ena proti ena.
+Lahko se zgodi, da je neka procedure izvedljiva v uporabniškem načinu in ne zahteva sistemskega klica, ali pa zahteva uporabo več sistemskih klicev.
+V nekaterih primerih se lahko zgodi tudi, da več procedur uporablja isti (bolj splošen) sistemski klic.
+Te specifike si bomo pobližje ogledali v naslednjem poglavju.
 
 \section{Programski vmesnik Windows -- Windows API}
 
@@ -816,7 +833,7 @@ Nekateri Win32 klici sprejmejo pot do objekta medtem ko NT ekvivalentna funkcija
 Prav tako je naloga Win32 API klicev, da pretvorijo znakovne nize iz ANSI v Unicode kodiranje.
 \cite{Tanenbaum_Bos_2023}
 
-TODO: Nedokumentiran del API-ja (Ntoskrnl.exe, Win32k.sys, ntdll.dll) pg. 49, Ne-strukturirano procesno drevo, omemba teže NT jedra v imenu kompatibilnosti
+TODO: Nedokumentiran del API-ja (Ntoskrnl.exe, Win32k.sys, ntdll.dll) pg. 49, Ne-strukturirano procesno drevo
 
 \chapter{Upravljanje procesov} \label{sec:process_control}
 
