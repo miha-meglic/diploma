@@ -228,7 +228,7 @@ sorting=nty,
 	licenco, ki je enaka tej.
 	Podrobnosti licence so dostopne na spletni strani \href{http://creativecommons.si}{creativecommons.si} ali na Inštitutu za
 	intelektualno lastnino, Streliška 1, 1000 Ljubljana.
-																															
+																																																																							
 	\vspace*{1cm}
 	\begin{center}% 0.66 / 0.89 = 0.741573033707865
 		\CcImageCc{0.741573033707865}\hspace*{1ex}\CcImageBy{1}\hspace*{1ex}\CcImageSa{1}%
@@ -375,17 +375,15 @@ A proper abstract should contain around 100 words which makes this one way too s
 \chapter{Uvod}
 
 
-\chapter{Teorija}
+\chapter{Pregled področja}
 
 Moderni računalniki vsebujejo mnogo različnih komponent -- centralno procesno enoto, pomnilnik in vhodno-izhodne naprave.
 Pri takem obsegu in kompleksnosti računalniških sistemov je praktično nepredstavljivo, da bi vsak programer poznal vse podrobnosti delovanja vseh komponent.
 Zato se je pojavila potreba po programu, katerega naloga je upravljanje z viri sistema in abstrakcija dostopa do le teh -- \textbf{operacijski sistem}.
-\cite{Tanenbaum_Bos_2023}
 
 \section{Operacijski sistem}
 
 Operacijski sistem iz uporabnikove perspektive stoji med aplikacijami in strojno opremo, kot vidimo na sliki \ref{fig:computer_system_components}.
-\cite{Silberschatz_Galvin_Gagne_2018}
 
 \begin{figure}[h!]
 	\begin{center}
@@ -408,33 +406,32 @@ Operacijski sistem iz uporabnikove perspektive stoji med aplikacijami in strojno
 	\label{fig:computer_system_components}
 \end{figure}
 
-Glavna naloga operacijskega sistema upravljanje z viri sistema in abstrakcija dostopa do strojne opreme.
+Glavna naloga operacijskega sistema upravljanje z viri sistema in abstrakcija dostopa do strojne opreme \cite{Tanenbaum_Bos_2023}.
 Upravljanje z viri je tako uporabniku kot tudi programerju skrito in v večini transparentno, saj se izvaja avtomatsko in v ozadju.
 Abstrakcija dostopa do strojne opreme pa je implementirana s \textbf{sistemskimi klici}.
-\cite{Tanenbaum_Bos_2023}
 
 \section{Operacijski sistem Linux}
 
-Linux se obnaša podobno kot kateri koli drug UNIX sistem, saj je bil eden izmed glavnih ciljev pri razvoju skladnost s standardi POSIX (\textit{angl. Portable Operating System Interface}) in SUS (\textit{angl. Single UNIX Specification}).
+Linux je odprtokodno, UNIXu podobno jedro operacijskega sistema, ki ga je razvil Linux Torvalds.
 
-Seveda pa je pomembno omeniti, da je Linux samo jedro operacijskega sistema.
-Za celoten operacijski sistem pa potrebujemo še uporabniško programsko opremo, ki ji danes pravimo distribucija.
-Ta vsebuje vse standardne komponente Linux sistema in doda administrativna orodja, ki poenostavijo namestitev, nadgradnjo in vzdrževanje sistema ter omogočajo delo z datotečnim sistemom, kreiranje in upravljanje uporabniških računov, administracijo omrežij in mnogo več.
-Prav tako ponuja programe, ki nam omogočajo namestitev dodatnih programov in orodij, ki jih uporabnik potrebuje.
-Veliko izmed teh programov je bilo razvitih v sklopu odprtokodnih projektov, kot so GNU, BSD, X Window System, itd.
-\cite{Silberschatz_Galvin_Gagne_2018}
+Seveda pa jedro še ni celoten operacijski sistem, potrebujemo tudi uporabniško programsko opremo.
+Danes obstaja nešteto mnogo različnih kombinacij jedra in različne programske opreme, ki jih imenujemo distribucije.
+Te vsebujejo vse standardne komponente Linux sistema in dodajo administrativna orodja, ki poenostavijo namestitev, nadgradnjo in vzdrževanje sistema ter omogočajo delo z datotečnim sistemom, kreiranje in upravljanje uporabniških računov, administracijo omrežij in mnogo več \cite{Silberschatz_Galvin_Gagne_2018}.
+Prav tako ponujajo programe, ki nam omogočajo namestitev dodatne programske opreme in orodij, ki jih uporabnik potrebuje.
+Velika večina te programske opreme je bilo razvite v sklopu drugih odprtokodnih projektov kot so GNU, BSD, X Window System, itd.
 
-SUS oz. Enotna UNIX specifikacija je delo podjetja X/Open. Namen je poenotiti vse UNIX-u podobne sisteme in zagotavljati medsebojno kompatibilnost in prenosljivost kode.
+Eden izmed glavnih ciljev pri razvoju je bila skladnost s standardi POSIX (\textit{angl. Portable Operating System Interface}) in SUS (\textit{angl. Single UNIX Specification}).
+To je razlog, da je Linux danes del širokega nabora UNIXu podobnih operacijskih sistemov, skupaj z MacOS, BSD, Solaris in njihovimi izvedenkami.
+
+SUS oz. Enotna UNIX specifikacija \cite{SUS_2020} je delo podjetja X/Open. Namen je poenotiti vse UNIX-u podobne sisteme in zagotavljati medsebojno kompatibilnost in prenosljivost kode.
 Sestavlja jo pet dokumentov: Definicija sistemskih vmesnikov, Sistemski vmesniki in zaglavne datoteke, Ukazi in podporni programi, Omrežne storitve in X/Open Curses.
-\cite{SUS_2020}
 
-Jedro SUS pa je POSIX oz. Prenosni Vmesnik za Operacijske Sisteme, ki ga vzdržuje delovna skupina Austin Group s člani iz ISO, IEEE in The Open Group.
+Jedro SUS pa je POSIX oz. Prenosni Vmesnik za Operacijske Sisteme \cite{POSIX.1_2024}, ki ga vzdržuje delovna skupina Austin Group s člani iz ISO, IEEE in The Open Group.
 Standard je objavljen pod oznako IEEE 1003 in ISO/IEC 9945.
 Sestavljata ga dva dela: POSIX.1, ki vsebuje dejanske definicije sistemskih vmesnikov in storitev, in POSIX Testiranje Ustreznosti, ki definira teste za določanje konformnosti s POSIX.1.
 
 POSIX.1 standard, in posledično SUS, se osredotoča na prenosnost aplikacij med UNIX-podobnimi sistemi, definiranje vmesnika jedra in minimalno definicijo vmesnika.
 Ta standard je osnova za vse UNIX-podobne sisteme in omogoča enotno izkušnjo tako razvijalcem kot tudi uporabnikom.
-\cite{POSIX.1_2024}
 
 \subsection{Zgodovina}
 
@@ -444,7 +441,7 @@ Zgodaj v razvoju je bila Linux izvorna koda javno objavljena in je kmalu pritegn
 Sistem je hitro zrasel iz majhne nepopolne replike UNIX sistema v popolnoma funkcionalen moderen operacijski sistem.
 
 Prvo Linux jedro (verzija 0.01) je bilo javno izdano 14. maja 1991. Ni podpiralo omrežij in delovalo je le na procesorjih kompatibilnih z Intel 80386.
-Podpora za strojno opremo je bila zelo omejena in podprt je bila samo Minix datotečni sistem.
+Podpora za strojno opremo je bila zelo omejena in podprt je bil samo Minix datotečni sistem.
 
 Naslednji mejnik, Linux 1.0, je bil izdan 14. marca 1994. Dodana je bila podpora za TCP/IP omrežne protokole in BSD kompatibilna implementacija vtičnic (\textit{angl. socket}).
 Drastično je bila izboljšana tudi podpora za strojno opremo, dodana je bila podpora disketne pogone, CD-ROM naprave, zvočne kartice, miške in mednarodne tipkovnice.
@@ -452,13 +449,13 @@ Prav tako je bila dodana podpora za več procesorjev, vendar še vedno omejena n
 Omembe vredni so še podpora za deljen pomnilnik, semaforje, sporočilne vrste in, kot že omenjeno, medprocesno komunikacijo.
 
 V sledečih verzija je bila sčasoma dodana podpora za nove arhitekture procesorjev, kot so DEC Alpha, Sun SPARC in MIPS ter kasneje še PowerPC, ARM in mnoge druge.
-\cite{Silberschatz_Galvin_Gagne_2018}
+%\cite{Silberschatz_Galvin_Gagne_2018}
 
 \subsection{Arhitektura}
 
 Linux sistem si lahko predstavljamo kot neke vrste piramido, kot ilustrira slika \ref{fig:linux_architecture}.
 Na dnu piramide je strojna oprema, ki jo nadzira naslednji sloj -- operacijski sistem.
-Nad operacijskim sistemom imamo sloja standardne knjižnice (\textit{angl. standard library}) in sistemskih ter uporabniških programov.
+Nad operacijskim sistemom pa imamo sloja standardne knjižnice (\textit{angl. standard library}) in sistemskih ter uporabniških programov.
 
 \begin{figure}[h!]
 	\begin{center}
@@ -471,13 +468,11 @@ Nad operacijskim sistemom imamo sloja standardne knjižnice (\textit{angl. stand
 Kar pa nas tu zares zanima, so vmesniki med posameznimi plastmi.
 Predvsem nas zanima vmesnik sistemskih klicev, ki jih ponuja jedro, in vmesnik standardne knjižnice, ki nam olajša klicanje sistemskih klicev.
 
-Uporaba vmesnika sistemskih klicev je zelo odvisna od arhitekture procesorja.
-Prav tako C nima podpore za klicanje specifičnih ukazov procesorja, ki jih potrebujemo za klicanje sistemskih klicev, to je mogoče zgolj preko zbirnega jezika.
+Standardna knjižnica nas zanima predvsem ker je uporaba vmesnika sistemskih klicev zelo odvisna od arhitekture procesorja.
+Prav tako C in drugi višje nivojski programski jeziki nimajo podpore za klicanje specifičnih ukazov procesorja, ki jih potrebujemo za klicanje sistemskih klicev, to je mogoče zgolj preko zbirnega jezika \cite{Tanenbaum_Bos_2023}.
 Zato bomo v nadaljevanju uporabljali standardno knjižnico, ki izpostavi preproste funkcije in poskrbi za same klice v jedro.
 
-POSIX standardi definirajo funkcije, njihove parametre, funkcionalnosti in rezultate standardne knjižnice.
-Posledično bo naša koda izvedljiva na katerem koli POSIX skladnem sistemu.
-\cite{Tanenbaum_Bos_2023}
+Ker POSIX standardi definirajo funkcije, njihove parametre, funkcionalnosti in rezultate standardne knjižnice, bo naša koda tehnično izvedljiva na katerem koli sistemu skladnem s POSIX standardom.
 
 \subsection{Struktura jedra}
 
@@ -495,49 +490,63 @@ Na najnižjem nivoju jedro implementira prekinitvene rutine (\textit{angl. inter
 in dodeljevalnik (\textit{angl. dispatcher}), ki upravlja procese v izvajanju in omogoča menjavanje konteksta izvajanja.
 
 Na višjem nivoju ločujemo razne jedrne podsisteme v tri komponente.
-Vhodno-izhodna komponenta vsebuje vse sisteme za interakcijo z napravami sistema.
+Vhodno-izhodna komponenta vsebuje vse sisteme za interakcijo z napravami sistema \cite{Tanenbaum_Bos_2023}.
 Na najvišjem nivoju komponenta združuje vse I/O operacije pod navideznim datotečnim sistemom oz. VFS (\textit{angl. Virtual File System}), ki si ga bolj podrobno pogledamo v poglavju \ref{ssec:linux:vfs}.
 Na najnižjem nivoju pa se vse I/O operacije izvedejo v nekem gonilniku naprave.
 Linux gonilnike klasificira kot gonilnike znakovnih naprav, ki ne omogočajo naključnega dostopa, in gonilnike bločnih naprav, ki omogočajo naključni dostop.
-V diagramu so gonilniki omrežnih naprav zapisani posebej, ker so implementirane nekoliko drugače, vendar so iz tehničnega vidika klasificirani kot znakovne naprave.
+V diagramu so gonilniki omrežnih naprav zapisani posebej, ker so implementirani nekoliko drugače, vendar so iz tehničnega vidika klasificirani kot znakovne naprave.
 
-Drugi dve ključni komponenti, na sliki \ref{fig:linux_kernel_architecture}, sta komponenta za upravljanje pomnilnika in komponenta za upravljanje procesov.
+Drugi dve ključni komponenti, na sliki \ref{fig:linux_kernel_architecture}, sta komponenta za upravljanje pomnilnika in komponenta za upravljanje procesov \cite{Tanenbaum_Bos_2023}.
 Komponenta za upravljanje pomnilnika skrbi za povezavo virtualnega in fizičnega pomnilnika, povezane strani v pomnilniku, predpomnilnik in prenašanje novih strani v pomnilnik.
 Komponenta za upravljanje procesov pa skrbi za življenjske cikle in razvrščanje procesov.
 % Note: Linux obravnava tako procese kot tudi niti kot izvajalne entitete
-\cite{Tanenbaum_Bos_2023}
 
 \subsubsection{Linux Virtual File System} \label{ssec:linux:vfs}
 
 Navidezni datotečni sistem (\textit{angl. Virtual File System -- abbr. VFS}) je programska plast v jedru, ki omogoča uporabnikom in uporabniškim programom dostop do različnih datotečnih sistemov.
 Deluje pa tudi kot abstrakcija znotraj jedra, ki omogoča sobivanje različnih datotečnih sistemov.
 
-VFS implementira vse funkcionalnosti, ki jih pričakujemo od datotečnega sistema, kot so branje in pisanje datotek, ustvarjanje in brisanje datotek, itd.
+VFS \cite{Linux_kernel_docs_LVFS} implementira vse funkcionalnosti, ki jih pričakujemo od datotečnega sistema, kot so branje in pisanje datotek, ustvarjanje in brisanje datotek, itd.
 Pot do imenika, ki je podana omenjenim ukazom, se v VFS preko predpomnilnika imeniških vnosov (\textit{angl. dentry cache / dcache}) pretvori v imeniški vnos (\textit{angl. dentry}).
 Ta mehanizem omogoča zelo hitro prevedbo poti v imeniški vnos, saj se izognemo branju iz diska, če seveda je imeniški vnos na voljo v predpomnilniku.
 
 Vsak imeniški vnos vsebuje kazalec na indeksno vozlišče (\textit{angl. inode}). Indeksna vozlišča so objekti datotečnega sistema (npr. datoteke, imeniki, naprave), ki bivajo na disku (za datotečne sisteme blokovnih naprav) ali v pomnilniku (za pseudo datotečne sisteme).
 Indeksna vozlišča, ki bivajo na disku se, po potrebi, kopirajo v pomnilnik, spremembe pa se zapišejo nazaj na disk.
 Eno indeksno vozlišče lahko pripada več imeniškim vnosom, kar omogoča, da se datoteka prikaže na več različnih mestih v imeniku.
-\cite{Linux_kernel_docs_LVFS}
 
 VFS omogoča UNIX koncept ``everything is a file'', kjer je osnovna ideja, da se vsi sistemski resursi (npr. naprave, procesi, omrežje) predstavijo kot datoteke.
 To omogoča enoten način dostopa do sistemskih virov, kar olajša uporabo in razvoj programske opreme in zmanjša število potrebnih sistemskih klicev.
 
 \section{Operacijski sistem Windows}
 
+Windows je zaprtokodni operacijski sistem, ki ga razvija Microsoft.
+Nastopa v več različnih družinah, vsaka s svojo ciljno publiko od uporabniških računalnikov in strežnikov do IoT in vgrajenih sistemov.
+
+Danes je Windows najbolj popularen operacijski sistem za namizne računalnike, s približno 70\% tržnim deležem.
+
 \subsection{Zgodovina}
 
-Razvoj Windows se je začel leta 1988 pod okriljem Microsoft in IBM. Cilj je bil razviti NT (\textit{``New Technology''}) operacijski sistem s podporo za OS/2 in POSIX aplikacijska vmesnika, vendar je tekom razvoja nastal svoj 32-bitni Windows API, pod imenom Win32.
-V NT verziji 4.0, ki se je uporabljala v Windows 95, je jedro vsebovalo spletni strežnik in brskalnik, skupaj z vso grafično logiko in uporabniškim vmesnikom. Te spremembe so bile uvedene z namenom izboljšanja učinkovitosti, stranski učinek pa je bila zmanjšana zanesljivost sistema.
-V Windows 2000 so dodali podporo za Active Directory, ``plug-and-play'' naprave in porazdeljen datotečni sistem. Prav tako so izboljšali omrežno podporo ter podprli več različnih procesorjev, vendar samo Intel (in kompatibilne) procesorje, in več sistemskega pomnilnika.
-Naslednji večji skok v razvoju je bil Windows XP, ki je na trg nastopil z prenovljenim grafičnim okoljem in samodejnim odpravljanjem težav z aplikacijami in samim operacijskim sistemom.
-S temi spremembami je Windows XP zagotavljal boljše omrežne storitve, podporo za več naprav ter ogromno izboljšavo v zmogljivosti, zanesljivosti in varnosti. Prav tako je bila prva izdaja s podporo za 64-bitne sisteme.
-Leta 2006 je bil izdan Windows Vista, ki kljub mnogim izboljšavam, zaradi težav z nekompatibilnostmi in počasnim odzivnim časom, ni požel velikega uspeha. Med najbolj ključnimi izboljšavami je bil premik grafične implementacije v ``desktop window manager'', ki se je izvajal kot uporabniški proces.
-Naslednji večji skok je nastopil z Windows 7, ki je bil izdan leta 2009, in je odpravil večino težav svojega predhodnika.
-\cite{Silberschatz_Galvin_Gagne_2018}
+Razvoj Windows se je začel leta 1988 pod okriljem Microsoft in IBM.
+Cilj je bil razviti NT (\textit{``New Technology''}) operacijski sistem s podporo za OS/2 in POSIX aplikacijska vmesnika, vendar je tekom razvoja nastal ločen 32-bitni Windows aplikacijski vmesnik pod imenom Win32.
 
-Glavna cilji pri razvoju Windows NT so bila:
+V NT verziji 4.0, ki se je uporabljala v Windows 95, je jedro vsebovalo spletni strežnik in brskalnik, skupaj z vso grafično logiko in uporabniškim vmesnikom.
+Te spremembe so bile uvedene z namenom izboljšanja učinkovitosti, stranski učinek pa je bila zmanjšana zanesljivost sistema.
+
+V Windows 2000 so dodali podporo za Active Directory, ``plug-and-play'' naprave in porazdeljen datotečni sistem.
+Prav tako so izboljšali omrežno podporo ter podprli več različnih procesorjev, vendar samo Intel (in kompatibilne) procesorje, in več sistemskega pomnilnika.
+
+Naslednji večji skok v razvoju je bil Windows XP, ki je na trg nastopil z prenovljenim grafičnim okoljem in samodejnim odpravljanjem težav z aplikacijami in samim operacijskim sistemom.
+S temi spremembami je Windows XP zagotavljal boljše omrežne storitve, podporo za več naprav ter ogromno izboljšavo v zmogljivosti, zanesljivosti in varnosti.
+Prav tako je bila prva izdaja s podporo za 64-bitne sisteme.
+
+Leta 2006 je bil izdan Windows Vista, ki kljub mnogim izboljšavam, zaradi težav z nekompatibilnostmi in počasnim odzivnim časom, ni požel velikega uspeha.
+Med najbolj ključnimi izboljšavami je bil premik grafične implementacije v ``desktop window manager'', ki se je izvajal kot uporabniški proces.
+
+Naslednji večji skok je nastopil z Windows 7, ki je bil izdan leta 2009, in je odpravil večino težav svojega predhodnika.
+% TODO: Win 8, 10, 11
+%\cite{Silberschatz_Galvin_Gagne_2018}
+
+Glavna cilji pri razvoju Windows NT so bila \cite{Yosifovich_Russinovich_Solomon_Ionescu_2017}:
 \begin{itemize}
 	\item Razširljivost
 	      \begin{description}
@@ -562,17 +571,15 @@ Glavna cilji pri razvoju Windows NT so bila:
 \end{itemize}
 
 Seveda so se te cilji spreminjali tekom razvoja.
-\cite{Yosifovich_Russinovich_Solomon_Ionescu_2017}
 
 \subsection{Arhitektura}
 
-Windows je monoliten operacijski sistem, v smislu da si večina kode OS in gonilnikov deli isti privilegiran naslovni prostor.
+Windows je monoliten operacijski sistem, v smislu da si večina kode OS in gonilnikov deli isti privilegiran naslovni prostor \cite{Yosifovich_Russinovich_Solomon_Ionescu_2017}.
 To pomeni, da lahko katera koli komponenta OS ali gonilnik potencialno okvari/spremeni podatke, ki jih uporabljajo druge komponente OS.
 
 V poskusu zmanjšanja verjetnosti tovrstnih napak, Windows zahteva digitalno podpisane gonilnike.
 Gonilnik mora najprej z ustreznim certifikatom podpisati izdajatelj, ter ga oddati v pregled na Microsoftov portal.
 Ko Microsoft potrdi delovanje gonilnika, ga podpiše še s svojim digitalnim certifikatom in šele nato bo operacijski sistem sprejel in izvajal gonilnik.
-\cite{Yosifovich_Russinovich_Solomon_Ionescu_2017}
 
 \begin{figure}[h!]
 	\begin{center}
@@ -591,15 +598,13 @@ Podpora za OS/2 je bila odstranjena v izdaji Windows XP, podpora za POSIX pa v W
 Danes so vse Windows aplikacije napisane z uporabo Win32 API, ki ga izpostavlja Win32 podsistem.
 Microsoft, preko Github projekta \href{https://github.com/microsoft/win32metadata}{microsoft/win32metadata}, objavlja opis celotne Win32 API površine v standardiziranem formatu (ECMA-335) na tak način, da omogoča izgradnjo projekcij v več programskih jezikov.
 To omogoča pisanje Windows aplikacij tako v privzetem C/C++ kot tudi v drugih jezikih.
-\cite{Tanenbaum_Bos_2023}
 
 \subsection{Windows Podsistemi}
 
-Kot prikazuje slika \ref{fig:windows_subsystems_components}, so NT podsistemi sestavljeni iz štirih komponent: procesa podsistema, nabora knjižnic, sistemskih kljuk in podpora v jedru.
+Kot prikazuje slika \ref{fig:windows_subsystems_components}, so NT podsistemi sestavljeni iz štirih komponent: procesa podsistema, nabora knjižnic, sistemskih kljuk in podpora v jedru \cite{Tanenbaum_Bos_2023}.
 Proces podsistema je storitev, ki jo zažene upravljalnik sej (\textit{smss.exe}) -- prvi uporabniški proces, ki se zažene v Windows.
 
 Kljub temu, da je Win32 sedaj edini podprti podsistem, se Windows drži modela podsistemov za potencialne prihodnje razširitve.
-\cite{Tanenbaum_Bos_2023}
 
 \begin{figure}[h!]
 	\begin{center}
@@ -612,10 +617,8 @@ Kljub temu, da je Win32 sedaj edini podprti podsistem, se Windows drži modela p
 \subsubsection{Win32 podsistem}
 
 Win32 funkcijski klici se kolektivno imenujejo Win32 API.
-To so polno dokumentirani javno objavljeni vmesniki, implementirani kot procedure, ki kličejo NT sistemske klice ali, v nekaterih primerih, opravijo delo v uporabniškem načinu.
+To so polno dokumentirani javno objavljeni vmesniki, implementirani kot procedure, ki kličejo NT sistemske klice ali, v nekaterih primerih, opravijo delo v uporabniškem načinu \cite{Tanenbaum_Bos_2023}.
 Za ohranjanje aplikacijske kompatibilnosti se obstoječi Win32 API klici ne spreminjajo z novimi izdajami Windows, se pa dodajajo nove funkcije.
-
-
 
 Programi napisani za starejše verzije Win32, bi teoretično morale delovati v novejših verzijah sistema, saj se je Win32 API zelo malo spreminjal.
 V imenu kompatibilnosti Windows podpira dva posebna izvajalna okolja imenovana WoW oz. Windows-on-Windows.
@@ -628,15 +631,14 @@ Osnovna filozofija Win32 se precej razlikuje od UNIX pristopa.
 V UNIX sistemih so funkcije OS precej preproste, z malo parametri in redko najdemo več kot en način za izvedbo določene operacije.
 Win32 pa zagotavlja obsežen nabor vmesnikov, z veliko parametri in običajno najdemo tri ali štiri načine za izvedbo določene operacije.
 Pogosto vidimo tudi mešanje nizko in visoko nivojskih funkcij v istem vmesniku.
-To pomeni, da Win32 zagotavlja funkcionalno zelo bogat nabor vmesnikov, vendar vnese veliko kompleksnosti zaradi slabše strukture vmesnikov, ki mešajo nizko in visoko nivojske funkcije v isti API.
-\cite{Tanenbaum_Bos_2023}
+To pomeni, da Win32 zagotavlja funkcionalno zelo bogat nabor vmesnikov, vendar vnese veliko kompleksnosti zaradi slabše strukture vmesnikov, ki mešajo nizko in visoko nivojske funkcije v isti API \cite{Tanenbaum_Bos_2023}.
 
 \subsection{Windows Register}
 
 Ob zagonu sistema Windows ustvari NT imenski prostor, na katerega se pripenjajo datotečni volumni.
 To pomeni, da mora sistem nekje drugje pridobiti konfiguracijo potrebno ob zagonu.
 V ta namen se uporablja poseben datotečni sistem, ki se pripne na NT imenski prostor.
-Ta datotečni sistem se imenuje register (\textit{angl. registry}) in je optimiziran za majhne datoteke.
+Ta datotečni sistem se imenuje register (\textit{angl. registry}) in je optimiziran za majhne datoteke \cite{Tanenbaum_Bos_2023}.
 
 Register je organiziran v ločene volumne, ki jih imenujemo gnezda (\textit{angl. hive}).
 Vsako gnezdo se hrani v svoji datoteki v imeniku \texttt{C:\symbol{92}Windows\symbol{92}system32\symbol{92}config\symbol{92}} na zagonskem volumnu.
@@ -662,11 +664,11 @@ Poleg tega ima Windows še druga gnezda kot vidimo v tabeli \ref{tab:windows_reg
 			COMPONENTS & manifesti in odvisnosti sistemskih komponent  \\
 		\end{tabular}
 	\end{center}
-	\caption{Gnezda Windows registrov}
+	\caption{Gnezda Windows registrov \cite{Tanenbaum_Bos_2023}}
 	\label{tab:windows_registry_hives}
 \end{table}
 
-\section{Sistemski klici}
+\section{Sistemski klici} \label{sec:syscalls}
 
 Sistemski klici so vmesnik do storitev, ki jih ponuja jedro operacijskega sistema, kot na primer ustvarjanje procesov, branje in pisanje datotek, komunikacijo med procesi, itd.
 Ker torej sistemski klici prehajajo med uporabniškim in jedrnim načinom procesorja (več o tem v poglavju \ref{sec:syscall_execution}), je njihova implementacija odvisna od arhitekture procesorja in njegovega nabora ukazov.
@@ -676,7 +678,7 @@ Najbolj pogosto uporabljena API-ja za aplikacijske programerje sta \textbf{POSIX
 Programer do API dostopa preko knjižnice, ki jo ponuja operacijski sistem -- npr. glibc za programski jezik C, v primeru Linuxa.
 Tu je omembe vredno tudi, da imena funkcij v knjižnici niso nujno enaka imenom sistemskih klicev, ki jih uporablja sistem.
 
-Ker je sistemskih klicev ogromno, jih bomo v nadaljevanju razdelili na šest kategorij, in sicer:
+Ker je sistemskih klicev ogromno, jih bomo v nadaljevanju razdelili na šest kategorij \cite{Silberschatz_Galvin_Gagne_2018}, in sicer:
 \begin{itemize}
 	\item \textbf{upravljanje procesov}
 	      \begin{description}
@@ -703,7 +705,6 @@ Ker je sistemskih klicev ogromno, jih bomo v nadaljevanju razdelili na šest kat
 	      	\item upravljanje pravic procesov, datotek in naprav
 	      \end{description}
 \end{itemize}
-\cite{Silberschatz_Galvin_Gagne_2018}
 
 % Preden pa se podamo v primerjave posameznih sistemskih klicev, si poglejmo še, kakšne so implementacijske razlike med sistemskimi klici v Linuxu in Windowsu.
 % Tu še enkrat poudarjam, da so razlike med sistemskimi klici odvisne od arhitekture procesorja.
@@ -712,12 +713,11 @@ Ker je sistemskih klicev ogromno, jih bomo v nadaljevanju razdelili na šest kat
 \section{Izvedba sistemskega klica} \label{sec:syscall_execution}
 
 Kot smo že povedali, imajo operacijski sistemi dve glavni funkciji: upravljanje sistemskih virov in zagotavljanje abstrakcij za uporabniške aplikacije.
-Upravljanje virov je v večini primerov transparentno uporabnikom in se izvaja v ozadju. Zato je vmesnik med programi in operacijskim sistemom predvsem osredotočen na abstrakcije sistema.
+Upravljanje virov je v večini primerov transparentno uporabnikom in se izvaja v ozadju. Zato je vmesnik med programi in operacijskim sistemom predvsem osredotočen na abstrakcije sistema \cite{Tanenbaum_Bos_2023}.
 Da lahko res razumemo kaj operacijski sistemi počnejo, si moramo pobližje pogledati ta vmesnik.
-\cite{Tanenbaum_Bos_2023}
 
 Moderne procesorske arhitekture definirajo več privilegijskih nivojev ali obročev.
-Vzemimo za primer arhitekturo x86, ki implementira 4 nivoje oz. obroče (številčene od 0 do 3) kot prikazuje slika \ref{fig:privilege_levels_x86}.
+Vzemimo za primer arhitekturo x86 \cite{Intel_2024}, ki implementira 4 nivoje oz. obroče (številčene od 0 do 3) kot prikazuje slika \ref{fig:privilege_levels_x86}.
 Večja številka pomeni manj privilegijev.
 Srednji obroč oz. nivo 0 se uporablja za najbolj kritično programsko opremo, običajno jedro operacijskega sistema.
 Zunanji obroči oz. nivoji 1 do 3 pa se uporabljajo za manj kritično programsko opremo.
@@ -729,7 +729,6 @@ Prav tako ima procesor poseben nabor navodil, ki se imenujejo privilegirana navo
 Le-ta se lahko uporabljajo samo v nivoju 0.
 
 Kadar procesor zazna kršitev nivoja, sproži izjemo in tako obvesti jedro o napaki.
-\cite{Intel_2024}
 
 \begin{figure}[h!]
 	\begin{center}
@@ -753,30 +752,28 @@ Kadar procesor zazna kršitev nivoja, sproži izjemo in tako obvesti jedro o nap
 			\draw[->] (-4.5, -3.2) -- (0, -3.2);
 		\end{tikzpicture}
 	\end{center}
-	\caption{Nivoji zaščite v x86 arhitekturi\cite{Intel_2024}}
+	\caption{Nivoji zaščite v x86 arhitekturi \cite{Intel_2024}}
 	\label{fig:privilege_levels_x86}
 \end{figure}
 
 Ker pa je število nivojev in njihov namen drugačen od arhitekture do arhitekture, jih posplošimo dva nivoja delovanja: \textbf{uporabniški} in \textbf{jedrni} oz. privilegiran način.
 Kot že omenjeno, se jedro operacijskega sistema izvaja v jedrnem načinu, kjer ima dostop do vseh virov sistema in lahko izvede kateri koli ukaz v ukaznem naboru procesorja.
 Preostanek programske opreme pa se izvaja v uporabniškem načinu, kjer ima omejen dostop.
-\cite{Tanenbaum_Bos_2023}
 
 Ker je način izvedbe klica odvisen od arhitekture sistema in običajno zahteva implementacijo v zbirnem jeziku, večina operacijskih sistemov zagotavlja knjižnico v višje-nivojskem jeziku -- običajno C ali C++.
-Kljub temu, da iz uporabniške oz. programske strani sistemski klici v knjižnici izgledajo kot običajne funkcije, pa je njihova implementacija popolnoma drugačna:
+Kljub temu, da iz uporabniške oz. programske strani sistemski klici v knjižnici izgledajo kot običajne funkcije, pa je njihova implementacija popolnoma drugačna \cite{Tanenbaum_Bos_2023}:
 \begin{enumerate}
 	\item Uporabniški proces (oz. knjižnica, ki jo uporablja) shrani številko sistemskega klica in argumente funkcije v registre procesorja -- registri se razlikujejo glede na arhitekturo in OS.
 	\item Uporabniški proces proži past, ki preklopi procesor v jedrni način in požene prekinitveni servisni program (ISR), ki ga je definiral operacijski sistem.
 	\item Jedro izvede zahtevan sistemski klic kot katero koli drugo funkcijo in vrne rezultat -- rezultat se zapiše v register iz katerega ga uporabniški program lahko prebere.
-	\item Procesor preklopi nazaj v uporabniški način in nadaljuje izvajanje uporabniškega procesa.\cite{Tanenbaum_Bos_2023}
+	\item Procesor preklopi nazaj v uporabniški način in nadaljuje izvajanje uporabniškega procesa.
 \end{enumerate}
 
 \section{Programski vmesnik Linux -- POSIX API}
 
-Linux API je implementiran preko glibc oz. GNU C knjižnice, ki zagotavlja API vmesnik po standardih ISO C11, POSIX.1-2008 in BSD ter druge OS-specifične API vmesnike.
+Linux API je implementiran preko glibc oz. GNU C knjižnice, ki zagotavlja API vmesnik po standardih ISO C11, POSIX.1-2008 in BSD ter druge OS-specifične API vmesnike \cite{GNU_Manual}.
 Prav tako je kompatibilna s starejšimi verzijami ISO C.
 Celotna GNU C knjižnica je odprtokodna pod licenčnimi pogoji LGPL 2.1.
-\cite{GNU_Manual}
 
 Ker pa je Linux jedro odprtokodno pod licenco GPL 2.0, si lahko pogledamo tudi celotno implementacijo jedra.
 Za nas je najbolj relevantna tabela sistemskih klicev.
@@ -796,17 +793,15 @@ Ena izmed glavnih razlik je, da Windows omogoča dostop do sistemskih klicev izk
 Torej, če smo v Linuxu lahko pokukali v tabelo sistemskih klicev in jih lahko celo poklicali direktno z zbirnim jezikom, je v Windowsu to nemogoče.
 
 Še ena velika razlika, ki jo bomo srečavali v naslednjem poglavju, je število API procedur.
-Windows API izpostavi ogromno procedur, v rangu več tisoč, medtem ko POSIX API izpostavi le nekaj sto.
+Windows API izpostavi ogromno procedur, v rangu več tisoč, medtem ko POSIX API izpostavi le nekaj sto \cite{Tanenbaum_Bos_2023}.
 To je posledica več faktorjev -- pogosto več funkcij uporablja isti sistemski klic, veliko pa je tudi funkcij, ki so v celoti implementirane v uporabniškem načinu.
 
-Ker Windows ne izpostavi sistemskih klicev direktno, se lahko le-te spreminjajo med posameznimi verzijami operacijskega sistema.
+Ker Windows ne izpostavi sistemskih klicev direktno, se lahko le-te spreminjajo med posameznimi verzijami operacijskega sistema \cite{Tanenbaum_Bos_2023}.
 To pomeni, da je težko zagotovo reči ali je neka funkcija implementirana v jedru ali uporabniški knjižnici.
-\cite{Tanenbaum_Bos_2023}
 
-Windows se od večine operacijskih sistemov razlikuje po kodiranju internih znakovnih nizov. Uporablja namreč 13-bitno Unicode kodiranje.
+Windows se od večine operacijskih sistemov razlikuje po kodiranju internih znakovnih nizov \cite{Yosifovich_Russinovich_Solomon_Ionescu_2017}. Uporablja namreč 13-bitno Unicode kodiranje.
 Ker pa mnogo aplikacij uporablja 8-bitno ANSI kodiranje, ima večina Windows funkcij dve verziji: tako, ki sprejema ANSI znake in tako, ki sprejema 16-bitne Unicode znake.
 8-bitne verzije funkcij so posledično rahlo počasnejše, saj se niz najprej pretvori v Unicode.
-\cite{Yosifovich_Russinovich_Solomon_Ionescu_2017}
 
 \begin{table}[h!]
 	\begin{center}
@@ -827,17 +822,14 @@ Ker pa mnogo aplikacij uporablja 8-bitno ANSI kodiranje, ima večina Windows fun
 
 V tabeli \ref{tab:example_win32_nt_mapping} si pogledamo nekaj primerov Win32 API klicev in NT API klicev, ki jih kličejo.
 Zanimivo je da so povezave tako nezanimive.
-Večina nizko nivojskih Win32 funkcij ima direktne NT ekvivalente kar ni preveč presenetljivo, saj je bil Win32 oblikovan z NT v mislih.
+Večina nizko nivojskih Win32 funkcij ima direktne NT ekvivalente kar ni preveč presenetljivo, saj je bil Win32 oblikovan z NT v mislih\cite{Tanenbaum_Bos_2023}.
 Pogosto Win32 funkcije samo manipulirajo parametre in kličejo NT funkcije.
 Nekateri Win32 klici sprejmejo pot do objekta medtem ko NT ekvivalentna funkcija pričakuje ročico objekta (\textit{angl. handle}).
 Prav tako je naloga Win32 API klicev, da pretvorijo znakovne nize iz ANSI v Unicode kodiranje.
-\cite{Tanenbaum_Bos_2023}
 
 TODO: Nedokumentiran del API-ja (Ntoskrnl.exe, Win32k.sys, ntdll.dll) pg. 49, Ne-strukturirano procesno drevo
 
-\chapter{Upravljanje procesov} \label{sec:process_control}
-
-\section{Primerjava sistemskih klicev}
+\chapter{Procesi}
 
 Proces je program (strojna koda) v izvajanju, katerega status predstavljajo programski števec in vsebina procesorskih registrov.
 Proces ima tudi svoj prostor v pomnilniku, ki je običajno razdeljen na več segmentov:
@@ -845,7 +837,7 @@ Proces ima tudi svoj prostor v pomnilniku, ki je običajno razdeljen na več seg
 	\item \textbf{podatkovni} (\textit{angl. data}) -- vsebuje vrednosti globalnih spremenljivk,
 	\item \textbf{programski} (\textit{angl. text}) -- vsebuje strojno kodo programa,
 	\item \textbf{sklad} (\textit{angl. stack}) -- vsebuje vrednosti lokalnih spremenljivk in povratne naslove funkcij in
-	\item \textbf{kopica} (\textit{angl. heap}) -- dinamično dodeljen pomnilnik.\cite{Silberschatz_Galvin_Gagne_2018}
+	\item \textbf{kopica} (\textit{angl. heap}) -- dinamično dodeljen pomnilnik \cite{Silberschatz_Galvin_Gagne_2018}.
 \end{itemize}
 
 \begin{figure}[h!]
@@ -865,14 +857,46 @@ Proces ima tudi svoj prostor v pomnilniku, ki je običajno razdeljen na več seg
 	\caption{Segmenti pomnilnika procesa}
 \end{figure}
 
+\section{Pregled funkcionalnosti}
+
 Sistemski klici za procesni nadzor skrbijo za:
 \begin{itemize}
-	\item ustvarjanje in uničevanje procesov,
+	\item ustvarjanje in končanje procesov,
 	\item nalaganje in izvajanje programov,
 	\item pridobivanje in nastavljanje atributov procesov,
 	\item sinhronizacijo procesov,
-	\item dodeljevanje in sproščanje pomnilnika.\cite{Silberschatz_Galvin_Gagne_2018}
+	\item dodeljevanje in sproščanje pomnilnika \cite{Silberschatz_Galvin_Gagne_2018}.
 \end{itemize}
+
+\section{Sistemski klici v Linux}
+
+\subsection{Ustvarjanje in končanje procesa}
+
+\subsection{Čakanje}
+
+\subsection{Niti}
+
+\subsection{Spanje}
+
+\subsection{Pridobivanje sistemskih informacij}
+
+\section{Sistemski klici v Windows}
+
+\subsection{Ustvarjanje in končanje procesa}
+
+\subsection{Čakanje}
+
+\subsection{Niti}
+
+\subsection{Spanje}
+
+\subsection{Pridobivanje sistemskih informacij}
+
+\section{Primerjava sistemov}
+
+\chapter{Upravljanje procesov} \label{sec:process_control}
+
+\section{Primerjava sistemskih klicev}
 
 \begin{table}[h!]
 	\begin{center}
