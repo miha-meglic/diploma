@@ -872,7 +872,69 @@ Sistemski klici za procesni nadzor skrbijo za:
 
 \subsection{Ustvarjanje in končanje procesa}
 
-\subsection{Čakanje}
+\subsubsection{\texttt{fork}}
+
+\texttt{pid_t fork(void);}
+
+Funkcija \texttt{fork()} ustvari nov proces, ki je fuplikat izvajajočega procesa.
+Nov proces postane otrok klicajočega procesa.
+
+Otroški proces je identična kopija starševskega, z izjemo nekaj ključnih točk:
+\begin{itemize}
+	\item Identifikator procesa (PID) je unikaten za vsak proces, otrok torej dobi nov PID.
+	\item Identifikator starševskega procesa (PPID) postane enak kot PID starševskega (klicajočega) procesa.
+	\item Otrok ne deduje starševih pomnilniških ključavnic.
+	\item Ponastavijo se števci uporabe virov in CPU časa.
+	\item Otrok ne deduje čakajočih signalov.
+	\item Otrok ne deduje datotečnih ključavnic asociiranih s procesov. Deduje pa ključavnice asociirane z odprtimi datotekami.
+	\item Otrok ne deduje obstoječih asinhronih I/O operacij ali asinhronih I/O kontekstov.
+\end{itemize}
+
+Funkcija ne sprejme nobenih vhodnih parametrov, vrne pa \texttt{0} v otroškem procesu in PID otroškega procesa v starševskem procesu.
+V primeru napake funkcija vrne \texttt{-1} starševsskemu procesu in ne ustvari otroškega procesa.
+
+Vredno je pripomniti, da je \texttt{fork} v Linux implementiran preko tako imenovanega ``copy-on-write'' mehanizma.
+To pomeni, da kreiranje novega procesa zahteva minimalno kopiranje v pomnilniku, saj se to izvede šele ko je re potrebno -- tj. ko proces začne spreminjati pomnilnik.
+
+\subsubsection{\texttt{execve}}
+
+\texttt{int execve(const char *pathname, char *const _Nullable argv[],
+char *const _Nullable envp[]);}
+
+Ko želimo zagnati nov proces, ki izvaja drug program, takoj za klicem \texttt{fork} kličemo funkcijo \texttt{execve()}.
+\texttt{execve()} zamenja programski spomin trenutnega procesa z programom v podani datoteki.
+Prav tako na novo inicializira sklad, kopico in odatkovne segmente.
+
+Če ima program (datoteka), ki ga nalagamo, nastavljen ``setuid'' bit, se efektivni uporabniški ID procesa spremeni na ID lastnika datoteke.
+Enako se zgodi če ima program nastavljen ``getgid'' bit, samo da se ta navezuje na ID skupine.
+Te pravili pa imata nekaj izjem, ki se navezujejo na atribute klicajoče niti.
+
+\texttt{execve} ohrani vse atribute procesa z nekaj izjemami:
+\begin{itemize}
+	\item Dispozicije (akcije) signalov se ponastavijo.
+	\item Preslikani pomilniki se ne ohranijo.
+	\item Regije deljenega pomnilnika, vrste, semaforji, časovniki in ključavnice se ne ohranijo.
+	\item Vse niti razen kicajoče so usstavljene.
+\end{itemize}
+
+Funkcija sprejme tri argumente: pot do programa, argumente programa (opcijski) in okoljske spremenljivke programa (opcijski).
+Ob uspešni izvedbi funkcija ne vrne ničesar, saj se začne izvajati novo naloženi program, v primeru napake pa vrne \texttt{-1}.
+
+\subsubsection{\texttt{exit}}
+
+\texttt{void exit(int status);}
+
+Ko želimo trenutni proces ustaviti, pokličemo funkcijo \texttt{exit()}, ki zaključi in uniči proces.
+Sistem zapre odprte dokumente, osirotene (otroške) procese podeduje začetni proces (PID 1) in staršu pošlje signal SIGCHLD.
+
+Funkcija sprejme argument \textit{status}, katerega spodnji oktet oz. bajt je posredovan staršu.
+Funkcija v nobenem primeru ne vrne ničesar, saj se proces zaključi.
+
+Več o signalu SIGCHLD in posredovanju statusa staršu v poglavju \ref{ssec:linux_syscalls:waiting}.
+
+\subsubsection{\texttt{kill}}
+
+\subsection{Čakanje} \label{ssec:linux_syscalls:waiting}
 
 \subsection{Niti}
 
