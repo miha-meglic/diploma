@@ -236,7 +236,7 @@ sorting=nty,
 	licenco, ki je enaka tej.
 	Podrobnosti licence so dostopne na spletni strani \href{http://creativecommons.si}{creativecommons.si} ali na Inštitutu za
 	intelektualno lastnino, Streliška 1, 1000 Ljubljana.
-																																																																																																																																																														
+																																																																																																																																																																															
 	\vspace*{1cm}
 	\begin{center}% 0.66 / 0.89 = 0.741573033707865
 		\CcImageCc{0.741573033707865}\hspace*{1ex}\CcImageBy{1}\hspace*{1ex}\CcImageSa{1}%
@@ -1139,20 +1139,95 @@ Glavna razlika je, da si procesa delita dele izvajalnega konteksta.
 Funkciji \texttt{clone} in \texttt{clone3} omogočata kreiranje novega procesa z nadzorom nad deljenimi konteksti kot so naslovni prostor, tabela datotečnih opisnikov, tabela prekinitvenih funkcij signalov \dots
 
 \begin{lstlisting}[style=func]
- int clone(int (*fn)(void *_Nullable), void *stack, int flags, void *_Nullable arg, ...  /* pid_t *_Nullable parent_tid, void *_Nullable tls, pid_t *_Nullable child_tid */ );
+ int clone(int (*fn)(void *_Nullable), void *stack, int flags, void *_Nullable arg, pid_t *_Nullable parent_tid, void *_Nullable tls, pid_t *_Nullable child_tid);
 \end{lstlisting}
+
+Funkcija sprejme sedem argumentov, ki določajo kje bo nov proces pričel z izvajanjem in katere kontekste si bo delil s starševskim procesom.
+Nov proces bo začel z izvajanje v funkciji podani v argumentu \texttt{*fn}, ki prejme tudi argument \texttt{*arg}.
+Ročno mu moramo pripraviti sklad in podati začetni ali končni naslov (\texttt{*stack}), za kar moramo vedeti ali sklad raste navzgor ali navzdol na danem sistemu.
+Pri rezervaciji sklada se običajno poslužujemo funkcije \texttt{mmap}, ki nam omogoča nadzor na prostorom, ki ga rezerviramo.
+
+Preostali argumenti nadzirajo deljenje konteksta in starševski proces nove niti.
+Predvsem pomemben je argument \texttt{flags}, kjer lahko opcije združujemo z logično OR operacijo.
+Ker je seznam opcij zelo obsežen in v nekaterih primerih zahteva nadalnje obrazložitve, se bomo osredotočili samo na najbolj pomembne zastavice za našo rabo:
+\begin{itemize}
+	\item \texttt{CLONE\_CHILD\_CLEARTID}
+	      \begin{description}
+	      	\item prepiše otrokov TID (\textit{angl. thread ID}) na lokaciji \texttt{*child\_tid}, ko se proces zaključi, in zbudi futex (\textit{uporabniški mutex}) na naslovu
+	      \end{description}
+	\item \texttt{CLONE\_CHILD\_SETTID}
+	      \begin{description}
+	      	\item hrani otrokov TID na lokaciji \texttt{*child\_tid} v otrokovem pomnilniku
+	      \end{description}
+	\item \texttt{CLONE\_CLEAR\_SIGHAND}
+	      \begin{description}
+	      	\item prepiše prekinitvene funkcije za signale v otroškem procesu
+	      \end{description}
+	\item \texttt{CLONE\_FILES}
+	      \begin{description}
+	      	\item otrok si bo delil tabelo datotečnih opisnikov s staršem
+	      \end{description}
+	\item \texttt{CLONE\_FS}
+	      \begin{description}
+	      	\item otrok si bo delil informacije o datotečnem sistemu (korenski imenik, trenutni delovni imenik in umask) s staršem
+	      \end{description}
+	\item \texttt{CLONE\_IO}
+	      \begin{description}
+	      	\item otrok si bo delil vhodno-izhodni konteks s staršem
+	      \end{description}
+	\item \texttt{CLONE\_PARENT}
+	      \begin{description}
+	      	\item starš novega procesa bo enak staršu trenutnega procesa
+	      \end{description}
+	\item \texttt{CLONE\_PARENT\_SETTID}
+	      \begin{description}
+	      	\item hrani otrokov TID na lokaciji \texttt{*parent\_tid} v starševem pomnilniku
+	      \end{description}
+	\item \texttt{CLONE\_SIGHAND}
+	      \begin{description}
+	      	\item otrok si bo delil prekinitvene funkcije za signale s staršem
+	      \end{description}
+	\item \texttt{CLONE\_SYSVSEM}
+	      \begin{description}
+	      	\item otrok si bo delil seznam nastavitev za System V semaforje
+	      \end{description}
+	\item \texttt{CLONE\_THREAD}
+	      \begin{description}
+	      	\item otrok bo del iste skupine niti kot trenutni proces; vse niti si delijo isti PID oz. TGID (\textit{angl. thread group ID})
+	      \end{description}
+	\item \texttt{CLONE\_VM}
+	      \begin{description}
+	      	\item otrok si bo delil naslovni prostor s staršem
+	      \end{description}
+\end{itemize}
+
+Izmed opisanih opcij sta za niti najbolj ključni \texttt{CLONE\_VM}, saj je kopiranje pomnilnika najbol časovno intenziven del ustvarjanja novega procesa, in \texttt{CLONE\_THREAD}, saj pove sistemu, da je nova nit del obstoječega procesa.
+Vidimo pa lahko manjšo težavo pri opciji \texttt{CLONE\_THREAD}.
+Nova nit si namreč deli isti PID in posledično tudi PPID, kar pomeni da trenutna nit ne prejme signala \texttt{SIGCHLD} ob končanju nove niti in moramo to komunicirati na nek drug način.
+Seveda je tu najbolj preprosta rešitev uporaba deljenega pomnilnika, vendar implementacija lahko hitro postane nepregledna.
+Zato v praksi uporabljamo POSIX niti, implementirane v glibc knjižnici z uporabo sistemskih klicev \texttt{clone} in \texttt{clone3}.
 
 \subsection{Spanje}
 
 \subsubsection{\texttt{nanosleep}}
 
+Kadar želimo proces zaustaviti za določeno količino časa, nam Linux ponuja funkcijo \texttt{nanosleep}.
+Tako lahko ustavimo izvajanje in sprostimo procesor dokler se podani čas ne izteče ali pa je spanje prekinjeno zaradi prejema signala.
+
 \begin{lstlisting}[style=func]
  int nanosleep(const struct timespec *duration, struct timespec *_Nullable rem);
 \end{lstlisting}
 
+Funkcija sprejme dva atributa, \texttt{duration}, kjer določimo čas spanja v nanosekundah (veljavne so vrednosti od 0 do 999999999), in \texttt{rem}, kjer nam funkcija sporoči preostali čas spanja v primeru prekinitve.
+Pri uspešni izvedbi funkcija vrne \texttt{0}, v primeru prekinitve spanja s signalom ali druge napake pa \texttt{-1}.
+
 \subsection{Pridobivanje sistemskih informacij}
 
+Linux nam za pridobivanje informacij ponuja nekaj osnovnih funkcij, ki nam podajo identifikatorje procesa.
+
 \subsubsection{\texttt{getpid}, \texttt{getppid}}
+
+Najbolj osnovni informaciji o procesu sta ID procesa (PID) in ID starševskega procesa (PPID), ki jih lahko dobimo preko funkcij \texttt{getpid} in \texttt{getppid}.
 
 \begin{lstlisting}[style=func]
  pid_t getpid(void);
@@ -1161,9 +1236,23 @@ Funkciji \texttt{clone} in \texttt{clone3} omogočata kreiranje novega procesa z
 
 \subsubsection{\texttt{getpgid}, \texttt{setpgid}}
 
+Pri klicih \texttt{waitpid} in \texttt{waitid} smo na hitro omenili koncept skupine procesov, ki jo identificira ID skupine (PGID).
+Skupino procesa lahko pridobimo s funkcijo \texttt{getpgid}, ki ji podamo PID ciljnega procesa ali \texttt{0} za trenutni proces.
+Pri spreminjanju skupine pa se poslužujemo \texttt{setpgid}, ki ji spet podamo PID ciljnega procesa ter nov PGID.
+Pri tem je pogoj, da sta proces in skupina del iste seje.
+
 \begin{lstlisting}[style=func]
  int setpgid(pid_t pid, pid_t pgid);
  pid_t getpgid(pid_t pid);
+\end{lstlisting}
+
+\subsubsection{\texttt{gettid}}
+
+Kot smo videli pri \texttt{clone}, imajo niti poleg PID še ID niti (TID), ki jih razlikuje.
+TID lahko pridobimo s funkcijo \texttt{gettid}, ki v primeru procesa z eno nitjo preprosto vrne PID.
+
+\begin{lstlisting}[style=func]
+ pid_t gettid(void);
 \end{lstlisting}
 
 \section{Sistemski klici v Windows}
