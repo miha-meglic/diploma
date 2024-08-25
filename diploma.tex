@@ -19,6 +19,7 @@ pdfproducer={LaTeX}, pdfcreator={LaTeX}]{hyperref}
 \usepackage{soul}
 \usepackage{array}
 \usepackage{tikz}
+\usetikzlibrary{positioning,shapes.geometric,arrows.meta,bending,positioning}
 \usepackage{listings}
 
 \tikzstyle{arrow} = [thick,->,>=stealth]
@@ -236,7 +237,7 @@ sorting=nty,
 	licenco, ki je enaka tej.
 	Podrobnosti licence so dostopne na spletni strani \href{http://creativecommons.si}{creativecommons.si} ali na Inštitutu za
 	intelektualno lastnino, Streliška 1, 1000 Ljubljana.
-																																																																																																																																																																																																																																			
+																																																																																																																																																																																																																																																																																																																																																																																																
 	\vspace*{1cm}
 	\begin{center}% 0.66 / 0.89 = 0.741573033707865
 		\CcImageCc{0.741573033707865}\hspace*{1ex}\CcImageBy{1}\hspace*{1ex}\CcImageSa{1}%
@@ -828,12 +829,36 @@ Prav tako je naloga Win32 API klicev, da pretvorijo znakovne nize iz ANSI v Unic
 
 % TODO: Nedokumentiran del API-ja (Ntoskrnl.exe, Win32k.sys, ntdll.dll) pg. 49, Ne-strukturirano procesno drevo
 
-\chapter{Upravljanje procesov}
+\chapter{Procesi}
+
+Koncept procesa je ključen za večopravilne operacijske sisteme.
+Proces definiramo kot program (strojna koda) v izvajanju.
+Če na primer 16 ljudi sočasno izvaja nek program to pomeni, da se izvaja 16 procesov, ki izvajajo isto strojno kodo \cite{Bovet_Cesati_2005}.
+
+V tem poglavju bomo spoznali kaj so procesi, kako so ustvarjeni in končani ter kakšne so razlike med njihovo implementacijo v Linux in Windows.
 
 \section{Proces}
 
-Proces je program (strojna koda) v izvajanju, katerega status predstavljajo programski števec in vsebina procesorskih registrov.
-Proces ima tudi svoj prostor v pomnilniku, ki je običajno razdeljen na več segmentov:
+Izraz ``proces'' se pogosto uporablja z različnimi pomeni \cite{Bovet_Cesati_2005}, mi ga bomo opredelili kot program (strojna koda) v izvajanju.
+Lahko jih obravnavamo kot zbirka podatkovnih struktur, ki v celoti opisujejo izvajanje programa \cite{Bovet_Cesati_2005}.
+Iz perspektive jedra so procesi entiteta, ki zaseda sistemske vire (CPU čas, pomnilnik, \dots).
+
+Procesi so v mnogih pomenih podobni živim bitjem -- so ustvarjeni, imajo bolj ali manj pomenljivo življenje, lahko ustvarijo enega ali več otroških procesov ter na koncu umrejo oz. se zaključijo.
+
+Jedro operacijskega sistema beleži status procesa preko jedrnih podatkovnih struktur, ki med drugim vsebujejo:
+\begin{itemize}
+	\item identifikator procesa in starša,
+	\item stanje (življenjski cikel),
+	\item programski števec,
+	\item kazalnik na sklad,
+	\item pomnilniške dodelitve,
+	\item tabelo odprtih sistemskih objektov (datoteke, ključavnice, semaforji \dots),
+	\item informacije o izvajanju (uporabniški čas, jedrni čas, \dots),
+	\item informacije o razvrščanju (\textit{angl. scheduling}) \dots
+\end{itemize}
+Več o teh jedrnih strukturah si bomo pogledali pri vsakem sistemu posebej, saj se implementacije razlikujejo.
+
+Vsak proces ima svoj prostor v pomnilniku, ki je običajno razdeljen na več segmentov kot je ilustrirano na sliki \ref{fig:process_memory_segments}:
 \begin{itemize}
 	\item \textbf{podatkovni} (\textit{angl. data}) -- vsebuje vrednosti globalnih spremenljivk,
 	\item \textbf{programski} (\textit{angl. text}) -- vsebuje strojno kodo programa,
@@ -856,15 +881,115 @@ Proces ima tudi svoj prostor v pomnilniku, ki je običajno razdeljen na več seg
 		\end{tikzpicture}
 	\end{center}
 	\caption{Segmenti pomnilnika procesa \cite{Silberschatz_Galvin_Gagne_2018}}
+	\label{fig:process_memory_segments}
 \end{figure}
 
-\subsection{Proces v Linux}
+\section{Proces v Linux}
 
-\subsection{Proces v Windows}
+Novo ustvarjen Linux proces je skoraj identičen svojemu staršu.
+Prejme lastno kopijo starševega naslovnega prostora in nadaljuje z izvajanjem iste kode takoj za sistemskim klicem, ki je ustvaril nov proces.
+Če tudi pa si procesa delita kodo, imata ločeni kopiji podatkov (sklad in kopica), tako spremembe pomnilnika v otroku ne spremeni pomnilnika v starši in obratno.
 
-\section{Pregled funkcionalnosti}
+Novejše verzije Linux jedra implementirajo tudi podporo za niti in večnitne procese preko t. i. lahkotnih procesov (\textit{Lightweight Process -- LWP}) \cite{Bovet_Cesati_2005}.
+V osnovi si lahkotni procesi lahko delijo vire kot so pomnilniški prostor, odprte datoteke oz. datotečne opisnike ipd.
+Istočasno pa omogočajo neodvisno razvrščanje za izvajanje, kar jih ločuje od uporabniške implementacije, ki se je uporabljala pred jedrno podporo.
 
-Sistemski klici za procesni nadzor skrbijo za:
+Za združevanje niti Linux implementira koncept skupine niti, ki je množica lahkotnih procesov, ki se obnašajo kot celota v smislu sistemskih klicev \texttt{getpid()}, \texttt{kill()} in \texttt{exit()}.
+% TODO: Premakni pod niti!
+
+\subsection{Procesni deskriptor}
+
+Kot smo že omenili, jedro beleži vse relevantne informacije procesa v posebni podatkovni strukturi.
+V Linux sistemih se ta podatkovna struktura imenuje procesni deskriptor (\textit{angl. process descriptor}) -- struktura tipa \texttt{task\_struct}.
+Procesni deskriptor poleg velikega števila atributov o procesu vsebuje tudi nekaj kazalnikov na druge podatkovne strukture, ki vsebujejo kazalnike na druge podatkovne strukture in tako dalje kot prikazuje slika \ref{fig:linux_process_descriptor}.
+
+\begin{figure}[h!]
+	\begin{center}
+		\includegraphics[width=0.9\textwidth]{images/linux_process_descriptor.png}
+	\end{center}
+	\caption{Procesni deskriptor v Linux \cite{Bovet_Cesati_2005}}
+	\label{fig:linux_process_descriptor}
+\end{figure}
+
+Celotna struktura \texttt{task\_struct} je precej velika (v mojem testnem okolju približno $9.5$ KiB) in vsebuje mnogo atributov.
+Točna velikost in število atributov se spreminja z verzijo jedra, CPE arhitekturo sistema in atributi ob izgradnji jedra, zato si poglejmo samo najbolj relevantne:
+\begin{description}
+	\item[state] stanje (življenjski cikel) procesa, bolje opisano v poglavju \ref{ssec:linux_process:lifecycle}
+	\item[pid] enolični numerični identifikator procesa, določen sekvenčno ob kreiranju; ta vrednost ima zgornjo mejo $32767$ in ko jo sistem doseže, prične reciklirati stare (sproščene) vrednosti
+	\item[tgid] PID vodilnega procesa skupine niti
+	\item[group\_leader] kazalnik na procesni deskriptor vodilnega procesa v skupini procesov
+	\item[parent] kazalnik na procesni deskriptor procesa, ki prejme signal \texttt{SIGCHLD}
+	\item[real\_parent] kazalnik na procesni deskriptor starša ali proces 1 (\textit{init}), če starš ne obstaja več
+	\item[children] dvojni povezan seznam kazalnikov na procesne deskriptorje otroških procesov
+	\item[sibling] dvojni povezan seznam kazalnikov na procesne deskriptorje sorodnih procesov oz. sorojencev
+	\item[exit\_code] koda podana funkciji \texttt{exit()}
+	\item[exit\_state] izhodno stanje procesa 
+	\item[cred] poverilnice procesa
+\end{description}
+
+Ker so procesi dinamične entitete in lahko obstajajo vse od nekaj sekund do nekaj mesecev, se procesni deskriptorji hranijo v dinamičnem pomnilniku namesto statičnem jedrnem pomnilniku.
+Vsak proces v tem dinamičnem pomnilniku hrani dve podatkovni strukturi -- majhno podatkovno strukturo (\texttt{thread\_info}), ki vsebuje kazalnik na procesni deskriptor in procesni sklad, ki se uporablja v jedrnem načinu.
+
+Za naključne vpoglede in poizvedbe procesnih deskriptorjev Linux prav tako vzdržuje zgoščene tabele za polja \texttt{pid}, \texttt{tgid}, \texttt{pgrp} in \texttt{session} \cite{Bovet_Cesati_2005}.
+
+\subsection{Življenjski cikel} \label{ssec:linux_process:lifecycle} % AKA stanje procesa
+
+Omenili smo, da imajo procesi v Linuxu specifično polje \texttt{state}, ki nam pove v katerem stanju življenjskega cikla je proces.
+Možna stanja za spremenljivko so \cite{Bovet_Cesati_2005}:
+\begin{description}
+	\item[\texttt{TASK\_RUNNING}] Proces se izvaja na CPE ali čaka na izvajanje.
+	\item[\texttt{TASK\_INTERRUPTIBLE}] Proces je odložen (spi) dokler se ne izpolni željen pogoj (strojna prekinitev, sprostitev sistemskega vira, signal \dots).
+	\item[\texttt{TASK\_UNINTERRUPTIBLE}] Enako kot \texttt{TASK\_INTERRUPTIBLE}, vendar procesa ne moramo zbuditi s signalom.
+	To procesno stanje je redko uporabljeno \cite{Bovet_Cesati_2005}.
+	\item[\texttt{TASK\_STOPPED}] Izvajanje procesa je zaustavljeno po prejemu signala (npr. \texttt{SIGSTOP}).
+	\item[\texttt{TASK\_TRACED}] Izvajanje procesa je zaustavljeno preko razhroščevalnika.
+	\item[\texttt{TASK\_ZOMBIE}] Proces se je končal, vendar starš še ni prevzel informacij (\texttt{wait()}, \texttt{waitpid()} \dots) o končanem procesu.
+	Jedro vedno obdrži informacije končanega procesa, saj jih bo starš morda potreboval.
+	\item[\texttt{TASK\_DEAD}] Proces je v postopku brisanja, saj je starš ravno prevzel informacije ``zombi'' procesa.
+	Sprememba statusa iz \texttt{TASK\_ZOMBIE} na \texttt{TASK\_DEAD} je pomembna za preprečevanje tveganih stanj (\textit{angl. race condition}), kjer bi lahko druge niti izvedle \texttt{wait()} ali podoben klic na istem procesu.
+\end{description}
+
+Poleg spremenljivke \texttt{state} ima proces tudi spremenljivko \texttt{exit\_state}, ki se nastavi ob končanju procesa.
+Spremenljivka \texttt{exit\_state} ima dve veljavni stanji: \texttt{EXIT\_ZOMBIE} in \texttt{EXIT\_DEAD}, katerih pomen je enak stanjema \texttt{TASK\_ZOMBIE} in \texttt{TASK\_DEAD} \cite{Bovet_Cesati_2005}.
+
+\begin{figure}[h!]
+	\begin{center}
+		\begin{tikzpicture}[align=center, font=\small]
+			\node[ellipse, draw=black, very thick] (created) {Ustvarjen\\z \texttt{fork()}};
+			\node[ellipse, draw=black, very thick, below=of created] (ready) {Pripravljen\\\texttt{TASK\_RUNNING}};
+			\node[right=of ready] (dummy) {};
+			\node[ellipse, draw=black, very thick, right=of dummy] (running) {V izvajanju\\\texttt{TASK\_RUNNING}};
+			\node[ellipse, draw=black, very thick, below=2.5cm of dummy] (waiting) {Čakajoč\\\texttt{TASK\_INTERRUPTIBLE} ali\\\texttt{TASK\_UNINTERRUPTIBLE}};
+			\node[ellipse, draw=black, very thick, above=of running] (terminated) {``Zombi''\\\texttt{TASK\_ZOMBIE}};
+			\node[ellipse, draw=black, very thick, right=of terminated] (dead) {Zaključen\\\texttt{TASK\_DEAD}};
+																																																																																																																																																																																																																																																																																																																								
+			\draw[line width=0.4mm, -{Stealth[length=3mm]}] (created) -- (ready);
+			\draw[line width=0.4mm, -{Stealth[length=3mm]}] (ready) to [out=15, in=165] node [text width=3.5cm,midway,above] {časovnik izbere proces za izvajanje} (running);
+			\draw[line width=0.4mm, -{Stealth[length=3mm]}] (running) to [out=195, in=345] node [text width=3.5cm,midway,below] {prekinjen zaradi prioritetnega procesa} (ready);
+			\draw[line width=0.4mm, -{Stealth[length=3mm]}] (running) to [in=45, out=270] (waiting);
+			\draw[line width=0.4mm, -{Stealth[length=3mm]}] (waiting) to [in=270, out=135] (ready);
+			\draw[line width=0.4mm, -{Stealth[length=3mm]}] (running) -- node [midway,right] {\texttt{exit()}} (terminated);
+			\draw[line width=0.4mm, -{Stealth[length=3mm]}] (terminated) -- node [midway,above=0.5cm] {\texttt{wait()}} (dead);
+		\end{tikzpicture}
+	\end{center}
+	\caption{Življenjski cikel Linux procesa}
+	\label{fig:linux_process_lifecycle}
+\end{figure}
+
+Na diagramu \ref{fig:linux_process_lifecycle} vidimo tok stanj v življenjskem ciklu procesa.
+Ko je proces ustvarjen, običajno s sistemskim klicem \texttt{fork()}, je ustvarjen v stanju \texttt{TASK\_RUNNING} in čaka, da ga časovnik izbere za izvajanje.
+V primeru, da ima časovnik v čakalni vrsti proces z višjo prioriteto, bo zamenjal izvajalni kontekst na prioritetni proces in trenutni proces spet čaka v pripravljenosti.
+
+Ko proces v izvajanju želi počakati na specifični dogodek v sistemu (npr. signal, sprostitev sistemskega vira \dots), preide v čakanje v enem izmed stanj \texttt{TASK\_INTERRUPTIBLE} ali \texttt{TASK\_UNINTERRUPTIBLE}.
+Ob prejetju želenega signala proces spet preide v pripravljenost in čaka na izvajanje.
+
+Ko se proces zaključi, običajno s sistemskim klicem \texttt{exit()} ali ob prejetju signala, postane ``zombi'' s prehodom v stanje \texttt{TASK\_ZOMBIE} in čaka da starš prevzame informacije o procesu preden končno preide v stanje \texttt{TASK\_DEAD}
+
+\section{Proces v Windows}
+
+\chapter{Upravljanje procesov}
+
+Sistemski klici za upravljanje procesov skrbijo za:
 \begin{itemize}
 	\item ustvarjanje in končanje procesov,
 	\item nalaganje in izvajanje programov,
@@ -873,7 +998,7 @@ Sistemski klici za procesni nadzor skrbijo za:
 	\item dodeljevanje in sproščanje pomnilnika \cite{Silberschatz_Galvin_Gagne_2018}.
 \end{itemize}
 
-\section{Sistemski klici}
+\section{Sistemski klici v Linux}
 
 \subsection{Ustvarjanje in končanje procesa}
 
