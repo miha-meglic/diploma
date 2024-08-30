@@ -237,7 +237,7 @@ sorting=nty,
 	licenco, ki je enaka tej.
 	Podrobnosti licence so dostopne na spletni strani \href{http://creativecommons.si}{creativecommons.si} ali na Inštitutu za
 	intelektualno lastnino, Streliška 1, 1000 Ljubljana.
-																																																																																																																																																																																																																																																																																																																																																																																																
+																																																																																																																																																																																																																																																																																																																																																																																																																																																							
 	\vspace*{1cm}
 	\begin{center}% 0.66 / 0.89 = 0.741573033707865
 		\CcImageCc{0.741573033707865}\hspace*{1ex}\CcImageBy{1}\hspace*{1ex}\CcImageSa{1}%
@@ -962,7 +962,6 @@ Spremenljivka \texttt{exit\_state} ima dve veljavni stanji: \texttt{EXIT\_ZOMBIE
 			\node[ellipse, draw=black, very thick, below=2.5cm of dummy] (waiting) {Čakajoč\\\texttt{TASK\_INTERRUPTIBLE} ali\\\texttt{TASK\_UNINTERRUPTIBLE}};
 			\node[ellipse, draw=black, very thick, above=of running] (terminated) {``Zombi''\\\texttt{TASK\_ZOMBIE}};
 			\node[ellipse, draw=black, very thick, right=of terminated] (dead) {Zaključen\\\texttt{TASK\_DEAD}};
-																																																																																																																																																																																																																																																																																																																								
 			\draw[line width=0.4mm, -{Stealth[length=3mm]}] (created) -- (ready);
 			\draw[line width=0.4mm, -{Stealth[length=3mm]}] (ready) to [out=15, in=165] node [text width=3.5cm,midway,above] {časovnik izbere proces za izvajanje} (running);
 			\draw[line width=0.4mm, -{Stealth[length=3mm]}] (running) to [out=195, in=345] node [text width=3.5cm,midway,below] {prekinjen zaradi prioritetnega procesa} (ready);
@@ -986,6 +985,150 @@ Ob prejetju želenega signala proces spet preide v pripravljenost in čaka na iz
 Ko se proces zaključi, običajno s sistemskim klicem \texttt{exit()} ali ob prejetju signala, postane ``zombi'' s prehodom v stanje \texttt{TASK\_ZOMBIE} in čaka da starš prevzame informacije o procesu preden končno preide v stanje \texttt{TASK\_DEAD}
 
 \section{Proces v Windows}
+
+Na najvišjem nivoju abstrakcije, prikazano na sliki \ref{fig:windows_process}, ima vsak proces v Windows \cite{Yosifovich_Russinovich_Solomon_Ionescu_2017}:
+\begin{description}
+	\item[seznam odprih ročic (\textit{angl. handle})] Te predstavljajo različne sistemske vire kot so semaforji in drugi sinhronizacijski objekti ter datoteke, ki so na voljo vsem nitim procesa.
+	\item[varnostni kontekst (\textit{angl. security context})] To je dostopni žeton oz. poverilnica, ki identificira uporabnika, varnostne skupine, privilegije, atribute, pravice, sposobnosti, virtualizacijsko stanje in sejo povezano s procesom.
+	\item[ID procesa] Unikatni identifikator procesa.
+	\item[vsaj eno nit] Medtem ko je ``prazen'' proces mogoč, to večinoma ni uporabno. 
+\end{description}
+Implementacijo teh si bomo pobližje ogledali v poglavju \ref{ssec:windows_process:eprocess}.
+
+\begin{figure}[h!]
+	\begin{center}
+		\includegraphics[width=0.9\textwidth]{images/windows_process.png}
+	\end{center}
+	\caption{Proces v Windows \cite{Yosifovich_Russinovich_Solomon_Ionescu_2017}}
+	\label{fig:windows_process}
+\end{figure}
+
+% TODO: Move down
+Kot smo videli pri Linux ima tudi Windows proces kazalnik na starša.
+Če starš ne obstaja več, se ta informacija ne posodobi, zato je mogoče da se ta informacija nanaša na neobstoječ proces.
+Za razliko od Linux pa to ni problem, saj se nič ne zanaša na to informacijo.
+
+Podobno kot pri Linuxu tudi Windows implementira koncept niti, vendar so le-te ločena entiteta od procesa.
+Zato je nit nosilka ključnih komponent za izvajanje procesa, kot so:
+\begin{itemize}
+	\item vsebina nabora CPE registrov, ki predstavljajo stanje procesorja,
+	\item sklada za uporabniški in jedrni izvajalni kontekst,
+	\item nitno shrambo (\textit{angl. thread-local storage -- TLS}) in
+	\item unikatni identifikator niti (\textit{angl. thread ID}).
+\end{itemize}
+Poleg tega imajo lahko posamezne niti svoj ločen varnostni kontekst.
+Implementacijo niti si bomo bolj podrobno ogledali v poglavju \ref{ssec:windows_process:ethread}.
+
+Windows s konceptom vlaken (\textit{angl. fiber}) ponuja še globljo delitev izvajalnega konteksta.
+Niti lahko ljubkovalno imenujemo tudi lahkotne niti, saj se obnašajo podobno, vendar so implementirane v celoti v uporabniškem kontekstu in se jih jedro sploh ne zaveda \cite{Yosifovich_Russinovich_Solomon_Ionescu_2017}.
+Uporabljajo se takrat, ko želi aplikacija implementirati lastni časovnih za razvrščanje izvajanja.
+Podobno funkcionalnost lahko vidimo pri starejših implementacijah niti v Linux sistemih.
+Ker vlakna niso implementirana v jedru, za naše namene niso zanimiva, vendar je vredno izpostaviti prvorazredno podporo za to funkcionalnost.
+
+Poleg vlaken Windows ponuja tudi uporabniško razvrščevalne niti (\textit{angl. user-mode scheduling thread -- UMS thread}).
+Njihova funkcionalnost je podobna vlakom.
+Za razliko od vlaken pa se jedro zaveda UMS niti in razlikuje med njimi ko pride do sistemskih klicev, saj vsaka prejme lasten jedrni kontekst.
+
+Če pa se pomaknemo nivo višje od procesa, Windows implementira koncept poslov (\textit{angl. job}), ki omogočajo upravljanje in manipulacijo skupine procesov kot enoto.
+Posli nekoliko kompenzirajo za pomanjkanje strukturiranega procesnega drevesa in so lahko v mnogi pogledi celo bolj zmogljive kot procesna drevesa UNIX podobnih sistemov \cite{Yosifovich_Russinovich_Solomon_Ionescu_2017}.
+% TODO: Dopolni Ch.3-Jobs
+
+\subsection{EPROCESS in KPROCESS} \label{ssec:windows_process:eprocess}
+
+Podobno kot Linux procesni deskriptor ima tudi Windows jedro podatkovne strukture, ki predstavljajo izvajalni proces.
+Windows v ta namen uporablja dve strukturi -- \texttt{EPROCESS} in \texttt{KPROCESS} \cite{Yosifovich_Russinovich_Solomon_Ionescu_2017}.
+\texttt{EPROCESS} je višje nivojska in se uporablja v izvajalnem kontekstu, torej za spremljanje izvajanja procesa.
+\texttt{KPROCESS} pa je jedrna struktura, ki se uporablja v časovniku ter prekinitveni in računovodski kodi jedra.
+Strukturi sta povezani preko bloka za nadzor procesa (\textit{angl. Process Control Block -- PCB}) v \texttt{EPROCESS}, ki je kazalnik na strukturo tipa \texttt{KPROCESS} \cite{Yosifovich_Russinovich_Solomon_Ionescu_2017}.
+
+\texttt{EPROCESS}, prikazana na sliki \ref{fig:windows_ethread}, in nanjo vezane podatkovne strukture se hranijo v jedrnem naslovnem prostoru.
+Ena izjema temu pravilu je blok izvajalnega okolja procesa (\textit{angl. Process Environment Block -- PEB}), ki se hrani v uporabniškem naslovnem prostoru, saj vsebuje informacije potrebne za izvajanje uporabniške kode \cite{Yosifovich_Russinovich_Solomon_Ionescu_2017}.
+Nivo višje upravljalnik izvršilnih objektov enkapsulira vsako instanco strukture \texttt{EPROCESS} v procesni objekt (\texttt{WinObj}).
+
+\begin{figure}[h!]
+	\begin{center}
+		\includegraphics[width=0.9\textwidth]{images/windows_eprocess.png}
+	\end{center}
+	\caption{EPROCESS v Windows \cite{Yosifovich_Russinovich_Solomon_Ionescu_2017}}
+	\label{fig:windows_eprocess}
+\end{figure}
+
+Enako se \texttt{KPROCESS}, prikazana na sliki \ref{fig:windows_kprocess}, in nanjo vezane strukture hranijo v jedrnem naslovnem prostoru.
+Za razliko od \texttt{EPROCESS}, je \texttt{KPROCESS} v celoti rezervirana samo za jedro sistema.
+
+\begin{figure}[h!]
+	\begin{center}
+		\includegraphics[width=0.9\textwidth]{images/windows_kprocess.png}
+	\end{center}
+	\caption{KPROCESS v Windows \cite{Yosifovich_Russinovich_Solomon_Ionescu_2017}}
+	\label{fig:windows_kprocess}
+\end{figure}
+
+Poleg \texttt{EPROCESS} in \texttt{KPROCESS} različni podsistemi in njihovi procesi vzdržujejo ločene strukture za proces, ki so v večini primerov ustvarjene po potrebi, običajno ko program naloži specifično sistemsko knjižnico \cite{Yosifovich_Russinovich_Solomon_Ionescu_2017}.
+
+Iz slik \ref{fig:windows_eprocess} in \ref{fig:windows_kprocess} vidimo, da Windows o procesu beleži podobne informacije kot Linux:
+\begin{itemize}
+	\item unikatni identifikator procesa in starša,
+	\item tabelo odprtih ročic,
+	\item varnostni kontekst oz. žeton,
+	\item procesne števce (računovodske informacije),
+	\item reference na niti,
+	\item sejo v kateri proces nastopa \dots
+\end{itemize}
+
+% Poleg tega proces podsistema Windows (\textit{Client/Server Runtime Subsystem} -- \texttt{csrss.exe}) vzdržuje vzporedno strukturo \texttt{CSR_PROCESS} za vsak proces, ki izvaja Windows program \cite{Yosifovich_Russinovich_Solomon_Ionescu_2017}.
+% Prav tako jedrni del podsistema Windows vzdržuje podatkovno strukturo \texttt{W32PROCESS}, ki se ustvari prvič ko nit pokliče katero koli jedrno Windows USER ali GDI funkcijo.
+% To se zgodi takoj ko naložimo \texttt{User32.dll} knjižnico, ki jo potrebujejo funkcije kot \texttt{CreateWindow} in \texttt{GetMessage}.
+
+\subsection{ETHREAD in KTHREAD} \label{ssec:windows_process:ethread}
+
+Kot že omenjeno Windows, za razliko od Linux, sledi nitim z ločenimi podatkovnimi strukturami.
+Tako kot pri procesih se uporabljata dve strukturi -- \texttt{ETHREAD} in \texttt{KTHREAD} \cite{Yosifovich_Russinovich_Solomon_Ionescu_2017}
+Njuni vlogi sta simetrični strukturama \texttt{EPROCESS} in \texttt{KPROCESS}, kjer se \texttt{ETHREAD} uporablja v izvajalnem kontekstu in \texttt{KTHREAD} v jedrnem kontekstu za uvrščanje in prekinitve.
+Spet sta strukturi povezani preko bloka za nadzor niti (\textit{angl. Thread Control Block -- TCB}) v \texttt{ETHREAD}, ki je kazalnik na strukturo tipa \texttt{KTHREAD} \cite{Yosifovich_Russinovich_Solomon_Ionescu_2017}.
+
+\texttt{ETHREAD}, prikazana na sliki \ref{fig:windows_ethread}, in nanjo vezane podatkovne strukture se hranijo v jedrnem naslovnem prostoru.
+Spet pa je temu pravilu ena izjema -- blok izvajalnega okolja niti (\textit{angl. Thread Environment Block -- TEB}), ki se hrani v uporabniškem naslovnem prostoru, podobno kot PEB za \texttt{EPROCESS}.
+
+\begin{figure}[h!]
+	\begin{center}
+		\includegraphics[width=0.9\textwidth]{images/windows_ethread.png}
+	\end{center}
+	\caption{ETHREAD v Windows \cite{Yosifovich_Russinovich_Solomon_Ionescu_2017}}
+	\label{fig:windows_ethread}
+\end{figure}
+
+Na sliki \ref{fig:windows_ethread_tib} si pobližje pogledamo vsebino TEB in vidimo, da med drugim vsebuje najpomembnejše informacije za izvajanje programa kot so kazalnik na sklad, mejo sklada, lokalno shrambo niti in seveda informacije o starševskem procesu.
+
+\begin{figure}[h!]
+	\begin{center}
+		\includegraphics[width=0.7\textwidth]{images/windows_ethread_teb.png}
+	\end{center}
+	\caption{ETHREAD TEB \cite{Yosifovich_Russinovich_Solomon_Ionescu_2017}}
+	\label{fig:windows_ethread_tib}
+\end{figure}
+
+Enako se \texttt{KTHREAD}, prikazana na sliki \ref{fig:windows_kthread}, in nanjo vezane strukture hranijo v jedrnem naslovnem prostoru.
+Za razliko od \texttt{ETHREAD}, je \texttt{KTHREAD} v celoti rezervirana samo za jedro sistema.
+
+\begin{figure}[h!]
+	\begin{center}
+		\includegraphics[width=0.9\textwidth]{images/windows_kthread.png}
+	\end{center}
+	\caption{KTHREAD v Windows \cite{Yosifovich_Russinovich_Solomon_Ionescu_2017}}
+	\label{fig:windows_kthread}
+\end{figure}
+
+Poleg \texttt{ETHREAD} in \texttt{KTHREAD} različni podsistemi in njihovi procesi vzdržujejo ločene strukture za nit \cite{Yosifovich_Russinovich_Solomon_Ionescu_2017}.
+
+Iz slik \ref{fig:windows_ethread}, \ref{fig:windows_ethread_tib} in \ref{fig:windows_kthread} vidimo, da jedro Windows vzdržuje podobne informacije o nitih kot o procesih:
+\begin{itemize}
+	\item unikatni identifikator niti,
+	\item unikatni identifikator in kazalnik na proces kateremu pripada,
+	\item varnostni kontekst oz. žeton,
+	\item informacije ključne za izvajanje \dots
+\end{itemize}
+Manjkajo pa reference na deljene vire kot tabela odprtih ročic, seja \dots
 
 \chapter{Upravljanje procesov}
 
