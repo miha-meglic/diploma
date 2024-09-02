@@ -237,7 +237,7 @@ sorting=nty,
 	licenco, ki je enaka tej.
 	Podrobnosti licence so dostopne na spletni strani \href{http://creativecommons.si}{creativecommons.si} ali na Inštitutu za
 	intelektualno lastnino, Streliška 1, 1000 Ljubljana.
-																																																																																																																																																																																																																																																																																																																																																																																																																																																							
+																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																															
 	\vspace*{1cm}
 	\begin{center}% 0.66 / 0.89 = 0.741573033707865
 		\CcImageCc{0.741573033707865}\hspace*{1ex}\CcImageBy{1}\hspace*{1ex}\CcImageSa{1}%
@@ -1003,10 +1003,10 @@ Implementacijo teh si bomo pobližje ogledali v poglavju \ref{ssec:windows_proce
 	\label{fig:windows_process}
 \end{figure}
 
-% TODO: Move down
 Kot smo videli pri Linux ima tudi Windows proces kazalnik na starša.
 Če starš ne obstaja več, se ta informacija ne posodobi, zato je mogoče da se ta informacija nanaša na neobstoječ proces.
 Za razliko od Linux pa to ni problem, saj se nič ne zanaša na to informacijo.
+% TODO: Drugi tipi procesov
 
 Podobno kot pri Linuxu tudi Windows implementira koncept niti, vendar so le-te ločena entiteta od procesa.
 Zato je nit nosilka ključnih komponent za izvajanje procesa, kot so:
@@ -1196,6 +1196,8 @@ Te pravili pa imata nekaj izjem, ki se navezujejo na atribute klicajoče niti.
 Funkcija sprejme tri argumente: pot do programa, argumente programa (opcijski) in okoljske spremenljivke programa (opcijski).
 Ob uspešni izvedbi funkcija ne vrne ničesar, saj se začne izvajati novo naloženi program, v primeru napake pa vrne \texttt{-1}.
 
+\subsubsection{\texttt{clone}}
+
 \subsubsection{\texttt{exit}}
 
 Ko želimo trenutni proces ustaviti, pokličemo funkcijo \texttt{exit()}, ki zaključi in uniči proces.
@@ -1209,6 +1211,8 @@ Funkcija sprejme argument \textit{status}, katerega spodnji oktet oz. bajt je po
 Funkcija v nobenem primeru ne vrne ničesar, saj se proces zaključi.
 
 Več o signalu \texttt{SIGCHLD} in posredovanju statusa staršu v poglavju \ref{ssec:linux_syscalls:waiting}.
+
+\subsection{Signali}
 
 \subsubsection{\texttt{kill}}
 
@@ -1524,13 +1528,459 @@ TID lahko pridobimo s funkcijo \texttt{gettid}, ki v primeru procesa z eno nitjo
 
 \subsection{Ustvarjanje in končanje procesa}
 
-\subsection{Čakanje}
+Windows API ponuja več različnih funkcij za ustvarjanje procesa.
+Najbolj preprosta med njimi je \texttt{CreateProcess}, ki poskuša ustvariti nov proces z enakom dostopnim žetonom kot trenutni proces.
+V primeru, da želimo ustvariti proces z drugimi poverilnicami, uporabimo \texttt{CreateProcessAsUser}, ki kot argument sprejme dostopni žeton.
+
+Iz slike \ref{fig:windows_createprocess_functions} vidimo, da funkcije za ustvajanje procesa implementira več različnih knjižnic.
+Dotično \texttt{Kernel32.dll}, ki predstavlja uporabniško implementacijo jedrnih funkcij in \texttt{Advapi32.dll}, ki je razširitev \texttt{Kernel32.dll} in na neki točki tudi kliče funkcije iz \texttt{Kernel32.dll}.
+Na neki točki vse klicne poti funkcij za ustvarjanje procesa pripeljejo do funkcije \texttt{CreateProcessInternal}, ki dejansko začne postopek ustvarjanja procesa v uporabniškem načinu.
+Nazadnje \texttt{CreateProcessInternal} kliče \texttt{NtCreateUserProcess} v \texttt{Ntdll.dll}, ki izvede sistemski klic in s tem prehod v jedrni način.
+V jedru funkcija z istim imenom (\texttt{NtCreateUserProcess}) nadaljuje jedrni del ustvarjanja procesa \cite{Yosifovich_Russinovich_Solomon_Ionescu_2017}.
+
+\begin{figure}[h!]
+	\begin{center}
+		\includegraphics[width=0.9\textwidth]{images/windows_createprocess_functions.png}
+	\end{center}
+	\caption{Funkcije za kreiranje procesa v Windows \cite{Yosifovich_Russinovich_Solomon_Ionescu_2017}}
+	\label{fig:windows_createprocess_functions}
+\end{figure}
+
+Yosifovich in kolegi \cite{Yosifovich_Russinovich_Solomon_Ionescu_2017} podrobno opisujejo postopek ustvarjanja procesa, ki se kot smo videli začne v funkciji \texttt{CreateProcessInternal}.
+Postopek je dokaj zapleten in ga na najvišjem nivoju sestavlja sedem etap:
+\begin{enumerate}
+	\item Validiranje parametrov in pretvajanje zastavic in opcij podsistema Windows v interne ekvivalente.
+	\item Odpiranje izvedljive datoteke (.exe) za izvajanje v procesu.
+	\item Ustvarjanje objekta izvršilnega procesa.
+	\item Ustvarjanje začetne niti (sklad, kontekst in objekt izvršilne niti).
+	\item Inicializacija v specifičnem podsistemu.
+	\item Začetek izvajanja začetne niti (razen kadar je podana zastavica \texttt{CREATE\_SUSPENDED}).
+	\item Končna inicializacija naslovnega prostora v kontekstu novega procesa in niti ter začetek izvajanja programa.
+\end{enumerate}
+
+\subsubsection{\texttt{CreateProcess}}
+
+Kot že omenjeno za ustvarjanje novega procesa z istim varnostnim kontekstom uporabimo funkcijo \texttt{CreateProcess}.
+
+\begin{lstlisting}[style=func]
+ BOOL CreateProcessW(
+	LPCWSTR               lpApplicationName,
+	LPWSTR                lpCommandLine,
+	LPSECURITY_ATTRIBUTES lpProcessAttributes,
+	LPSECURITY_ATTRIBUTES lpThreadAttributes,
+	BOOL                  bInheritHandles,
+	DWORD                 dwCreationFlags,
+	LPVOID                lpEnvironment,
+	LPCWSTR               lpCurrentDirectory,
+	LPSTARTUPINFOW        lpStartupInfo,
+	LPPROCESS_INFORMATION lpProcessInformation
+ );
+\end{lstlisting}
+
+Funkcija sprejme veliko argumentov kot bomo opazili pri veliko drugih WinAPI funkcijah.
+Pa si jih oglejmo kar po vrsti:
+\begin{description}
+	\item[\texttt{lpApplicationName}] opcijski vhodni argument; absolutna ali relativna pot aplikacije, ki jo želimo zagnati; če podamo \texttt{NULL} bo ime aplikacije razbrano iz \texttt{lpCommandLine}
+	\item[\texttt{lpCommandLine}] opcijski vhodno-izhodni argument; ukaz za zagon aplikacije (t. j. pot in argumente); če podamo \texttt{NULL} bo sistem uporabil \texttt{lpApplicationName} kar pomeni, da mora vsaj en od prvih parametrov vsebovati pot do izvedljive aplikacije; kadar sta določena oba argumenta sistem pričakuje, da \texttt{lpApplicationName} vsebuje pot in \texttt{lpCommandLine} argumente
+	\item[\texttt{lpProcessAttributes}] opcijski vhodni argument; kazalnik na strukturo tipa \texttt{SECURITY\_ATTRIBUTES}, ki specificira lastnosti dedovanja ročice procesa vrnjene po izvedbi funkcije; če podamo \texttt{NULL}, ročica ne mora biti dedovana
+	\item[\texttt{lpThreadAttributes}] opcijski vhodni argument; simetrično \texttt{lpProcessAttributes} določa lastnosti dedovanja ročice niti vrnejne po izvedbi funkcije
+	\item[\texttt{bInheritHandles}] obvezni vhodni argument; če podamo \texttt{TRUE}, novo ustvarjeni proces podeduje vse odprte ročice trenutnega procesa, ki dovoljujejo dedovanje
+	\item[\texttt{dwCreationFlags}] obvezni vhodni argument; zastavice, ki določajo ustvarjanje procesa in prioritetni razred novo ustvarjenega procesa
+	\item[\texttt{lpEnvironment}] opcijski vhodni argument; kazalnik na blok izvajalnega okolja novega procesa, ki je sestavljen iz terminiranega bloka terminiranih nizov formata ``ime=vrednost''; če podamo \texttt{NULL}, bo uporabljeno izvajalno okolje trenutnega procesa
+	\item[\texttt{lpCurrentDirectory}] opcijski vhodni argument; pot do imenika v katerem se bo proces začel izvajati; če podamo \texttt{NULL}, bo uporabljen trenutni imenik trenutnega procesa
+	\item[\texttt{lpStartupInfo}] obvezni vhodni argument; kazalnik na strukturo tipa \texttt{STARTUPINFO} ali \texttt{STARTUPINFOEX}, ki določa pozicijo okna, namizje, standardne ročice in atribute novega procesa
+	\item[\texttt{lpProcessInformation}] izhodni argument; kazalnik na strukturo tipa \texttt{PROCESS\_INFORMATION}, ki vsebuje ročici in identifikatorja procesa ter niti; ročice v strukturi je potrebno zapreti ko niso več potrebne
+\end{description}
+% TODO: dwCreationFlags, .exe is appended if no extension is provided, varnostna opomba pri prvih dveh argumentih
+
+Funkcija pri uspešni izvedbi vrne neničelno vrednost, v primeru napake pa \texttt{0}.
+
+\subsubsection{\texttt{CreateProcessAsUser}}
+
+Kadar pa želimo proces zagnati z drugimi poverilnicami oz. kot drug uporabnik, uprabimo \texttt{CreateProcessAsUser}.
+Funkcija je razen dodatnega prvega argumenta identična \texttt{CreateProcess}.
+
+\begin{lstlisting}[style=func]
+ BOOL CreateProcessW(
+	HANDLE                hToken,   
+	LPCWSTR               lpApplicationName,
+	...
+ );
+\end{lstlisting}
+
+Dodatni opcijski vhodni argument \texttt{hToken} sprejme ročico žetona pridobljenega s funkcijo \texttt{LogonUser}, ki mu preprosto podamo avtentikacijske podatke željenega uporabnika.
+Preostali argumenti in izhodi so enaki \texttt{CreateProcess}.
+
+\subsubsection{\texttt{OpenProcess}}
+
+Kot bomo videli v mnogo sledečih funkcijah, izvajanje operacij nad odprtimi procesi zahteva ročico dotičnega procesa.
+To ročico lahko pridobimo s funkcijo \texttt{OpenProcess}.
+
+\begin{lstlisting}[style=func]
+ HANDLE OpenProcess(
+	DWORD dwDesiredAccess,
+	BOOL  bInheritHandle,
+	DWORD dwProcessId
+ );
+\end{lstlisting}
+
+Funkcija sprejme tri argumente:
+\begin{description}
+	\item[\texttt{dwDesiredAccess}] željen dostop, ki naj ga ročica omogoča
+	\item[\texttt{bInheritHandle}] dedovalne lastnosti ročice; če podatmo \texttt{TRUE}, bodo otroci trenutnega procesa lahko podedovali ročico; podobno kot smo videli pri argumentu \texttt{lpProcessAttributes} funkcije \texttt{CreateProcess}
+	\item[\texttt{dwProcessId}] numerični identifikator procesa katerega ročico zahtevamo
+\end{description}
+
+Argument \texttt{dwDesiredAccess} sprejme zastavice, ki jih lahko združujemo z logičnim OR operatorjem.
+Vsak objekt ima štiri splošne zastavice, ki definirajo dostop:
+\begin{description}
+	\item[\texttt{DELETE}] omogoča brisanje objekta
+	\item[\texttt{READ\_CONTROL}] omogoča branje informacij v varnostnem deskriptorju
+	\item[\texttt{SYNCHRONIZE}] omogoča sinhronizacijo z objektom; sinhronizacijo z objekti Windows si bomo pogledali v poglavju \ref{ssec:windows_syscalls:waiting}
+	\item[\texttt{WRITE\_DAC}] omogoča spreminjanje diskrecijskega seznama dostopa (\textit{angl. discretionary access control list -- DACL}) v varnostnem deskriptorju
+	\item[\texttt{WRITE\_OWNER}] omogoča spreminjanje lastnika objekta v varnostnem deskriptorju
+\end{description}
+Poleg tega lahko definiramo še kar precej zastavic specifičnih za dostopne pravice procesa:
+\begin{description}
+	\item[\texttt{PROCESS\_ALL\_ACCESS}] omogoča vse splošne in procesu specifične pravice
+	\item[\texttt{PROCESS\_CREATE\_PROCESS}] omogoča ustvarjanje otroškega procesa v imenu ciljnega procesa
+	\item[\texttt{PROCESS\_CREATE\_THREAD}] omogoča ustvarjanje niti v ciljnem procesu
+	\item[\texttt{PROCESS\_DUP\_HANDLE}] omogoča dupliciranje ročice
+	\item[\texttt{PROCESS\_QUERY\_INFORMATION}] omogoča pridobivanje nekaterih informacij procesa
+	\item[\texttt{PROCESS\_QUERY\_LIMITED\_INFORMATION}] omogoča pridobivanja podmnožice informacij procesa; ta pravica je avtomatsko omogočena, če je podana zastavica \texttt{PROCESS\_QUERY\_INFORMATION}
+	\item[\texttt{PROCESS\_SET\_INFORMATION}] omogoča priodobivanje prioritetnega razreda procesa
+	\item[\texttt{PROCESS\_SET\_QUOTA}] omogoča nastavljanje pomnilniških omejitev procesa
+	\item[\texttt{PROCESS\_SUSPEND\_RESUME}] omogoča zaustavitev in nadaljevanje izvajanja procesa
+	\item[\texttt{PROCESS\_TERMINATE}] omogoča prisilno končanje procesa
+	\item[\texttt{PROCESS\_VM\_OPERATION}] omogoča izvajanje operacij v naslovnem prostoru procesa
+	\item[\texttt{PROCESS\_VM\_READ}] omogoča branje naslovnega prostora procesa
+	\item[\texttt{PROCESS\_VM\_WRITE}] omogoča pisanje v naslovni prostor procesa
+	\item[\texttt{SYNCHRONIZE}] omogoča čakanje na končanje procesa
+\end{description}
+
+\subsubsection{\texttt{ExitProcess}}
+
+Ko želimo končati trenutni proces in vse niti procesa, uporabimo funkcijo \texttt{ExitProcess}.
+Ta deluje identično funkciji \texttt{exit} v Linux.
+
+\begin{lstlisting}[style=func]
+ void ExitProcess(UINT uExitCode);
+\end{lstlisting}
+
+Funkcija sprejme argument \texttt{uExitCode}, ki ga lahko prevzame druga nit s funkcijo \texttt{GetExitCodeProcess}.
+
+\subsubsection{\texttt{TerminateProcess}}
+
+Ko želimo prisilno končati drug proces, uporabimo funkcijo \texttt{TerminateProcess}.
+Ta deluje podobno kot funkcija \texttt{kill} v Linux.
+
+\begin{lstlisting}[style=func]
+ BOOL TerminateProcess(HANDLE hProcess, UINT uExitCode);
+\end{lstlisting}
+
+Funkcija sprejme ročico ciljnega procesa (\texttt{hProcess}) in izhodno kodo procesa (\texttt{uExitCode}).
+Ročica ciljnega procesa mora imeti pravico \texttt{PROCESS\_TERMINATE}.
+
+\subsection{Čakanje} \label{ssec:windows_syscalls:waiting}
+
+Windows omogoča čakanje na skoraj kateri koli objekt v sistemu.
+Objekti pa se razlikujejo po tem kdaj so v ``signaliziranem stanju''.
+Procesi in niti to stanje dosežejo ko se končajo.
+Kasneje si bomo ogledali tudi signale, kjer signalizirano stanje nadziramo s sistemskimi klici.
+
+Ne glede na ciljni objekt, mora za čakanje ročica imeti pravico \texttt{SYNCHRONIZE}.
+
+\subsubsection{\texttt{WaitForSingleObject}, \texttt{WaitForSingleObjectEx}}
+
+Kadar želimo čakati na točno določen objekt, uporabimo funkcijo \texttt{WaitForSingleObject} ali \texttt{WaitForSingleObjectEx}.
+Funkciji sta praktično identični in se razlikujeta samo po dodatnem argumentu v \texttt{WaitForSingleObjectEx}.
+
+\begin{lstlisting}[style=func]
+ DWORD WaitForSingleObject(HANDLE hHandle, DWORD dwMilliseconds);
+\end{lstlisting}
+
+Funkcija \texttt{WaitForSingleObject} sprejme ročico ciljnega objekta (\texttt{hHandle}) in maksimalen čas čakanja v milisekundah (\texttt{dwMilliseconds}).
+Pri vseh funkcijah v tem podpoglavju lahko za argument \texttt{dwMilliseconds} uporabimo konstanto \texttt{INFINITE}.
+
+Funkcija \texttt{WaitForSingleObjectEx} doda še argument \texttt{bAlertable}.
+Če ga nastavimo na \texttt{TRUE}, bo čakanje prekinjeno v primeru, da se tekom čakanja zaključi asinhrona V/I operacija.
+
+Funkciji vrneta eno izmed definiranih konstant:
+\begin{description}
+	\item[\texttt{WAIT\_IO\_COMPLETION}] čakanje je bilo prekinjeno zaradi zaključene V/I operacije; samo pri \texttt{WaitForSingleObjectEx}
+	\item[\texttt{WAIT\_OBJECT\_0}] objekt je prešel v ``signalizirano stanje''
+	\item[\texttt{WAIT\_TIMEOUT}] maksimalen čas čakanja je potekel
+	\item[\texttt{WAIT\_FAILED}] funkcija se ni izvedla uspešno
+\end{description}
+
+\subsubsection{\texttt{WaitForMultipleObjects}, \texttt{WaitForMultipleObjectsEx}}
+
+V določenih primerih pa želimo čakati na več objektov sočasno.
+Takrat uporabimo funkcijo \texttt{WaitForMultipleObjects} ali \texttt{WaitForMultipleObjectsEx}.
+Spet se funkciji razlikujeta samo po dodatnem argumentu v \texttt{WaitForMultipleObjectsEx}.
+
+\begin{lstlisting}[style=func]
+ DWORD WaitForMultipleObjects(
+	DWORD        nCount,
+	const HANDLE *lpHandles,
+	BOOL         bWaitAll,
+	DWORD        dwMilliseconds
+ );
+\end{lstlisting}
+
+Funkcija \texttt{WaitForMultipleObjects} namesto ene same ročice sprejme število objektov (\texttt{nCount}) in kazalnik na seznam ročic objektov (\texttt{*lpHandles}).
+Prav tako ima dodaten argument \texttt{bWaitAll}, ki ga lahko nastavimo na \texttt{TRUE}, če želimo počakati na vse objekte, ali na \texttt{FALSE}, da počakamo na prvi objekt, ki javi ``signalizirano stanje''.
+Spet imamo argument za maksimalni čas čakanja (\texttt{dwMilliseconds}).
+
+Funkcija \texttt{WaitForMultipleObjectsEx} spet doda argument \texttt{bAlertable}, ki se obnaša identično kot pri \texttt{WaitForSingleObjectEx}.
+
+Funkciji spet vrneta eno izmed definiranih stanj:
+\begin{description}
+	\item[\texttt{WAIT\_OBJECT\_0} (\textit{+ index})] objekt(i) so prešli v ``signalizirano stanje''; kadar je \texttt{bWaitAll = FALSE} je konstanti prištet index objekta, ki je bil počakan
+	\item[\texttt{WAIT\_IO\_COMPLETION}] čakanje je bilo prekinjeno zaradi zaključene V/I operacije; samo pri \texttt{WaitForMultipleObjectsEx}
+	\item[\texttt{WAIT\_TIMEOUT}] maksimalen čas čakanja je potekel
+	\item[\texttt{WAIT\_FAILED}] funkcija se ni izvedla uspešno
+\end{description}
 
 \subsection{Niti}
 
+Živjenjski cikel niti se začne ko proces (v kontekstu neke niti) ustvari novo nit.
+Zahteva na neki točki prispe do izvršilnega dela jedra Windows, kjer upravljanik procesov rezervira prostor za objekte niti in pokliče jedro, da inicializira blok za nadzor niti.
+Kot bomo videli kasneje imamo več funkcij za ustvarjanje niti, ki vse na neki točki kličejo \texttt{CreateRemoteThreadEx} \cite{Yosifovich_Russinovich_Solomon_Ionescu_2017}.
+
+Yosifovich in kolegi \cite{Yosifovich_Russinovich_Solomon_Ionescu_2017} opisujejo postopek ustvarjanja niti, ki se začne v \texttt{Kernel32.dll}:
+\begin{enumerate}
+	\item Pretvajanje parametrov Windows API v interne ekvivalente izgradnja internih struktur.
+	\item Izgradnja seznama atributov z dvema vnosoma: ID odjemalca in TEB (blok izvajalnega okolja niti) naslov.
+	\item Določanje procesa v katerem se bo nit ustvarila (to je lahko trenutni ali nek drug proces). 
+	      Določiti je treba namreč, če je podana ročica samo psevdo ročica trenutnega procesa (taka kot jo vrne \texttt{GetCurrentProcess}), veljavna ročica trenutnega procesa ali ročica nekega drugega procesa.
+	      V ta manen se kliče funkcija \texttt{NtQueryInformationProcess} v \texttt{Ntdll.dll}.
+	\item Klic \texttt{NtCreateThreadEx} v \texttt{Ntdll.dll}, ki izvede sistemski klic in s tem preda ustvarjanje niti jedru.
+	\item Funkcija z istim imenom (\texttt{NtCreateThreadEx}) v jedru ustvari in inicializira uporabniški kontekst niti in kliče \texttt{PspCreateThread}, da ustvari zaustavljen izvršilni objekt niti.
+	      Ta korak zrcali etapo 3 in 5 iz postopka ustvarjanja procesa.
+	\item \texttt{CreateRemoteThreadEx} rezervira aktivacijski kontekst niti in aktivira sklad.
+	      Kazalnik na sklad se hrani v TEB.
+	\item Razen, če je bila nit ustvarjena z zastavico \texttt{CREATE\_SUSPENDED}, nit sedaj začne z izvajanjem.
+	      Ta korak zrcali etapo 7 iz postopka ustvarjanja procesa.
+	\item Ročica in ID nove niti sta podani klicoči niti.
+\end{enumerate}
+
+\subsubsection{\texttt{CreateThread}}
+
+\begin{lstlisting}[style=func]
+ HANDLE CreateThread(
+	LPSECURITY_ATTRIBUTES   lpThreadAttributes,
+	SIZE_T                  dwStackSize,
+	LPTHREAD_START_ROUTINE  lpStartAddress,
+	__drv_aliasesMem LPVOID lpParameter,
+	DWORD                   dwCreationFlags,
+	LPDWORD                 lpThreadId
+ );
+\end{lstlisting}
+
+\subsubsection{\texttt{CreateRemoteThread}, \texttt{CreateRemoteThreadEx}}
+
+\begin{lstlisting}[style=func]
+ HANDLE CreateRemoteThread(
+	HANDLE                 hProcess,
+	LPSECURITY_ATTRIBUTES  lpThreadAttributes,
+	SIZE_T                 dwStackSize,
+	LPTHREAD_START_ROUTINE lpStartAddress,
+	LPVOID                 lpParameter,
+	DWORD                  dwCreationFlags,
+	LPDWORD                lpThreadId
+ );
+\end{lstlisting}
+
+\subsubsection{\texttt{OpenThread}}
+
+\begin{lstlisting}[style=func]
+ HANDLE OpenThread(
+	DWORD dwDesiredAccess,
+	BOOL  bInheritHandle,
+	DWORD dwThreadId
+ );
+\end{lstlisting}
+
+\subsubsection{\texttt{ExitThread}}
+
+\begin{lstlisting}[style=func]
+ void ExitThread(DWORD dwExitCode);
+\end{lstlisting}
+
+\subsubsection{\texttt{TerminateThread}}
+
+\begin{lstlisting}[style=func]
+ BOOL TerminateThread(HANDLE hThread, DWORD dwExitCode);
+\end{lstlisting}
+
+\subsection{Signali}
+
+\subsubsection{\texttt{CreateEvent}, \texttt{CreateEventEx}}
+
+\begin{lstlisting}[style=func]
+ HANDLE CreateEventW(
+	LPSECURITY_ATTRIBUTES lpEventAttributes,
+	BOOL                  bManualReset,
+	BOOL                  bInitialState,
+	LPCWSTR               lpName
+ );
+\end{lstlisting}
+
+\subsubsection{\texttt{OpenEvent}}
+
+\begin{lstlisting}[style=func]
+ HANDLE OpenEventW(
+	DWORD   dwDesiredAccess,
+	BOOL    bInheritHandle,
+	LPCWSTR lpName
+ );
+\end{lstlisting}
+
+\subsubsection{\texttt{SetEvent}}
+
+\begin{lstlisting}[style=func]
+ BOOL SetEvent(HANDLE hEvent);
+\end{lstlisting}
+
+\subsubsection{\texttt{ResetEvent}}
+
+\begin{lstlisting}[style=func]
+ BOOL ResetEvent(HANDLE hEvent);
+\end{lstlisting}
+
 \subsection{Spanje}
 
+\subsubsection{\texttt{Sleep}, \texttt{SleepEx}}
+
+\begin{lstlisting}[style=func]
+ void Sleep(DWORD dwMilliseconds);
+\end{lstlisting}
+
+\subsubsection{\texttt{WaitOnAddress}}
+
+\begin{lstlisting}[style=func]
+ BOOL WaitOnAddress(
+	volatile VOID *Address,
+	PVOID         CompareAddress,
+	SIZE_T        AddressSize,
+	DWORD         dwMilliseconds
+ );
+\end{lstlisting}
+
+\subsubsection{\texttt{WakeByAddressSingle}, \texttt{WakeByAddressAll}}
+
+\begin{lstlisting}[style=func]
+ void WakeByAddressSingle(PVOID Address);
+ void WakeByAddressAll(PVOID Address);
+\end{lstlisting}
+
 \subsection{Pridobivanje sistemskih informacij}
+
+\subsubsection{\texttt{GetCurrentProcess}}
+
+\begin{lstlisting}[style=func]
+ HANDLE GetCurrentProcess();
+\end{lstlisting}
+
+\subsubsection{\texttt{GetCurrentProcessId}, \texttt{GetProcessId}}
+
+\begin{lstlisting}[style=func]
+ DWORD GetCurrentProcessId();
+ DWORD GetProcessId(HANDLE Process);
+\end{lstlisting}
+
+\subsubsection{\texttt{GetCurrentProcessToken}}
+
+\begin{lstlisting}[style=func]
+ HANDLE GetCurrentProcessToken();
+\end{lstlisting}
+
+\subsubsection{\texttt{GetProcessInformation}}
+
+\begin{lstlisting}[style=func]
+ BOOL GetProcessInformation(
+	HANDLE                    hProcess,
+	PROCESS_INFORMATION_CLASS ProcessInformationClass,
+	LPVOID                    ProcessInformation,
+	DWORD                     ProcessInformationSize
+ );
+\end{lstlisting}
+
+\subsubsection{\texttt{GetProcessTimes}}
+
+\begin{lstlisting}[style=func]
+ BOOL GetProcessInformation(
+	HANDLE                    hProcess,
+	PROCESS_INFORMATION_CLASS ProcessInformationClass,
+	LPVOID                    ProcessInformation,
+	DWORD                     ProcessInformationSize
+ );
+\end{lstlisting}
+
+\subsubsection{\texttt{GetExitCodeProcess}}
+
+\begin{lstlisting}[style=func]
+ BOOL GetExitCodeProcess(
+	HANDLE  hProcess,
+	LPDWORD lpExitCode
+ );
+\end{lstlisting}
+
+\subsubsection{\texttt{GetProcessIdOfThread}}
+
+\begin{lstlisting}[style=func]
+ DWORD GetProcessIdOfThread(HANDLE Thread);
+\end{lstlisting}
+
+\subsubsection{\texttt{GetCurrentThread}}
+
+\begin{lstlisting}[style=func]
+ HANDLE GetCurrentThread();
+\end{lstlisting}
+
+\subsubsection{\texttt{GetCurrentThreadId}, \texttt{GetThreadId}}
+
+\begin{lstlisting}[style=func]
+ DWORD GetCurrentThreadId();
+ DWORD GetThreadId(HANDLE Thread);
+\end{lstlisting}
+
+\subsubsection{\texttt{GetCurrentThreadToken}, \texttt{GetCurrentThreadEffectiveToken}}
+
+\begin{lstlisting}[style=func]
+ HANDLE GetCurrentThreadToken();
+ HANDLE GetCurrentThreadEffectiveToken();
+\end{lstlisting}
+
+\subsubsection{\texttt{GetThreadInformation}}
+
+\begin{lstlisting}[style=func]
+ BOOL GetThreadInformation(
+	HANDLE                   hThread,
+	THREAD_INFORMATION_CLASS ThreadInformationClass,
+	LPVOID                   ThreadInformation,
+	DWORD                    ThreadInformationSize
+ );
+\end{lstlisting}
+
+\subsubsection{\texttt{GetThreadTimes}}
+
+\begin{lstlisting}[style=func]
+ BOOL GetThreadTimes(
+	HANDLE     hThread,
+	LPFILETIME lpCreationTime,
+	LPFILETIME lpExitTime,
+	LPFILETIME lpKernelTime,
+	LPFILETIME lpUserTime
+ );
+\end{lstlisting}
+
+\subsubsection{\texttt{GetExitCodeThread}}
+
+\begin{lstlisting}[style=func]
+ BOOL GetExitCodeThread(HANDLE hThread, LPDWORD lpExitCode);
+\end{lstlisting}
 
 \section{Primerjava sistemov}
 
