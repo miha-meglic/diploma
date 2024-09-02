@@ -237,7 +237,7 @@ sorting=nty,
 	licenco, ki je enaka tej.
 	Podrobnosti licence so dostopne na spletni strani \href{http://creativecommons.si}{creativecommons.si} ali na Inštitutu za
 	intelektualno lastnino, Streliška 1, 1000 Ljubljana.
-																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																															
+																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																									
 	\vspace*{1cm}
 	\begin{center}% 0.66 / 0.89 = 0.741573033707865
 		\CcImageCc{0.741573033707865}\hspace*{1ex}\CcImageBy{1}\hspace*{1ex}\CcImageSa{1}%
@@ -1613,7 +1613,7 @@ Preostali argumenti in izhodi so enaki \texttt{CreateProcess}.
 
 \subsubsection{\texttt{OpenProcess}}
 
-Kot bomo videli v mnogo sledečih funkcijah, izvajanje operacij nad odprtimi procesi zahteva ročico dotičnega procesa.
+Kot bomo videli v mnogo sledečih funkcijah, izvajanje operacij nad procesi zahteva ročico dotičnega procesa.
 To ročico lahko pridobimo s funkcijo \texttt{OpenProcess}.
 
 \begin{lstlisting}[style=func]
@@ -1767,6 +1767,8 @@ Yosifovich in kolegi \cite{Yosifovich_Russinovich_Solomon_Ionescu_2017} opisujej
 
 \subsubsection{\texttt{CreateThread}}
 
+Za ustvarjanje nove niti v istem navideznem uporabniškem prostoru uporabimo funkcijo \texttt{CreateProcess}.
+
 \begin{lstlisting}[style=func]
  HANDLE CreateThread(
 	LPSECURITY_ATTRIBUTES   lpThreadAttributes,
@@ -1778,7 +1780,25 @@ Yosifovich in kolegi \cite{Yosifovich_Russinovich_Solomon_Ionescu_2017} opisujej
  );
 \end{lstlisting}
 
+Funkcija sprejme sledeče argumente:
+\begin{description}
+	\item[\texttt{lpThreadAttributes}] opcijski vhodni argument; kazalnik na strukturo tipa \texttt{SECURITY\_ATTRIBUTES}, ki specificira lastnosti dedovanja ročice procesa vrnjene po izvedbi funkcije; če podamo \texttt{NULL}, ročica ne mora biti dedovana
+	\item[\texttt{dwStackSize}] obvezni vhodni argument; začetna velikost sklada v bajtih; sistem vrednost zaokroži do najbljižje strani; če podamo \texttt{0}, nova nit prejme privzeto velikost (1 MB)
+	\item[\texttt{lpStartAddress}] obvezni vhodni argument; kazalnik na začetno funkcijo nit
+	\item[\texttt{lpParameter}] opcijski vhodni argument; kazalnik na spremenljivko, ki bo podana niti
+	\item[\texttt{dwCreationFlags}] obvezni vhodni argument; zastavice, ki nadzirajo ustvarjanje niti; če podamo \texttt{0}, nit prične z izvajanje takoj ko je ustvarjena, če pa podamo \texttt{CREATE\_SUSPENDED}, se nit ustvari zaustavljena
+	\item[\texttt{lpThreadId}] opcijski izhodni argument; kazalnik na spremeljivko, ki prejme identifikator nove niti; če podamo \texttt{NULL}, funkcija ne vrne identifikatorja
+\end{description}
+
+V primeru, da je nit uspešno ustvarjena, funkcija vrne ročico nove niti.
+V primeru napake funkcija vrne \texttt{NULL}.
+
 \subsubsection{\texttt{CreateRemoteThread}, \texttt{CreateRemoteThreadEx}}
+
+Kadar pa želimo ustvariti nit v navideznem pomnilniku drugega procesa, uporabimo funkcijo \texttt{CreateRemoteThread} ali \texttt{CreateRemoteThreadEx}.
+V osnovi sta funkciji enaki, vendar \texttt{CreateRemoteThreadEx} omogoča podajanje dodatnih atributov nove niti.
+
+Za klicanje teh funkcij potrebujemo ročico ciljnega procesa s pravicami \texttt{PROCESS\_CREATE\_THREAD}, \texttt{PROCESS\_QUERY\_INFORMATION}, \texttt{PROCESS\_VM\_OPERATION}, \texttt{PROCESS\_VM\_WRITE} in \texttt{PROCESS\_VM\_READ }.
 
 \begin{lstlisting}[style=func]
  HANDLE CreateRemoteThread(
@@ -1792,7 +1812,15 @@ Yosifovich in kolegi \cite{Yosifovich_Russinovich_Solomon_Ionescu_2017} opisujej
  );
 \end{lstlisting}
 
+Funkcija sprejme enake argumente kot \texttt{CreateThread}, vendar doda prvi argument, ki določa proces v katerem naj se nit ustvari.
+Poleg tega funkcija \texttt{CreateRemoteThreadEx}, dodaja argument \texttt{lpAttributeList}, preko katerega med drugim lahko določamo željeno procesorsko jedro, dedovane ročice in omogoča ustvarjanje UMS niti.
+
+Tako kot \texttt{CreateThread}, funkcija vrne ročico nove niti.
+
 \subsubsection{\texttt{OpenThread}}
+
+Kot smo že videli videli pri procesih, izvajanje operacij nad nitmi zahteva ročico dotične niti.
+To ročico lahko pridobimo s funkcijo \texttt{OpenThread}.
 
 \begin{lstlisting}[style=func]
  HANDLE OpenThread(
@@ -1802,21 +1830,73 @@ Yosifovich in kolegi \cite{Yosifovich_Russinovich_Solomon_Ionescu_2017} opisujej
  );
 \end{lstlisting}
 
+Funkcija sprejme tri argumente:
+\begin{description}
+	\item[\texttt{dwDesiredAccess}] željen dostop, ki naj ga ročica omogoča
+	\item[\texttt{bInheritHandle}] dedovalne lastnosti ročice; če podatmo \texttt{TRUE}, bodo otroci trenutnega procesa lahko podedovali ročico; podobno kot smo videli pri argumentu \texttt{lpProcessAttributes} funkcije \texttt{CreateProcess}
+	\item[\texttt{dwProcessId}] numerični identifikator niti katere ročico zahtevamo
+\end{description}
+
+Tako kot pri \texttt{OpenProcess}, argument \texttt{dwDesiredAccess} sprejme zastavice, ki jih lahko združujemo z logičnim OR operatorjem.
+Splošne zastavice so enake kot pri odpiranju ročice procesa.
+Poleg teh pa imajo tudi niti nabor specifičnih zastavic:
+\begin{description}
+	\item[\texttt{SYNCHRONIZE}] omogoča čakanje na končanje niti
+	\item[\texttt{THREAD\_ALL\_ACCESS}] omogoča vse splošne in niti specifične pravice
+	\item[\texttt{THREAD\_DIRECT\_IMPERSONATION}] omogoča imitacijo pravic niti 
+	\item[\texttt{THREAD\_GET\_CONTEXT}] omogoča branje kontexta niti
+	\item[\texttt{THREAD\_IMPERSONATE}] omogoča uporabo varnostnih informacij niti
+	\item[\texttt{THREAD\_QUERY\_INFORMATION}] omogoča pridobivanje nekaterih informacij niti
+	\item[\texttt{THREAD\_QUERY\_LIMITED\_INFORMATION}] omogoča pridobivanja podmnožice informacij nitita pravica je avtomatsko omogočena, če je podana zastavica \texttt{THREAD\_QUERY\_INFORMATION}
+	\item[\texttt{THREAD\_SET\_CONTEXT}] omogoča spreminjanje konteksta niti
+	\item[\texttt{THREAD\_SET\_INFORMATION}] omogoča nastavljanje določenih informacij v objektu niti
+	\item[\texttt{THREAD\_SET\_LIMITED\_INFORMATION}] omogoča nastavljanje podmnožice informacij niti; ta pravica je avtomatsko omogočena, če je podana zastavica \texttt{THREAD\_SET\_INFORMATION}
+	\item[\texttt{THREAD\_SET\_THREAD\_TOKEN}] omogoča nastavljanje imitacijskega žetona niti
+	\item[\texttt{THREAD\_SUSPEND\_RESUME}] omogoča zaustavitev in nadaljevanje izvajanja niti
+	\item[\texttt{THREAD\_TERMINATE}] omogoča prisilno končanje niti
+\end{description}
+
+Funkcija pri uspešni izvedbi vrne ročico z željenim dostopom, v primeru napake pa \texttt{NULL}.
+
 \subsubsection{\texttt{ExitThread}}
+
+Ko želimo končati trenutno nit, uporabimo funkcijo \texttt{ExitThread}.
 
 \begin{lstlisting}[style=func]
  void ExitThread(DWORD dwExitCode);
 \end{lstlisting}
 
+Funkcija sprejme argument \texttt{dwExitCode}, ki ga lahko prevzame druga nit s funkcijo \texttt{GetExitCodeThread}.
+
 \subsubsection{\texttt{TerminateThread}}
+
+Ko želimo prisilno končati drugo nit, uporabimo funkcijo \texttt{TerminateThread}.
+Ta deluje podobno kot funkcija \texttt{kill} v Linux.
 
 \begin{lstlisting}[style=func]
  BOOL TerminateThread(HANDLE hThread, DWORD dwExitCode);
 \end{lstlisting}
 
+Funkcija sprejme ročico ciljne niti (\texttt{hThread}) in izhodno kodo niti (\texttt{dwExitCode}).
+Ročica ciljne niti mora imeti pravico \texttt{THREAD\_TERMINATE}.
+
 \subsection{Signali}
 
-\subsubsection{\texttt{CreateEvent}, \texttt{CreateEventEx}}
+Windows sicer implementira POSIXu podobne signale, vendar samo za procese v dokaj specifičnih kontekstih.
+Namesto tega ponuja dogodke (\textit{angl. event}).
+
+Dogodek je sinhronizacijski objekt, ki ga lahko procesi oz. niti ``nastavijo'' in ``ponastavijo.''
+Dogodek lahko ustvarimo z imenom in tako omogočimo drugim procesom dostop in interakcijo z ustvarjenim dogodkom.
+Pri tem moramo biti previdni, saj v sistemu lahko sočasno obstaja samo en objekt z danim imenom, to vlkjučuje objekte drugih tipov.
+
+Ob ustvarjanju dogodka ga lahko nastavimo kot ročno ponastavljivega ali avtomatsko ponastavljivega.
+Avtomatsko ponastavljivi dogodki se ponastavijo takoj ko jih prva nit počaka.
+
+Čakanje objektov smo že predelali v poglavju \ref{ssec:windows_syscalls:waiting}.
+
+\subsubsection{\texttt{CreateEvent}}
+
+Za ustvarjanje novega dogodka uporabimo funkcijo \texttt{CreateEvent}.
 
 \begin{lstlisting}[style=func]
  HANDLE CreateEventW(
@@ -1827,7 +1907,21 @@ Yosifovich in kolegi \cite{Yosifovich_Russinovich_Solomon_Ionescu_2017} opisujej
  );
 \end{lstlisting}
 
+Funkcija sprejme štiri argumente:
+\begin{description}
+	\item[\texttt{lpEventAttributes}] opcijski vhodni atribut; kazalnik na strukturo tipa \texttt{SECURITY\_ATTRIBUTES}, ki določa varnostni desktiptor novega dogodka
+	\item[\texttt{bManualReset}] obvezni vhodni atribut; če podamo \texttt{TRUE}, bo objekt ročno ponastavljiv, v nasprotnem primeru se bo ponastavil avtomatsko ko ga prva nit počaka
+	\item[\texttt{bInitialState}] obvezni vhodni atribut; začetno stanje
+	\item[\texttt{lpName}] opcijski vhodni atribut; ime novega objekta ali \texttt{NULL}; če objekt z istim imenom že obstaja, bo funkcija zahtevala dostop do obstočega objekta in ignorira ostale atribute
+\end{description}
+
+Je bil nov objekt uspeštno ustvarjen, funkcija vrne ročico.
+V primeru, da je objekt z istim imenom že obstajal objekt vrne ročico obstoječega objekta in funkcija \texttt{GetLastError} vrne konstanto \texttt{ERROR\_ALREADY\_EXISTS}.
+V primeru napake funkcija vrne \texttt{NULL}.
+
 \subsubsection{\texttt{OpenEvent}}
+
+Kadar želimo iz drugega procesa dostopati do poimenovanega dogodka, lahko njegovo ročico pridobimo s funkcijo \texttt{OpenEvent}.
 
 \begin{lstlisting}[style=func]
  HANDLE OpenEventW(
@@ -1837,53 +1931,71 @@ Yosifovich in kolegi \cite{Yosifovich_Russinovich_Solomon_Ionescu_2017} opisujej
  );
 \end{lstlisting}
 
+Kot smo že dvakrat videli, odpiranje objekta zahteva argument željenega dostopa (\texttt{dwDesiredAccess}) v obliki zastavic združenih z logično OR operacijo.
+Spet so veljavne sprošne zastavice opisane pri funkciji \texttt{OpenProcess}, poleg tega pa imajo dogodki dve speficični zastavici:
+\begin{description}
+	\item[\texttt{EVENT\_ALL\_ACCESS}] omogoča vse splošne in dogodku specifične pravice
+	\item[\texttt{EVENT\_MODIFY\_STATE}] omogoča spreminjanje stanja
+\end{description}
+
+Poleg tega funkcija sprejme argument \texttt{bInheritHandle}, ki določa dedovanje ročice.
+Ciljni objekt pa določimo v argumentu \texttt{lpName}, kjer podamo ime dogodka.
+
+V primeru uspešne izvedbe funkcija vrne ročico, v nasprotnem primeru pa \texttt{NULL}.
+
 \subsubsection{\texttt{SetEvent}}
+
+Za proženje dogodka uporabimo funkcijo \texttt{SetEvent}.
+Ta zahteva ročico dogodka s pravico \texttt{EVENT\_MODIFY\_STATE}.
 
 \begin{lstlisting}[style=func]
  BOOL SetEvent(HANDLE hEvent);
 \end{lstlisting}
 
+V primeru uspešnega proženja funkcija vrne neničeno vrednost, v nasprotnem primeru pa \texttt{0}.
+
 \subsubsection{\texttt{ResetEvent}}
+
+Za ponastavitev dogodka uporabimo funkcijo \texttt{ResetEvent}.
+Ta zahteva ročico dogodka s pravico \texttt{EVENT\_MODIFY\_STATE}.
+
+Seveda klic te funkcije za avtomatsko ponastavljive dogodke običajno ni potreben.
 
 \begin{lstlisting}[style=func]
  BOOL ResetEvent(HANDLE hEvent);
 \end{lstlisting}
 
+V primeru uspešnega proženja funkcija vrne neničeno vrednost, v nasprotnem primeru pa \texttt{0}.
+
 \subsection{Spanje}
 
 \subsubsection{\texttt{Sleep}, \texttt{SleepEx}}
+
+Kadar želimo izvajanje niti zaustaviti za določeno količino časa, nam Windows ponuja funkcijo \texttt{Sleep}.
+Tako lahko ustavimo izvajanje in sprostimo procesor dokler se podani čas ne izteče.
 
 \begin{lstlisting}[style=func]
  void Sleep(DWORD dwMilliseconds);
 \end{lstlisting}
 
-\subsubsection{\texttt{WaitOnAddress}}
-
-\begin{lstlisting}[style=func]
- BOOL WaitOnAddress(
-	volatile VOID *Address,
-	PVOID         CompareAddress,
-	SIZE_T        AddressSize,
-	DWORD         dwMilliseconds
- );
-\end{lstlisting}
-
-\subsubsection{\texttt{WakeByAddressSingle}, \texttt{WakeByAddressAll}}
-
-\begin{lstlisting}[style=func]
- void WakeByAddressSingle(PVOID Address);
- void WakeByAddressAll(PVOID Address);
-\end{lstlisting}
+Funkcija sprejme vhodni argument \texttt{dwMilliseconds}, ki določa koliko časa v milisekundah bo izvajanje zaustavljeno.
 
 \subsection{Pridobivanje sistemskih informacij}
 
 \subsubsection{\texttt{GetCurrentProcess}}
+
+Funkcija \texttt{GetCurrentProcess} nam poda psevdo ročico trenutnega procesa.
+Ta ročica se nikoli ne deduje in je trenutno posebna konstanta.
+Pravo ročico trenutnega procesa lahko pridobimo tako, da funkciji \texttt{DuplicateHandle} podamo psevdo ročico ali s funkcijo \texttt{OpenProcess}.
 
 \begin{lstlisting}[style=func]
  HANDLE GetCurrentProcess();
 \end{lstlisting}
 
 \subsubsection{\texttt{GetCurrentProcessId}, \texttt{GetProcessId}}
+
+Funkciji \texttt{GetCurrentProcessId} in \texttt{GetProcessId} nam podata identifikator trenutnega procesa in identifikator procesa, katerega ročico podamo.
+Ročica podana funkciji \texttt{GetProcessId} mora imeti pravico \texttt{PROCESS\_QUERY\_INFORMATION} ali \texttt{PROCESS\_QUERY\_LIMITED\_INFORMATION}.
 
 \begin{lstlisting}[style=func]
  DWORD GetCurrentProcessId();
@@ -1892,12 +2004,19 @@ Yosifovich in kolegi \cite{Yosifovich_Russinovich_Solomon_Ionescu_2017} opisujej
 
 \subsubsection{\texttt{GetCurrentProcessToken}}
 
+Funkcija \texttt{GetCurrentProcessToken} nam poda psevdo ročico dosopnega žetona trenutnega procesa.
+Spet je ta ročica posebna konstanta, ki se ne deduje.
+Za razliko od ročice procesa, se ta ročica ne more uporabiti za pridobivanje prave ročice žetona.
+
 \begin{lstlisting}[style=func]
  HANDLE GetCurrentProcessToken();
 \end{lstlisting}
 
 \subsubsection{\texttt{GetProcessInformation}}
 
+Funkcija \texttt{GetProcessInformation} nam omogoča pridobivanje informacij o procesu, ki ga določa podana ročica.
+Podana ročica mora imeti pravico \texttt{PROCESS\_QUERY\_LIMITED\_INFORMATION}.
+
 \begin{lstlisting}[style=func]
  BOOL GetProcessInformation(
 	HANDLE                    hProcess,
@@ -1906,19 +2025,34 @@ Yosifovich in kolegi \cite{Yosifovich_Russinovich_Solomon_Ionescu_2017} opisujej
 	DWORD                     ProcessInformationSize
  );
 \end{lstlisting}
+
+Poleg ročice funkcija sprejme še argument \texttt{ProcessInformationClass}, ki določa katero informacijo želimo pridobiti.
+Za željeni tip informacije moramo podati kazalnik na ustrezno strukturo (\texttt{ProcessInformation}), ki jo funkcija nato izpolni, in velikost te strukture (\texttt{ProcessInformationSize}).
 
 \subsubsection{\texttt{GetProcessTimes}}
 
+Funkcija \texttt{GetProcessTimes} nam omogoča pridobivanje časovnega zapisa procesa.
+Podana ročica mora spet imeti pravico \texttt{PROCESS\_QUERY\_INFORMATION} ali \texttt{PROCESS\_QUERY\_LIMITED\_INFORMATION}.
+
 \begin{lstlisting}[style=func]
- BOOL GetProcessInformation(
-	HANDLE                    hProcess,
-	PROCESS_INFORMATION_CLASS ProcessInformationClass,
-	LPVOID                    ProcessInformation,
-	DWORD                     ProcessInformationSize
+ BOOL GetProcessTimes(
+	HANDLE     hProcess,
+	LPFILETIME lpCreationTime,
+	LPFILETIME lpExitTime,
+	LPFILETIME lpKernelTime,
+	LPFILETIME lpUserTime
  );
 \end{lstlisting}
 
+Funkcija v podane kazalnike zapiše čas kreacije procesa (\texttt{lpCreationTime}), čas končanja procesa (\texttt{lpExitTime}), čas porabljen v jedru (\texttt{lpKernelTime}) in čas porabljen v uporabniškem prostoru (\texttt{lpUserTime}).
+Vsi časi so podani v obliki strukture tipa \texttt{FILETIME}.
+Windows ponuja funkcijo \texttt{FileTimeToSystemTime}, ki nam omogoča pretvorbo tega zapisa v bolj berljiv časovni zapis.
+
 \subsubsection{\texttt{GetExitCodeProcess}}
+
+Funkcija \texttt{GetExitCodeProcess} nam omogoča pridobivanje izhodne kode procesa.
+Spomnimo se, da je to vrednost, ki jo proces vrne ob končanju s funkcijo \texttt{ExitProcess}.
+Ročica mora spet imeti pravico \texttt{PROCESS\_QUERY\_INFORMATION} ali \texttt{PROCESS\_QUERY\_LIMITED\_INFORMATION}.
 
 \begin{lstlisting}[style=func]
  BOOL GetExitCodeProcess(
@@ -1929,17 +2063,25 @@ Yosifovich in kolegi \cite{Yosifovich_Russinovich_Solomon_Ionescu_2017} opisujej
 
 \subsubsection{\texttt{GetProcessIdOfThread}}
 
+Funkcija \texttt{GetProcessIdOfThread} nam omogoča pridobivanje identifikatorja procesa, ki ga izvaja dana nit.
+
 \begin{lstlisting}[style=func]
  DWORD GetProcessIdOfThread(HANDLE Thread);
 \end{lstlisting}
 
 \subsubsection{\texttt{GetCurrentThread}}
 
+Funkcija \texttt{GetCurrentThread} nam poda psevdo ročico trenutne niti.
+Ta ročica je deležna istih omejitev kot psevdo ročica procesa.
+
 \begin{lstlisting}[style=func]
  HANDLE GetCurrentThread();
 \end{lstlisting}
 
 \subsubsection{\texttt{GetCurrentThreadId}, \texttt{GetThreadId}}
+
+Funkciji \texttt{GetCurrentThreadId} in \texttt{GetThreadId} nam omogočata pridobivanje identifikatorja trenutne niti in identifikatorja niti, ki jo določa podana ročica.
+Ročica podana funkciji \texttt{GetThreadId} mora imeti pravico \texttt{THREAD\_QUERY\_INFORMATION} ali \texttt{THREAD\_QUERY\_LIMITED\_INFORMATION}.
 
 \begin{lstlisting}[style=func]
  DWORD GetCurrentThreadId();
@@ -1948,12 +2090,18 @@ Yosifovich in kolegi \cite{Yosifovich_Russinovich_Solomon_Ionescu_2017} opisujej
 
 \subsubsection{\texttt{GetCurrentThreadToken}, \texttt{GetCurrentThreadEffectiveToken}}
 
+Funkciji \texttt{GetCurrentThreadToken} in \texttt{GetCurrentThreadEffectiveToken} nam omogočata pridobivanje psevdo ročice žetona trenutne niti in ročice efektivnega žetona trenutne niti.
+Ta ročica je deležna istih omejitev kot psevdo ročica žetona procesa.
+
 \begin{lstlisting}[style=func]
  HANDLE GetCurrentThreadToken();
  HANDLE GetCurrentThreadEffectiveToken();
 \end{lstlisting}
 
 \subsubsection{\texttt{GetThreadInformation}}
+
+Funkcija \texttt{GetThreadInformation} nam omogoča pridobivanje informacij o niti, ki jo določa podana ročica.
+Podana ročica mora imeti pravico \texttt{THREAD\_QUERY\_INFORMATION}.
 
 \begin{lstlisting}[style=func]
  BOOL GetThreadInformation(
@@ -1964,7 +2112,13 @@ Yosifovich in kolegi \cite{Yosifovich_Russinovich_Solomon_Ionescu_2017} opisujej
  );
 \end{lstlisting}
 
+Simetrično \texttt{GetProcessInformation}, poleg ročice funkcija sprejme še argument \texttt{ThreadInformationClass}, ki določa katero informacijo želimo pridobiti.
+Za željeni tip informacije moramo podati kazalnik na ustrezno strukturo (\texttt{ThreadInformation}), ki jo funkcija nato izpolni, in velikost te strukture (\texttt{ThreadInformationSize}).
+
 \subsubsection{\texttt{GetThreadTimes}}
+
+Funkcija \texttt{GetThreadTimes} nam omogoča pridobivanje časovnega zapisa niti.
+Podana ročica mora imeti pravico \texttt{THREAD\_QUERY\_INFORMATION} ali \texttt{THREAD\_QUERY\_LIMITED\_INFORMATION}.
 
 \begin{lstlisting}[style=func]
  BOOL GetThreadTimes(
@@ -1976,7 +2130,14 @@ Yosifovich in kolegi \cite{Yosifovich_Russinovich_Solomon_Ionescu_2017} opisujej
  );
 \end{lstlisting}
 
+Funkcija v podane kazalnike zapiše čas kreacije niti (\texttt{lpCreationTime}), čas končanja niti (\texttt{lpExitTime}), čas porabljen v jedru (\texttt{lpKernelTime}) in čas porabljen v uporabniškem prostoru (\texttt{lpUserTime}).
+Vsi časi so podani v obliki strukture tipa \texttt{FILETIME}, ki jo lahko pretvorimo v bolj berljiv časovni zapis s funkcijo \texttt{FileTimeToSystemTime}.
+
 \subsubsection{\texttt{GetExitCodeThread}}
+
+Funkcija \texttt{GetExitCodeThread} nam omogoča pridobivanje izhodne kode niti.
+To je vrednost, ki jo nit vrne ob končanju s funkcijo \texttt{ExitThread}.
+Ročica mora imeti pravico \texttt{THREAD\_QUERY\_INFORMATION} ali \texttt{THREAD\_QUERY\_LIMITED\_INFORMATION}.
 
 \begin{lstlisting}[style=func]
  BOOL GetExitCodeThread(HANDLE hThread, LPDWORD lpExitCode);
