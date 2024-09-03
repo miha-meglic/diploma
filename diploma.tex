@@ -237,7 +237,7 @@ sorting=nty,
 	licenco, ki je enaka tej.
 	Podrobnosti licence so dostopne na spletni strani \href{http://creativecommons.si}{creativecommons.si} ali na Inštitutu za
 	intelektualno lastnino, Streliška 1, 1000 Ljubljana.
-																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																															
+																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																								
 	\vspace*{1cm}
 	\begin{center}% 0.66 / 0.89 = 0.741573033707865
 		\CcImageCc{0.741573033707865}\hspace*{1ex}\CcImageBy{1}\hspace*{1ex}\CcImageSa{1}%
@@ -562,17 +562,6 @@ Med najbolj ključnimi izboljšavami je bil premik grafične implementacije v ``
 Naslednji večji skok je nastopil z Windows 7, ki je bil izdan leta 2009, in je odpravil večino težav svojega predhodnika.
 % TODO: Win 8, 10, 11
 %\cite{Silberschatz_Galvin_Gagne_2018}
-
-Glavna cilji pri razvoju Windows NT so bili \cite{Yosifovich_Russinovich_Solomon_Ionescu_2017}:
-\begin{description}
-	\item[Razširljivost] Koda mora biti napisana tako, da lahko brez težav raste in se prilagodi zahtevam na trgu.
-	\item[Prenosljivost] Sistem se mora izvajati na različnih arhitekturah in ohranjati možnost prehoda na nove arhitekture.
-	\item[Zanesljivost in robustnost] Sistem se mora zaščititi pred internimi napakami in zunanjimi vplivi. Aplikacije ne morejo škodovati OS ali drugim aplikacijam.
-	\item[Kompatibilnost] Kljub temu, da Windows NT razširja funkcionalnosti obstoječih tehnologij, naj bodo programski vmesniki kompatibilni s starejšimi verzijami Windows in MS-DOS. Prav tako naj dobro sodeluje z drugimi sistemi kot UNIX, OS/2 ub NetWare.
-	\item[Zmogljivost] Upoštevajoč druge zahteve, naj bo sistem kar se da zmogljiv in hiter na vsaki platformi.
-\end{description}
-
-Seveda so se te cilji spreminjali tekom razvoja.
 
 \subsection{Arhitektura} \label{ssec:windows:architecture}
 
@@ -1141,9 +1130,9 @@ Sistemski klici za upravljanje procesov skrbijo za:
 	\item dodeljevanje in sproščanje pomnilnika \cite{Silberschatz_Galvin_Gagne_2018}.
 \end{itemize}
 
-\section{Sistemski klici v Linux}
+\section{Ustvarjanje in končanje procesa}
 
-\subsection{Ustvarjanje in končanje procesa}
+\subsection{Linux}
 
 Bovet in Cesati \cite{Bovet_Cesati_2005} opisujeta, da tradicionalni UNIX sistemi obravnavajo vse procese enako -- viri starša so podvojeni v otroku.
 Tak pristop je zelo neučinkovit in počasen, saj zahteva kopiranje celotnega naslovnega prostora starša.
@@ -1250,321 +1239,8 @@ Funkcija v nobenem primeru ne vrne ničesar, saj se proces zaključi.
 
 Več o signalu \texttt{SIGCHLD} in posredovanju statusa staršu v poglavju \ref{ssec:linux_syscalls:waiting}.
 
-\subsection{Signali}
+\subsection{Windows}
 
-\subsubsection{\texttt{kill}}
-
-Kadar pa želimo ustaviti drug proces, uporabimo funkcijo \texttt{kill}, ki želenemu procesu pošlje signal.
-
-Signali so neke vrste programske prekinitve, ki se uporabljajo za obveščanje procesa o asinhronih dogodkih. % https://faculty.cs.niu.edu/~hutchins/csci480/signals.htm
-Linux implementira 31 različnih signalov, vsakega z eno izmed petih privzetih dispozicij oz. akcij, ki se izvedejo ob prejemu signala.
-Možne privzete dispozicije so: končanje procesa, ignoriranje signala, končanje procesa in izpis sistemskega stanja (\textit{angl. core dump}), zaustavitev procesa ali nadaljevanje procesa, če je trenutno ustavljen.
-Proces lahko, z izjemo signalov \texttt{SIGKILL} in \texttt{SIGSTOP}, spremeni privzeto dispozicijo signala in implementira lastno prekinitveno funkcijo.
-
-Za naše potrebe je pomembnih le naslednjih nekaj signalov:
-\begin{itemize}
-	\item \texttt{SIGCHLD}
-	      \begin{description}
-	      	\item Opozori proces o zaustavitvi in nadaljevanju izvajanja ali končanju otroškega procesa.
-	      	\item Proces privzeto ignorira signal.
-	      \end{description}
-	\item \texttt{SIGTERM}
-	      \begin{description}
-	      	\item Sporoči procesu naj se mirno konča.
-	      	\item Isto sporoča sorodni signal \texttt{SIGINT}, vendar je ta namenjen za uporabniške zahteve in ga običajno lahko proži uporabnik iz interaktivne seje.
-	      	\item Enako velja za \texttt{SIGHUP}, vendar le-tega proži sistem ob zaključku uporabniške seje.
-	      \end{description}
-	\item \texttt{SIGKILL}
-	      \begin{description}
-	      	\item Prisilno konča proces. Kot že omenjeno, proces ne more spremeniti privzete dispozicije.
-	      \end{description}
-	\item \texttt{SIGSTOP}
-	      \begin{description}
-	      	\item Sporoči procesu naj se zaustavi. Kot že omenjeno, proces ne more spremeniti privzete dispozicije.
-	      	\item Sorodni signal \texttt{SIGTSTP} pa je namenjen specifično uporabniški zahtevi za zaustavitev. Glavna razlika je, da program lahko zanj implementira lastno prekinitveno funkcijo.
-	      \end{description}
-	\item \texttt{SIGCONT}
-	      \begin{description}
-	      	\item Sporoči procesu naj nadaljuje izvajanje, če je zaustavljen.
-	      \end{description}
-	\item \texttt{SIGUSR1} in \texttt{SIGUSR2}
-	      \begin{description}
-	      	\item Posebna signal, ki jih lahko program uporabi za lastne potrebe sporočanja, saj jih sistem ne proži.
-	      	\item Privzeto signala sprožita končanje procesa.
-	      \end{description}
-\end{itemize}
-
-\begin{lstlisting}[style=func]
- int kill(pid_t pid, int sig);
-\end{lstlisting}
-
-Funkcija sprejme dva argumenta: identifikator ciljnega procesa in signal, ki ga želimo poslati.
-Ob uspešni izvedbi vrne \texttt{0}, v primeru napake pa \texttt{-1}.
-
-\subsection{Čakanje} \label{ssec:linux_syscalls:waiting}
-
-Kadar želimo sinhronizirati starševski proces z otroškim procesom, blokiramo izvajanje starševskega procesa, dokler ciljni proces ne pošlje signala o spremembi stanja.
-Specifično, čakamo signal \texttt{SIGCHLD}, ki ga otroški proces pošlje ob končanju ter zaustavitvi ali nadaljevanju izvajanja procesa.
-
-Ko se otroški proces zaključi, postane ``zombi'' proces.
-Jedro o ``zombi'' procesih vzdržuje minimalno zbirko informacij kot so PID, status in informacije o uporabi sistemskih virov, da lahko starševski proces kasneje počaka na proces in pridobi omenjene informacije.
-Prav tako to pomeni, da ``zombi'' procesi zasedajo mesto v jedrni tabeli procesov in lahko potencialno onemogočijo kreiranje novih procesov.
-V primeru, da se starševski proces konča, njegove ``zombi'' procese podeduje proces \texttt{init}, ki jih počaka in s tem sprosti zasedene vire.
-
-\subsubsection{\texttt{wait}, \texttt{waitpid}}
-
-Najbolj preprosta funkcija za čakanje, \texttt{wait}, blokira trenutno nit dokler se eden izmed otroških procesov ne konča.
-Funkcijsko je ekvivalenten klicu \verb|waitpid(-1, &wstatus, 0);|.
-
-\begin{lstlisting}[style=func]
- pid_t wait(int *_Nullable wstatus);
-\end{lstlisting}
-
-Funkcija sprejme kazalnik na spremenljivko tipa integer, kamor zapiše statusne informacije končanega otroškega procesa.
-Ob uspešni izvedbi vrne PID končanega otroškega procesa, v primeru napake pa \texttt{-1}.
-
-Status procesa vrnjen preko argumenta \texttt{wstatus}, lahko dekodiramo z uporabo sledečih makrojev:
-\begin{itemize}
-	\item \texttt{WIFEXITED(wstatus)}
-	      \begin{description}
-	      	\item vrne \texttt{true}, če je otrok zaključil običajno (klic \texttt{exit} ali \texttt{return} iz funkcije \texttt{main()})
-	      \end{description}
-	\item \texttt{WEXITSTATUS(wstatus)}
-	      \begin{description}
-	      	\item vrne izhodni status otroka
-	      \end{description}
-	\item \texttt{WIFSIGNALED(wstatus)}
-	      \begin{description}
-	      	\item vrne \texttt{true}, če se je proces zaključil zaradi signala
-	      \end{description}
-	\item \texttt{WTERMSIG(wstatus)}
-	      \begin{description}
-	      	\item vrne številko signala, ki je povzročil zaključek procesa
-	      \end{description}
-	\item \texttt{WCOREDUMP(wstatus)}
-	      \begin{description}
-	      	\item vrne \texttt{true}, če je proces ustvaril izpis sistemskega stanja
-	      \end{description}
-	\item \texttt{WIFSTOPPED(wstatus)}
-	      \begin{description}
-	      	\item vrne \texttt{true}, če je bil otroški proces ustavljen s signalom (mogoče samo pri klicu \texttt{waitpid} z opcijo \texttt{WUNTRACED})
-	      \end{description}
-	\item \texttt{WSTOPSIG(wstatus)}
-	      \begin{description}
-	      	\item vrne številko signala, ki je povzročil ustavitev izvajanja procesa
-	      \end{description}
-	\item \texttt{WIFCONTINUED(wstatus)}
-	      \begin{description}
-	      	\item vrne \texttt{true}, če proces nadaljuje izvajanje zaradi prejetega signala \texttt{SIGCONT}
-	      \end{description}
-\end{itemize}
-
-Bolj specifična funkcija, \texttt{waitpid}, blokira trenutno nit dokler otrok s podanim PID ne spremeni stanja.
-
-\begin{lstlisting}[style=func]
-	pid_t waitpid(pid_t pid, int *_Nullable wstatus, int options);
-\end{lstlisting}
-
-Funkcija sprejme tri atribute, od katerih se \texttt{wstatus} obnaša enako kot pri \texttt{wait}.
-
-Argument \texttt{pid} določa ciljni proces in sprejme štiri različne tipe vhoda:
-
-\begin{tabular}{ p{0.1\linewidth} p{0.82\linewidth} }
-	$< -1$ & določa kateri koli otroški proces, katerega skupinski ID je enak absolutni vrednosti argumenta \\
-	$-1$   & določa kateri koli otroški proces (kot \texttt{wait})                                          \\
-	$0$    & določa kateri koli otroški proces katerega skupinski ID je enak trenutnemu procesu             \\    
-	$> 0$  & določa točen PID procesa                                                                       
-\end{tabular}
-
-Privzeto funkcija čaka samo zaključene otroške procese, vendar to lahko spremenimo s podajanjem \texttt{options} parametra, za katerega imamo tri opcije, ki jih lahko združujemo z logično OR funkcijo:
-
-\begin{tabular}{ p{0.18\linewidth} p{0.72\linewidth} }
-	\texttt{WNOHANG}    & ne blokira niti, če se ciljni otroški proces ni zaključil                                     \\
-	\texttt{WUNTRACED}  & vrne rezultat tudi, če se je izvajanje procesa ustavi                                           \\
-	\texttt{WCONTINUED} & vrne rezultat tudi, če ustavljen proces nadaljuje izvajanje ob prejemu signala \texttt{SIGCONT} 
-\end{tabular}
-
-\subsubsection{\texttt{waitid}}
-
-Kadar potrebujemo še bolj specifičen nadzor nad čakano spremembo statusa, uporabimo funkcijo \texttt{waitid}.
-
-\begin{lstlisting}[style=func]
-	int waitid(idtype_t idtype, id_t id, siginfo_t *infop, int options);
-\end{lstlisting}
-
-Funkcija sprejme štiri argumente.
-Argument \texttt{idtype} in \texttt{id} določata ciljne otroške procese:
-\begin{itemize}
-	\item \texttt{idtype == P\_PID}
-	      \begin{description}
-	      	\item čaka proces katerega PID je enak argumentu \texttt{id}
-	      \end{description}
-	\item \texttt{idtype == P\_PIDFD}
-	      \begin{description}
-	      	\item čaka proces na katerega se nanaša PID opisnik (\textit{angl. PID file descriptor}) podan v argumentu \texttt{id}
-	      \end{description}
-	\item \texttt{idtype == P\_PGID}
-	      \begin{description}
-	      	\item čaka kateri koli proces, katerega skupinski ID je enak argumentu \texttt{id}
-	      \end{description}
-	\item \texttt{idtype == P\_ALL}
-	      \begin{description}
-	      	\item čaka kateri koli otroški proces in ignorira argument \texttt{id}
-	      \end{description}
-\end{itemize}
-
-Željeno spremembo statusa določamo z argumentom \texttt{options}, kjer lahko sledeče opcije združujemo z logično OR operacijo:
-\begin{itemize}
-	\item \texttt{WEXITED}
-	      \begin{description}
-	      	\item čaka zaključeno stanje
-	      \end{description}
-	\item \texttt{WSTOPPED}
-	      \begin{description}
-	      	\item čaka zaustavitev izvajanja procesa zaradi signala
-	      \end{description}
-	\item \texttt{WCONTINUED}
-	      \begin{description}
-	      	\item čaka nadaljevanje izvajanja procesa zaradi signala
-	      \end{description}
-	\item \texttt{WNOHANG}
-	      \begin{description}
-	      	\item ne blokira niti, če se ciljni otroški proces ni zaključil
-	      \end{description}
-	\item \texttt{WNOWAIT}
-	      \begin{description}
-	      	\item ne sprosti stanja procesa, da lahko kasneje spet pridobimo statusne informacije
-	      \end{description}
-\end{itemize}
-
-\subsection{Niti} \label{ssec:linux_syscalls:threads}
-
-\subsubsection{\texttt{clone}, \texttt{clone3}}
-
-Kreiranje niti je v osnovi enako kreiranju novega procesa.
-Glavna razlika je, da si procesa delita dele izvajalnega konteksta.
-Funkciji \texttt{clone} in \texttt{clone3} omogočata kreiranje novega procesa z nadzorom nad deljenimi konteksti kot so naslovni prostor, tabela datotečnih opisnikov, tabela prekinitvenih funkcij signalov \dots
-
-\begin{lstlisting}[style=func]
- int clone(int (*fn)(void *_Nullable), void *stack, int flags, void *_Nullable arg, pid_t *_Nullable parent_tid, void *_Nullable tls, pid_t *_Nullable child_tid);
-\end{lstlisting}
-
-Funkcija sprejme sedem argumentov, ki določajo kje bo nov proces pričel z izvajanjem in katere kontekste si bo delil s starševskim procesom.
-Nov proces bo začel z izvajanje v funkciji podani v argumentu \texttt{*fn}, ki prejme tudi argument \texttt{*arg}.
-Ročno mu moramo pripraviti sklad in podati začetni ali končni naslov (\texttt{*stack}), za kar moramo vedeti ali sklad raste navzgor ali navzdol na danem sistemu.
-Pri rezervaciji sklada se običajno poslužujemo funkcije \texttt{mmap}, ki nam omogoča nadzor na prostorom, ki ga rezerviramo.
-
-Preostali argumenti nadzirajo deljenje konteksta in starševski proces nove niti.
-Predvsem pomemben je argument \texttt{flags}, kjer lahko opcije združujemo z logično OR operacijo.
-Ker je seznam opcij zelo obsežen in v nekaterih primerih zahteva nadalnje obrazložitve, se bomo osredotočili samo na najbolj pomembne zastavice za našo rabo:
-\begin{itemize}
-	\item \texttt{CLONE\_CHILD\_CLEARTID}
-	      \begin{description}
-	      	\item prepiše otrokov TID (\textit{angl. thread ID}) na lokaciji \texttt{*child\_tid}, ko se proces zaključi, in zbudi futex (\textit{uporabniški mutex}) na naslovu
-	      \end{description}
-	\item \texttt{CLONE\_CHILD\_SETTID}
-	      \begin{description}
-	      	\item hrani otrokov TID na lokaciji \texttt{*child\_tid} v otrokovem pomnilniku
-	      \end{description}
-	\item \texttt{CLONE\_CLEAR\_SIGHAND}
-	      \begin{description}
-	      	\item prepiše prekinitvene funkcije za signale v otroškem procesu
-	      \end{description}
-	\item \texttt{CLONE\_FILES}
-	      \begin{description}
-	      	\item otrok si bo delil tabelo datotečnih opisnikov s staršem
-	      \end{description}
-	\item \texttt{CLONE\_FS}
-	      \begin{description}
-	      	\item otrok si bo delil informacije o datotečnem sistemu (korenski imenik, trenutni delovni imenik in umask) s staršem
-	      \end{description}
-	\item \texttt{CLONE\_IO}
-	      \begin{description}
-	      	\item otrok si bo delil vhodno-izhodni konteks s staršem
-	      \end{description}
-	\item \texttt{CLONE\_PARENT}
-	      \begin{description}
-	      	\item starš novega procesa bo enak staršu trenutnega procesa
-	      \end{description}
-	\item \texttt{CLONE\_PARENT\_SETTID}
-	      \begin{description}
-	      	\item hrani otrokov TID na lokaciji \texttt{*parent\_tid} v starševem pomnilniku
-	      \end{description}
-	\item \texttt{CLONE\_SIGHAND}
-	      \begin{description}
-	      	\item otrok si bo delil prekinitvene funkcije za signale s staršem
-	      \end{description}
-	\item \texttt{CLONE\_SYSVSEM}
-	      \begin{description}
-	      	\item otrok si bo delil seznam nastavitev za System V semaforje
-	      \end{description}
-	\item \texttt{CLONE\_THREAD}
-	      \begin{description}
-	      	\item otrok bo del iste skupine niti kot trenutni proces; vse niti si delijo isti PID oz. TGID (\textit{angl. thread group ID})
-	      \end{description}
-	\item \texttt{CLONE\_VM}
-	      \begin{description}
-	      	\item otrok si bo delil naslovni prostor s staršem
-	      \end{description}
-\end{itemize}
-
-Izmed opisanih opcij sta za niti najbolj ključni \texttt{CLONE\_VM}, saj je kopiranje pomnilnika najbol časovno intenziven del ustvarjanja novega procesa, in \texttt{CLONE\_THREAD}, saj pove sistemu, da je nova nit del obstoječega procesa.
-Vidimo pa lahko manjšo težavo pri opciji \texttt{CLONE\_THREAD}.
-Nova nit si namreč deli isti PID in posledično tudi PPID, kar pomeni da trenutna nit ne prejme signala \texttt{SIGCHLD} ob končanju nove niti in moramo to komunicirati na nek drug način.
-Seveda je tu najbolj preprosta rešitev uporaba deljenega pomnilnika, vendar implementacija lahko hitro postane nepregledna.
-Zato v praksi uporabljamo POSIX niti, implementirane v glibc knjižnici z uporabo sistemskih klicev \texttt{clone} in \texttt{clone3}.
-
-\subsection{Spanje}
-
-\subsubsection{\texttt{nanosleep}}
-
-Kadar želimo proces zaustaviti za določeno količino časa, nam Linux ponuja funkcijo \texttt{nanosleep}.
-Tako lahko ustavimo izvajanje in sprostimo procesor dokler se podani čas ne izteče ali pa je spanje prekinjeno zaradi prejema signala.
-
-\begin{lstlisting}[style=func]
- int nanosleep(const struct timespec *duration, struct timespec *_Nullable rem);
-\end{lstlisting}
-
-Funkcija sprejme dva atributa, \texttt{duration}, kjer določimo čas spanja v nanosekundah (veljavne so vrednosti od 0 do 999999999), in \texttt{rem}, kjer nam funkcija sporoči preostali čas spanja v primeru prekinitve.
-Pri uspešni izvedbi funkcija vrne \texttt{0}, v primeru prekinitve spanja s signalom ali druge napake pa \texttt{-1}.
-
-\subsection{Pridobivanje sistemskih informacij}
-
-Linux nam za pridobivanje informacij ponuja nekaj osnovnih funkcij, ki nam podajo identifikatorje procesa.
-
-\subsubsection{\texttt{getpid}, \texttt{getppid}}
-
-Najbolj osnovni informaciji o procesu sta ID procesa (PID) in ID starševskega procesa (PPID), ki jih lahko dobimo preko funkcij \texttt{getpid} in \texttt{getppid}.
-
-\begin{lstlisting}[style=func]
- pid_t getpid(void);
- pid_t getppid(void);
-\end{lstlisting}
-
-\subsubsection{\texttt{getpgid}, \texttt{setpgid}}
-
-Pri klicih \texttt{waitpid} in \texttt{waitid} smo na hitro omenili koncept skupine procesov, ki jo identificira ID skupine (PGID).
-Skupino procesa lahko pridobimo s funkcijo \texttt{getpgid}, ki ji podamo PID ciljnega procesa ali \texttt{0} za trenutni proces.
-Pri spreminjanju skupine pa se poslužujemo \texttt{setpgid}, ki ji spet podamo PID ciljnega procesa ter nov PGID.
-Pri tem je pogoj, da sta proces in skupina del iste seje.
-
-\begin{lstlisting}[style=func]
- int setpgid(pid_t pid, pid_t pgid);
- pid_t getpgid(pid_t pid);
-\end{lstlisting}
-
-\subsubsection{\texttt{gettid}}
-
-Kot smo videli pri \texttt{clone}, imajo niti poleg PID še ID niti (TID), ki jih razlikuje.
-TID lahko pridobimo s funkcijo \texttt{gettid}, ki v primeru procesa z eno nitjo preprosto vrne PID.
-
-\begin{lstlisting}[style=func]
- pid_t gettid(void);
-\end{lstlisting}
-
-\section{Sistemski klici v Windows}
-
-\subsection{Ustvarjanje in končanje procesa}
 
 Windows API ponuja več različnih funkcij za ustvarjanje procesa.
 Najbolj preprosta med njimi je \texttt{CreateProcess}, ki poskuša ustvariti nov proces z enakom dostopnim žetonom kot trenutni proces.
@@ -1719,7 +1395,285 @@ Ta deluje podobno kot funkcija \texttt{kill} v Linux.
 Funkcija sprejme ročico ciljnega procesa (\texttt{hProcess}) in izhodno kodo procesa (\texttt{uExitCode}).
 Ročica ciljnega procesa mora imeti pravico \texttt{PROCESS\_TERMINATE}.
 
-\subsection{Čakanje} \label{ssec:windows_syscalls:waiting}
+\section{Signali}
+
+\subsection{Linux}
+
+\subsubsection{\texttt{kill}}
+
+Kadar pa želimo ustaviti drug proces, uporabimo funkcijo \texttt{kill}, ki želenemu procesu pošlje signal.
+
+Signali so neke vrste programske prekinitve, ki se uporabljajo za obveščanje procesa o asinhronih dogodkih. % https://faculty.cs.niu.edu/~hutchins/csci480/signals.htm
+Linux implementira 31 različnih signalov, vsakega z eno izmed petih privzetih dispozicij oz. akcij, ki se izvedejo ob prejemu signala.
+Možne privzete dispozicije so: končanje procesa, ignoriranje signala, končanje procesa in izpis sistemskega stanja (\textit{angl. core dump}), zaustavitev procesa ali nadaljevanje procesa, če je trenutno ustavljen.
+Proces lahko, z izjemo signalov \texttt{SIGKILL} in \texttt{SIGSTOP}, spremeni privzeto dispozicijo signala in implementira lastno prekinitveno funkcijo.
+
+Za naše potrebe je pomembnih le naslednjih nekaj signalov:
+\begin{itemize}
+	\item \texttt{SIGCHLD}
+	      \begin{description}
+	      	\item Opozori proces o zaustavitvi in nadaljevanju izvajanja ali končanju otroškega procesa.
+	      	\item Proces privzeto ignorira signal.
+	      \end{description}
+	\item \texttt{SIGTERM}
+	      \begin{description}
+	      	\item Sporoči procesu naj se mirno konča.
+	      	\item Isto sporoča sorodni signal \texttt{SIGINT}, vendar je ta namenjen za uporabniške zahteve in ga običajno lahko proži uporabnik iz interaktivne seje.
+	      	\item Enako velja za \texttt{SIGHUP}, vendar le-tega proži sistem ob zaključku uporabniške seje.
+	      \end{description}
+	\item \texttt{SIGKILL}
+	      \begin{description}
+	      	\item Prisilno konča proces. Kot že omenjeno, proces ne more spremeniti privzete dispozicije.
+	      \end{description}
+	\item \texttt{SIGSTOP}
+	      \begin{description}
+	      	\item Sporoči procesu naj se zaustavi. Kot že omenjeno, proces ne more spremeniti privzete dispozicije.
+	      	\item Sorodni signal \texttt{SIGTSTP} pa je namenjen specifično uporabniški zahtevi za zaustavitev. Glavna razlika je, da program lahko zanj implementira lastno prekinitveno funkcijo.
+	      \end{description}
+	\item \texttt{SIGCONT}
+	      \begin{description}
+	      	\item Sporoči procesu naj nadaljuje izvajanje, če je zaustavljen.
+	      \end{description}
+	\item \texttt{SIGUSR1} in \texttt{SIGUSR2}
+	      \begin{description}
+	      	\item Posebna signal, ki jih lahko program uporabi za lastne potrebe sporočanja, saj jih sistem ne proži.
+	      	\item Privzeto signala sprožita končanje procesa.
+	      \end{description}
+\end{itemize}
+
+\begin{lstlisting}[style=func]
+ int kill(pid_t pid, int sig);
+\end{lstlisting}
+
+Funkcija sprejme dva argumenta: identifikator ciljnega procesa in signal, ki ga želimo poslati.
+Ob uspešni izvedbi vrne \texttt{0}, v primeru napake pa \texttt{-1}.
+
+\subsection{Windows}
+
+Windows sicer implementira POSIXu podobne signale, vendar samo za procese v dokaj specifičnih kontekstih.
+Namesto tega ponuja dogodke (\textit{angl. event}).
+
+Dogodek je sinhronizacijski objekt, ki ga lahko procesi oz. niti ``nastavijo'' in ``ponastavijo.''
+Dogodek lahko ustvarimo z imenom in tako omogočimo drugim procesom dostop in interakcijo z ustvarjenim dogodkom.
+Pri tem moramo biti previdni, saj v sistemu lahko sočasno obstaja samo en objekt z danim imenom, to vlkjučuje objekte drugih tipov.
+
+Ob ustvarjanju dogodka ga lahko nastavimo kot ročno ponastavljivega ali avtomatsko ponastavljivega.
+Avtomatsko ponastavljivi dogodki se ponastavijo takoj ko jih prva nit počaka.
+
+Čakanje objektov smo že predelali v poglavju \ref{ssec:windows_syscalls:waiting}.
+
+\subsubsection{\texttt{CreateEvent}}
+
+Za ustvarjanje novega dogodka uporabimo funkcijo \texttt{CreateEvent}.
+
+\begin{lstlisting}[style=func]
+ HANDLE CreateEventW(
+	LPSECURITY_ATTRIBUTES lpEventAttributes,
+	BOOL                  bManualReset,
+	BOOL                  bInitialState,
+	LPCWSTR               lpName
+ );
+\end{lstlisting}
+
+Funkcija sprejme štiri argumente:
+\begin{description}
+	\item[\texttt{lpEventAttributes}] opcijski vhodni atribut; kazalnik na strukturo tipa \texttt{SECURITY\_ATTRIBUTES}, ki določa varnostni desktiptor novega dogodka
+	\item[\texttt{bManualReset}] obvezni vhodni atribut; če podamo \texttt{TRUE}, bo objekt ročno ponastavljiv, v nasprotnem primeru se bo ponastavil avtomatsko ko ga prva nit počaka
+	\item[\texttt{bInitialState}] obvezni vhodni atribut; začetno stanje
+	\item[\texttt{lpName}] opcijski vhodni atribut; ime novega objekta ali \texttt{NULL}; če objekt z istim imenom že obstaja, bo funkcija zahtevala dostop do obstočega objekta in ignorira ostale atribute
+\end{description}
+
+Je bil nov objekt uspeštno ustvarjen, funkcija vrne ročico.
+V primeru, da je objekt z istim imenom že obstajal objekt vrne ročico obstoječega objekta in funkcija \texttt{GetLastError} vrne konstanto \texttt{ERROR\_ALREADY\_EXISTS}.
+V primeru napake funkcija vrne \texttt{NULL}.
+
+\subsubsection{\texttt{OpenEvent}}
+
+Kadar želimo iz drugega procesa dostopati do poimenovanega dogodka, lahko njegovo ročico pridobimo s funkcijo \texttt{OpenEvent}.
+
+\begin{lstlisting}[style=func]
+ HANDLE OpenEventW(
+	DWORD   dwDesiredAccess,
+	BOOL    bInheritHandle,
+	LPCWSTR lpName
+ );
+\end{lstlisting}
+
+Kot smo že dvakrat videli, odpiranje objekta zahteva argument željenega dostopa (\texttt{dwDesiredAccess}) v obliki zastavic združenih z logično OR operacijo.
+Spet so veljavne sprošne zastavice opisane pri funkciji \texttt{OpenProcess}, poleg tega pa imajo dogodki dve speficični zastavici:
+\begin{description}
+	\item[\texttt{EVENT\_ALL\_ACCESS}] omogoča vse splošne in dogodku specifične pravice
+	\item[\texttt{EVENT\_MODIFY\_STATE}] omogoča spreminjanje stanja
+\end{description}
+
+Poleg tega funkcija sprejme argument \texttt{bInheritHandle}, ki določa dedovanje ročice.
+Ciljni objekt pa določimo v argumentu \texttt{lpName}, kjer podamo ime dogodka.
+
+V primeru uspešne izvedbe funkcija vrne ročico, v nasprotnem primeru pa \texttt{NULL}.
+
+\subsubsection{\texttt{SetEvent}}
+
+Za proženje dogodka uporabimo funkcijo \texttt{SetEvent}.
+Ta zahteva ročico dogodka s pravico \texttt{EVENT\_MODIFY\_STATE}.
+
+\begin{lstlisting}[style=func]
+ BOOL SetEvent(HANDLE hEvent);
+\end{lstlisting}
+
+V primeru uspešnega proženja funkcija vrne neničeno vrednost, v nasprotnem primeru pa \texttt{0}.
+
+\subsubsection{\texttt{ResetEvent}}
+
+Za ponastavitev dogodka uporabimo funkcijo \texttt{ResetEvent}.
+Ta zahteva ročico dogodka s pravico \texttt{EVENT\_MODIFY\_STATE}.
+
+Seveda klic te funkcije za avtomatsko ponastavljive dogodke običajno ni potreben.
+
+\begin{lstlisting}[style=func]
+ BOOL ResetEvent(HANDLE hEvent);
+\end{lstlisting}
+
+V primeru uspešnega proženja funkcija vrne neničeno vrednost, v nasprotnem primeru pa \texttt{0}.
+
+\section{Čakanje}
+
+\subsection{Linux} \label{ssec:linux_syscalls:waiting}
+
+Kadar želimo sinhronizirati starševski proces z otroškim procesom, blokiramo izvajanje starševskega procesa, dokler ciljni proces ne pošlje signala o spremembi stanja.
+Specifično, čakamo signal \texttt{SIGCHLD}, ki ga otroški proces pošlje ob končanju ter zaustavitvi ali nadaljevanju izvajanja procesa.
+
+Ko se otroški proces zaključi, postane ``zombi'' proces.
+Jedro o ``zombi'' procesih vzdržuje minimalno zbirko informacij kot so PID, status in informacije o uporabi sistemskih virov, da lahko starševski proces kasneje počaka na proces in pridobi omenjene informacije.
+Prav tako to pomeni, da ``zombi'' procesi zasedajo mesto v jedrni tabeli procesov in lahko potencialno onemogočijo kreiranje novih procesov.
+V primeru, da se starševski proces konča, njegove ``zombi'' procese podeduje proces \texttt{init}, ki jih počaka in s tem sprosti zasedene vire.
+
+\subsubsection{\texttt{wait}, \texttt{waitpid}}
+
+Najbolj preprosta funkcija za čakanje, \texttt{wait}, blokira trenutno nit dokler se eden izmed otroških procesov ne konča.
+Funkcijsko je ekvivalenten klicu \verb|waitpid(-1, &wstatus, 0);|.
+
+\begin{lstlisting}[style=func]
+ pid_t wait(int *_Nullable wstatus);
+\end{lstlisting}
+
+Funkcija sprejme kazalnik na spremenljivko tipa integer, kamor zapiše statusne informacije končanega otroškega procesa.
+Ob uspešni izvedbi vrne PID končanega otroškega procesa, v primeru napake pa \texttt{-1}.
+
+Status procesa vrnjen preko argumenta \texttt{wstatus}, lahko dekodiramo z uporabo sledečih makrojev:
+\begin{itemize}
+	\item \texttt{WIFEXITED(wstatus)}
+	      \begin{description}
+	      	\item vrne \texttt{true}, če je otrok zaključil običajno (klic \texttt{exit} ali \texttt{return} iz funkcije \texttt{main()})
+	      \end{description}
+	\item \texttt{WEXITSTATUS(wstatus)}
+	      \begin{description}
+	      	\item vrne izhodni status otroka
+	      \end{description}
+	\item \texttt{WIFSIGNALED(wstatus)}
+	      \begin{description}
+	      	\item vrne \texttt{true}, če se je proces zaključil zaradi signala
+	      \end{description}
+	\item \texttt{WTERMSIG(wstatus)}
+	      \begin{description}
+	      	\item vrne številko signala, ki je povzročil zaključek procesa
+	      \end{description}
+	\item \texttt{WCOREDUMP(wstatus)}
+	      \begin{description}
+	      	\item vrne \texttt{true}, če je proces ustvaril izpis sistemskega stanja
+	      \end{description}
+	\item \texttt{WIFSTOPPED(wstatus)}
+	      \begin{description}
+	      	\item vrne \texttt{true}, če je bil otroški proces ustavljen s signalom (mogoče samo pri klicu \texttt{waitpid} z opcijo \texttt{WUNTRACED})
+	      \end{description}
+	\item \texttt{WSTOPSIG(wstatus)}
+	      \begin{description}
+	      	\item vrne številko signala, ki je povzročil ustavitev izvajanja procesa
+	      \end{description}
+	\item \texttt{WIFCONTINUED(wstatus)}
+	      \begin{description}
+	      	\item vrne \texttt{true}, če proces nadaljuje izvajanje zaradi prejetega signala \texttt{SIGCONT}
+	      \end{description}
+\end{itemize}
+
+Bolj specifična funkcija, \texttt{waitpid}, blokira trenutno nit dokler otrok s podanim PID ne spremeni stanja.
+
+\begin{lstlisting}[style=func]
+	pid_t waitpid(pid_t pid, int *_Nullable wstatus, int options);
+\end{lstlisting}
+
+Funkcija sprejme tri atribute, od katerih se \texttt{wstatus} obnaša enako kot pri \texttt{wait}.
+
+Argument \texttt{pid} določa ciljni proces in sprejme štiri različne tipe vhoda:
+
+\begin{tabular}{ p{0.1\linewidth} p{0.82\linewidth} }
+	$< -1$ & določa kateri koli otroški proces, katerega skupinski ID je enak absolutni vrednosti argumenta \\
+	$-1$   & določa kateri koli otroški proces (kot \texttt{wait})                                          \\
+	$0$    & določa kateri koli otroški proces katerega skupinski ID je enak trenutnemu procesu             \\    
+	$> 0$  & določa točen PID procesa                                                                       
+\end{tabular}
+
+Privzeto funkcija čaka samo zaključene otroške procese, vendar to lahko spremenimo s podajanjem \texttt{options} parametra, za katerega imamo tri opcije, ki jih lahko združujemo z logično OR funkcijo:
+
+\begin{tabular}{ p{0.18\linewidth} p{0.72\linewidth} }
+	\texttt{WNOHANG}    & ne blokira niti, če se ciljni otroški proces ni zaključil                                     \\
+	\texttt{WUNTRACED}  & vrne rezultat tudi, če se je izvajanje procesa ustavi                                           \\
+	\texttt{WCONTINUED} & vrne rezultat tudi, če ustavljen proces nadaljuje izvajanje ob prejemu signala \texttt{SIGCONT} 
+\end{tabular}
+
+\subsubsection{\texttt{waitid}}
+
+Kadar potrebujemo še bolj specifičen nadzor nad čakano spremembo statusa, uporabimo funkcijo \texttt{waitid}.
+
+\begin{lstlisting}[style=func]
+	int waitid(idtype_t idtype, id_t id, siginfo_t *infop, int options);
+\end{lstlisting}
+
+Funkcija sprejme štiri argumente.
+Argument \texttt{idtype} in \texttt{id} določata ciljne otroške procese:
+\begin{itemize}
+	\item \texttt{idtype == P\_PID}
+	      \begin{description}
+	      	\item čaka proces katerega PID je enak argumentu \texttt{id}
+	      \end{description}
+	\item \texttt{idtype == P\_PIDFD}
+	      \begin{description}
+	      	\item čaka proces na katerega se nanaša PID opisnik (\textit{angl. PID file descriptor}) podan v argumentu \texttt{id}
+	      \end{description}
+	\item \texttt{idtype == P\_PGID}
+	      \begin{description}
+	      	\item čaka kateri koli proces, katerega skupinski ID je enak argumentu \texttt{id}
+	      \end{description}
+	\item \texttt{idtype == P\_ALL}
+	      \begin{description}
+	      	\item čaka kateri koli otroški proces in ignorira argument \texttt{id}
+	      \end{description}
+\end{itemize}
+
+Željeno spremembo statusa določamo z argumentom \texttt{options}, kjer lahko sledeče opcije združujemo z logično OR operacijo:
+\begin{itemize}
+	\item \texttt{WEXITED}
+	      \begin{description}
+	      	\item čaka zaključeno stanje
+	      \end{description}
+	\item \texttt{WSTOPPED}
+	      \begin{description}
+	      	\item čaka zaustavitev izvajanja procesa zaradi signala
+	      \end{description}
+	\item \texttt{WCONTINUED}
+	      \begin{description}
+	      	\item čaka nadaljevanje izvajanja procesa zaradi signala
+	      \end{description}
+	\item \texttt{WNOHANG}
+	      \begin{description}
+	      	\item ne blokira niti, če se ciljni otroški proces ni zaključil
+	      \end{description}
+	\item \texttt{WNOWAIT}
+	      \begin{description}
+	      	\item ne sprosti stanja procesa, da lahko kasneje spet pridobimo statusne informacije
+	      \end{description}
+\end{itemize}
+
+\subsection{Windows} \label{ssec:windows_syscalls:waiting}
 
 Windows omogoča čakanje na skoraj kateri koli objekt v sistemu.
 Objekti pa se razlikujejo po tem kdaj so v ``signaliziranem stanju''.
@@ -1780,7 +1734,86 @@ Funkciji spet vrneta eno izmed definiranih stanj:
 	\item[\texttt{WAIT\_FAILED}] funkcija se ni izvedla uspešno
 \end{description}
 
-\subsection{Niti}
+\section{Niti}
+
+\subsection{Linux} \label{ssec:linux_syscalls:threads}
+
+\subsubsection{\texttt{clone}, \texttt{clone3}}
+
+Kreiranje niti je v osnovi enako kreiranju novega procesa.
+Glavna razlika je, da si procesa delita dele izvajalnega konteksta.
+Funkciji \texttt{clone} in \texttt{clone3} omogočata kreiranje novega procesa z nadzorom nad deljenimi konteksti kot so naslovni prostor, tabela datotečnih opisnikov, tabela prekinitvenih funkcij signalov \dots
+
+\begin{lstlisting}[style=func]
+ int clone(int (*fn)(void *_Nullable), void *stack, int flags, void *_Nullable arg, pid_t *_Nullable parent_tid, void *_Nullable tls, pid_t *_Nullable child_tid);
+\end{lstlisting}
+
+Funkcija sprejme sedem argumentov, ki določajo kje bo nov proces pričel z izvajanjem in katere kontekste si bo delil s starševskim procesom.
+Nov proces bo začel z izvajanje v funkciji podani v argumentu \texttt{*fn}, ki prejme tudi argument \texttt{*arg}.
+Ročno mu moramo pripraviti sklad in podati začetni ali končni naslov (\texttt{*stack}), za kar moramo vedeti ali sklad raste navzgor ali navzdol na danem sistemu.
+Pri rezervaciji sklada se običajno poslužujemo funkcije \texttt{mmap}, ki nam omogoča nadzor na prostorom, ki ga rezerviramo.
+
+Preostali argumenti nadzirajo deljenje konteksta in starševski proces nove niti.
+Predvsem pomemben je argument \texttt{flags}, kjer lahko opcije združujemo z logično OR operacijo.
+Ker je seznam opcij zelo obsežen in v nekaterih primerih zahteva nadalnje obrazložitve, se bomo osredotočili samo na najbolj pomembne zastavice za našo rabo:
+\begin{itemize}
+	\item \texttt{CLONE\_CHILD\_CLEARTID}
+	      \begin{description}
+	      	\item prepiše otrokov TID (\textit{angl. thread ID}) na lokaciji \texttt{*child\_tid}, ko se proces zaključi, in zbudi futex (\textit{uporabniški mutex}) na naslovu
+	      \end{description}
+	\item \texttt{CLONE\_CHILD\_SETTID}
+	      \begin{description}
+	      	\item hrani otrokov TID na lokaciji \texttt{*child\_tid} v otrokovem pomnilniku
+	      \end{description}
+	\item \texttt{CLONE\_CLEAR\_SIGHAND}
+	      \begin{description}
+	      	\item prepiše prekinitvene funkcije za signale v otroškem procesu
+	      \end{description}
+	\item \texttt{CLONE\_FILES}
+	      \begin{description}
+	      	\item otrok si bo delil tabelo datotečnih opisnikov s staršem
+	      \end{description}
+	\item \texttt{CLONE\_FS}
+	      \begin{description}
+	      	\item otrok si bo delil informacije o datotečnem sistemu (korenski imenik, trenutni delovni imenik in umask) s staršem
+	      \end{description}
+	\item \texttt{CLONE\_IO}
+	      \begin{description}
+	      	\item otrok si bo delil vhodno-izhodni konteks s staršem
+	      \end{description}
+	\item \texttt{CLONE\_PARENT}
+	      \begin{description}
+	      	\item starš novega procesa bo enak staršu trenutnega procesa
+	      \end{description}
+	\item \texttt{CLONE\_PARENT\_SETTID}
+	      \begin{description}
+	      	\item hrani otrokov TID na lokaciji \texttt{*parent\_tid} v starševem pomnilniku
+	      \end{description}
+	\item \texttt{CLONE\_SIGHAND}
+	      \begin{description}
+	      	\item otrok si bo delil prekinitvene funkcije za signale s staršem
+	      \end{description}
+	\item \texttt{CLONE\_SYSVSEM}
+	      \begin{description}
+	      	\item otrok si bo delil seznam nastavitev za System V semaforje
+	      \end{description}
+	\item \texttt{CLONE\_THREAD}
+	      \begin{description}
+	      	\item otrok bo del iste skupine niti kot trenutni proces; vse niti si delijo isti PID oz. TGID (\textit{angl. thread group ID})
+	      \end{description}
+	\item \texttt{CLONE\_VM}
+	      \begin{description}
+	      	\item otrok si bo delil naslovni prostor s staršem
+	      \end{description}
+\end{itemize}
+
+Izmed opisanih opcij sta za niti najbolj ključni \texttt{CLONE\_VM}, saj je kopiranje pomnilnika najbol časovno intenziven del ustvarjanja novega procesa, in \texttt{CLONE\_THREAD}, saj pove sistemu, da je nova nit del obstoječega procesa.
+Vidimo pa lahko manjšo težavo pri opciji \texttt{CLONE\_THREAD}.
+Nova nit si namreč deli isti PID in posledično tudi PPID, kar pomeni da trenutna nit ne prejme signala \texttt{SIGCHLD} ob končanju nove niti in moramo to komunicirati na nek drug način.
+Seveda je tu najbolj preprosta rešitev uporaba deljenega pomnilnika, vendar implementacija lahko hitro postane nepregledna.
+Zato v praksi uporabljamo POSIX niti, implementirane v glibc knjižnici z uporabo sistemskih klicev \texttt{clone} in \texttt{clone3}.
+
+\subsection{Windows}
 
 Živjenjski cikel niti se začne ko proces (v kontekstu neke niti) ustvari novo nit.
 Zahteva na neki točki prispe do izvršilnega dela jedra Windows, kjer upravljanik procesov rezervira prostor za objekte niti in pokliče jedro, da inicializira blok za nadzor niti.
@@ -1918,94 +1951,23 @@ Ta deluje podobno kot funkcija \texttt{kill} v Linux.
 Funkcija sprejme ročico ciljne niti (\texttt{hThread}) in izhodno kodo niti (\texttt{dwExitCode}).
 Ročica ciljne niti mora imeti pravico \texttt{THREAD\_TERMINATE}.
 
-\subsection{Signali}
+\section{Spanje}
 
-Windows sicer implementira POSIXu podobne signale, vendar samo za procese v dokaj specifičnih kontekstih.
-Namesto tega ponuja dogodke (\textit{angl. event}).
+\subsection{Linux}
 
-Dogodek je sinhronizacijski objekt, ki ga lahko procesi oz. niti ``nastavijo'' in ``ponastavijo.''
-Dogodek lahko ustvarimo z imenom in tako omogočimo drugim procesom dostop in interakcijo z ustvarjenim dogodkom.
-Pri tem moramo biti previdni, saj v sistemu lahko sočasno obstaja samo en objekt z danim imenom, to vlkjučuje objekte drugih tipov.
+\subsubsection{\texttt{nanosleep}}
 
-Ob ustvarjanju dogodka ga lahko nastavimo kot ročno ponastavljivega ali avtomatsko ponastavljivega.
-Avtomatsko ponastavljivi dogodki se ponastavijo takoj ko jih prva nit počaka.
-
-Čakanje objektov smo že predelali v poglavju \ref{ssec:windows_syscalls:waiting}.
-
-\subsubsection{\texttt{CreateEvent}}
-
-Za ustvarjanje novega dogodka uporabimo funkcijo \texttt{CreateEvent}.
+Kadar želimo proces zaustaviti za določeno količino časa, nam Linux ponuja funkcijo \texttt{nanosleep}.
+Tako lahko ustavimo izvajanje in sprostimo procesor dokler se podani čas ne izteče ali pa je spanje prekinjeno zaradi prejema signala.
 
 \begin{lstlisting}[style=func]
- HANDLE CreateEventW(
-	LPSECURITY_ATTRIBUTES lpEventAttributes,
-	BOOL                  bManualReset,
-	BOOL                  bInitialState,
-	LPCWSTR               lpName
- );
+ int nanosleep(const struct timespec *duration, struct timespec *_Nullable rem);
 \end{lstlisting}
 
-Funkcija sprejme štiri argumente:
-\begin{description}
-	\item[\texttt{lpEventAttributes}] opcijski vhodni atribut; kazalnik na strukturo tipa \texttt{SECURITY\_ATTRIBUTES}, ki določa varnostni desktiptor novega dogodka
-	\item[\texttt{bManualReset}] obvezni vhodni atribut; če podamo \texttt{TRUE}, bo objekt ročno ponastavljiv, v nasprotnem primeru se bo ponastavil avtomatsko ko ga prva nit počaka
-	\item[\texttt{bInitialState}] obvezni vhodni atribut; začetno stanje
-	\item[\texttt{lpName}] opcijski vhodni atribut; ime novega objekta ali \texttt{NULL}; če objekt z istim imenom že obstaja, bo funkcija zahtevala dostop do obstočega objekta in ignorira ostale atribute
-\end{description}
+Funkcija sprejme dva atributa, \texttt{duration}, kjer določimo čas spanja v nanosekundah (veljavne so vrednosti od 0 do 999999999), in \texttt{rem}, kjer nam funkcija sporoči preostali čas spanja v primeru prekinitve.
+Pri uspešni izvedbi funkcija vrne \texttt{0}, v primeru prekinitve spanja s signalom ali druge napake pa \texttt{-1}.
 
-Je bil nov objekt uspeštno ustvarjen, funkcija vrne ročico.
-V primeru, da je objekt z istim imenom že obstajal objekt vrne ročico obstoječega objekta in funkcija \texttt{GetLastError} vrne konstanto \texttt{ERROR\_ALREADY\_EXISTS}.
-V primeru napake funkcija vrne \texttt{NULL}.
-
-\subsubsection{\texttt{OpenEvent}}
-
-Kadar želimo iz drugega procesa dostopati do poimenovanega dogodka, lahko njegovo ročico pridobimo s funkcijo \texttt{OpenEvent}.
-
-\begin{lstlisting}[style=func]
- HANDLE OpenEventW(
-	DWORD   dwDesiredAccess,
-	BOOL    bInheritHandle,
-	LPCWSTR lpName
- );
-\end{lstlisting}
-
-Kot smo že dvakrat videli, odpiranje objekta zahteva argument željenega dostopa (\texttt{dwDesiredAccess}) v obliki zastavic združenih z logično OR operacijo.
-Spet so veljavne sprošne zastavice opisane pri funkciji \texttt{OpenProcess}, poleg tega pa imajo dogodki dve speficični zastavici:
-\begin{description}
-	\item[\texttt{EVENT\_ALL\_ACCESS}] omogoča vse splošne in dogodku specifične pravice
-	\item[\texttt{EVENT\_MODIFY\_STATE}] omogoča spreminjanje stanja
-\end{description}
-
-Poleg tega funkcija sprejme argument \texttt{bInheritHandle}, ki določa dedovanje ročice.
-Ciljni objekt pa določimo v argumentu \texttt{lpName}, kjer podamo ime dogodka.
-
-V primeru uspešne izvedbe funkcija vrne ročico, v nasprotnem primeru pa \texttt{NULL}.
-
-\subsubsection{\texttt{SetEvent}}
-
-Za proženje dogodka uporabimo funkcijo \texttt{SetEvent}.
-Ta zahteva ročico dogodka s pravico \texttt{EVENT\_MODIFY\_STATE}.
-
-\begin{lstlisting}[style=func]
- BOOL SetEvent(HANDLE hEvent);
-\end{lstlisting}
-
-V primeru uspešnega proženja funkcija vrne neničeno vrednost, v nasprotnem primeru pa \texttt{0}.
-
-\subsubsection{\texttt{ResetEvent}}
-
-Za ponastavitev dogodka uporabimo funkcijo \texttt{ResetEvent}.
-Ta zahteva ročico dogodka s pravico \texttt{EVENT\_MODIFY\_STATE}.
-
-Seveda klic te funkcije za avtomatsko ponastavljive dogodke običajno ni potreben.
-
-\begin{lstlisting}[style=func]
- BOOL ResetEvent(HANDLE hEvent);
-\end{lstlisting}
-
-V primeru uspešnega proženja funkcija vrne neničeno vrednost, v nasprotnem primeru pa \texttt{0}.
-
-\subsection{Spanje}
+\subsection{Windows}
 
 \subsubsection{\texttt{Sleep}, \texttt{SleepEx}}
 
@@ -2018,7 +1980,44 @@ Tako lahko ustavimo izvajanje in sprostimo procesor dokler se podani čas ne izt
 
 Funkcija sprejme vhodni argument \texttt{dwMilliseconds}, ki določa koliko časa v milisekundah bo izvajanje zaustavljeno.
 
-\subsection{Pridobivanje sistemskih informacij}
+\section{Pridobivanje sistemskih informacij}
+
+\subsection{Linux}
+
+Linux nam za pridobivanje informacij ponuja nekaj osnovnih funkcij, ki nam podajo identifikatorje procesa.
+
+\subsubsection{\texttt{getpid}, \texttt{getppid}}
+
+Najbolj osnovni informaciji o procesu sta ID procesa (PID) in ID starševskega procesa (PPID), ki jih lahko dobimo preko funkcij \texttt{getpid} in \texttt{getppid}.
+
+\begin{lstlisting}[style=func]
+ pid_t getpid(void);
+ pid_t getppid(void);
+\end{lstlisting}
+
+\subsubsection{\texttt{getpgid}, \texttt{setpgid}}
+
+Pri klicih \texttt{waitpid} in \texttt{waitid} smo na hitro omenili koncept skupine procesov, ki jo identificira ID skupine (PGID).
+Skupino procesa lahko pridobimo s funkcijo \texttt{getpgid}, ki ji podamo PID ciljnega procesa ali \texttt{0} za trenutni proces.
+Pri spreminjanju skupine pa se poslužujemo \texttt{setpgid}, ki ji spet podamo PID ciljnega procesa ter nov PGID.
+Pri tem je pogoj, da sta proces in skupina del iste seje.
+
+\begin{lstlisting}[style=func]
+ int setpgid(pid_t pid, pid_t pgid);
+ pid_t getpgid(pid_t pid);
+\end{lstlisting}
+
+\subsubsection{\texttt{gettid}}
+
+Kot smo videli pri \texttt{clone}, imajo niti poleg PID še ID niti (TID), ki jih razlikuje.
+TID lahko pridobimo s funkcijo \texttt{gettid}, ki v primeru procesa z eno nitjo preprosto vrne PID.
+
+\begin{lstlisting}[style=func]
+ pid_t gettid(void);
+\end{lstlisting}
+
+\subsection{Windows}
+
 
 \subsubsection{\texttt{GetCurrentProcess}}
 
@@ -2181,7 +2180,7 @@ Ročica mora imeti pravico \texttt{THREAD\_QUERY\_INFORMATION} ali \texttt{THREA
  BOOL GetExitCodeThread(HANDLE hThread, LPDWORD lpExitCode);
 \end{lstlisting}
 
-\section{Primerjava sistemov}
+\chapter{Kantitativna primerjava}
 
 \chapter{Zaključek}
 
