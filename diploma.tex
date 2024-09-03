@@ -237,7 +237,7 @@ sorting=nty,
 	licenco, ki je enaka tej.
 	Podrobnosti licence so dostopne na spletni strani \href{http://creativecommons.si}{creativecommons.si} ali na Inštitutu za
 	intelektualno lastnino, Streliška 1, 1000 Ljubljana.
-																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																									
+																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																															
 	\vspace*{1cm}
 	\begin{center}% 0.66 / 0.89 = 0.741573033707865
 		\CcImageCc{0.741573033707865}\hspace*{1ex}\CcImageBy{1}\hspace*{1ex}\CcImageSa{1}%
@@ -1145,15 +1145,51 @@ Sistemski klici za upravljanje procesov skrbijo za:
 
 \subsection{Ustvarjanje in končanje procesa}
 
+Bovet in Cesati \cite{Bovet_Cesati_2005} opisujeta, da tradicionalni UNIX sistemi obravnavajo vse procese enako -- viri starša so podvojeni v otroku.
+Tak pristop je zelo neučinkovit in počasen, saj zahteva kopiranje celotnega naslovnega prostora starša.
+Otrok redko potrebuje vse ter vire in jih v mnogih primerih takoj prepiše s funkcijo \texttt{execve()}, ki naloži drug program.
+Moderne UNIXu podobna jedra ta problem rešujejo na tri različne načine:
+\begin{itemize}
+	\item \textbf{``Copy on Write''} oz. CoW mehanizem omogoča tako otroku kot staršu branje iz istega fizičnega pomnilnika.
+	      Kadar eden izmed njiju začne pisati v pomnilnik, jedro ustvari novo fizično stran, ki je namenjena pisanju.
+	\item \textbf{Lahkotni procesi} omogočajo deljenje virov med staršem in otrokom.
+	      Delita si lahko mnogo jedrnih struktur, naslovni prostor, tabele odprtih datotečnih deskriptorjev in dispozicije signalov.
+	\item Funkcija \texttt{vfork()} ustvari proces, ki si deli naslovni prostor s staršem, vendar blokira izvajanje starša dokler se proces ne konča.
+\end{itemize}
+
+Imamo torej tri metode ustvarjanja procesa, zato imamo tudi tri sistemske klice, ki ustvarjajo procese -- \texttt{fork()}, \texttt{clone()} in \texttt{execve()}.
+
+Najbolj obsežna izmed njih je funkcija \texttt{clone()}, ki ustvari nov lahkotni proces in omogoča izbiranje deljenih virov.
+
+Tradicionalna funkcija \texttt{fork()} je v ozadju implementirana s sistemskim klicem \texttt{clone}, ki ima predefinirane zastavice za ločene vire \cite{Bovet_Cesati_2005}.
+Otrok in straš si takoj po izvedbi delita isti sklad, vendar se ta zaradi mehanizma CoW ob prvi spremembi kopira.
+
+Prav tako je funkciaj \texttt{vfork()} implementirana s sistemskim klicem \texttt{clone}, ki ima predefinirane zastavice za deljen naslovni prostor ter izvedbo \texttt{vfork()} in isti sklad kot starš \cite{Bovet_Cesati_2005}.
+V tem primeru nič od tega ne predstavlja težave, saj je starš blokiran in se ne izvaja dokler se otrok ne zaključi ali zažene nov program (\texttt{execve()}).
+
+Samo izvebo teh sistemskih klicev implementira jedrna funkcija \texttt{do\_fork()}, ki izvede sledeči postopek \cite{Bovet_Cesati_2005}:
+\begin{enumerate}
+	\item Zasede nov identifikator procesa (PID) za otroka.
+	\item Če starševem izvajanju sledi razhroščevalnik, preveri če ta želi slediti otroku neodvisno od starta.
+	\item Kliče funkcijo \texttt{copy\_process()}, ki ustvari kopijo procesnega deskriptorja in povezanih jedrnih podatkovnih struktur.
+	\item Če je nastavljena zastavica \texttt{CLONE\_STOPPED} ali če otroku sledi razhroščevalnik, nastavi status (življenski cikel) na \texttt{TASK\_STOPPED} in doda čakajoč signal \texttt{SIGSTOP}.
+	      Otrok bo ostal v tem stanju dokler mu drug proces (običano starš ali razhroščevalnik) ne pošlje signala \texttt{SIGCONT}.
+	\item Če zastavica \texttt{CLONE\_STOPPED} ni nastavljena, kliče funkcijo \texttt{wake\_up\_new\_task()}, ki nastavi parametre časvnika.
+	\item Če je nastavljena zastavica \texttt{CLONE\_STOPPED}, nastavi status na \texttt{TASK\_STOPPED}.
+	\item Če staršu sledi razhroščevalnik, le-temu pošlje signal in sporočilo s PID otroka.
+	\item Če je nastavljena zastavica \texttt{CLONE\_VFORK}, blokira izvajanje starša in ga postavi v čakalno vrsto, kjer ostane dokler se otrok ne konča ali zažene nov program.
+	\item Vrne PID otroka.
+\end{enumerate}
+
 \subsubsection{\texttt{fork}}
 
-Funkcija \texttt{fork()} ustvari nov proces, ki je duplikat izvajajočega procesa.
-Nov proces postane otrok klicajočega procesa.
+Funkcija \texttt{fork()} ustvari nov proces, ki je duplikat trenutnega procesa.
+Nov proces prav tako postane otrok trenutnega procesa.
 
 Otroški proces je identična kopija starševskega, z izjemo nekaj ključnih točk:
 \begin{itemize}
 	\item Identifikator procesa (PID) je unikaten za vsak proces, otrok torej dobi nov PID.
-	\item Identifikator starševskega procesa (PPID) postane enak kot PID starševskega (klicajočega) procesa.
+	\item Identifikator starševskega procesa (PPID) postane enak kot PID starševskega procesa.
 	\item Otrok ne deduje starševih pomnilniških ključavnic.
 	\item Ponastavijo se števci uporabe virov in CPU časa.
 	\item Otrok ne deduje čakajočih signalov.
@@ -1168,8 +1204,12 @@ Otroški proces je identična kopija starševskega, z izjemo nekaj ključnih to�
 Funkcija ne sprejme nobenih vhodnih parametrov, vrne pa \texttt{0} v otroškem procesu in PID otroškega procesa v starševskem procesu.
 V primeru napake funkcija vrne \texttt{-1} starševskemu procesu in ne ustvari otroškega procesa.
 
-Vredno je pripomniti, da je \texttt{fork} v Linux implementiran preko tako imenovanega ``copy-on-write'' mehanizma.
+Vredno je pripomniti, da je \texttt{fork} v Linux implementiran preko mehanizma CoW.
 To pomeni, da kreiranje novega procesa zahteva minimalno kopiranje v pomnilniku, saj se to izvede šele ko je re potrebno -- tj. ko proces začne spreminjati pomnilnik.
+
+\subsubsection{\texttt{clone}}
+
+Funkcija \texttt{clone()} je bolj fleksibilna različica funkcije \texttt{fork()}, ki jo bomo podrobno spoznali v poglavju \ref{ssec:linux_syscalls:threads}.
 
 \subsubsection{\texttt{execve}}
 
@@ -1195,8 +1235,6 @@ Te pravili pa imata nekaj izjem, ki se navezujejo na atribute klicajoče niti.
 
 Funkcija sprejme tri argumente: pot do programa, argumente programa (opcijski) in okoljske spremenljivke programa (opcijski).
 Ob uspešni izvedbi funkcija ne vrne ničesar, saj se začne izvajati novo naloženi program, v primeru napake pa vrne \texttt{-1}.
-
-\subsubsection{\texttt{clone}}
 
 \subsubsection{\texttt{exit}}
 
@@ -1399,7 +1437,7 @@ Argument \texttt{idtype} in \texttt{id} določata ciljne otroške procese:
 	      \end{description}
 \end{itemize}
 
-\subsection{Niti}
+\subsection{Niti} \label{ssec:linux_syscalls:threads}
 
 \subsubsection{\texttt{clone}, \texttt{clone3}}
 
