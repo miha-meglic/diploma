@@ -18,6 +18,7 @@ pdfproducer={LaTeX}, pdfcreator={LaTeX}]{hyperref}
 \usepackage{color}
 \usepackage{soul}
 \usepackage{array}
+\usepackage{siunitx}
 \usepackage{tikz}
 \usetikzlibrary{positioning,shapes.geometric,arrows.meta,bending,positioning}
 \usepackage{listings}
@@ -37,14 +38,16 @@ pdfproducer={LaTeX}, pdfcreator={LaTeX}]{hyperref}
     keywordstyle=\color{magenta},
     numberstyle=\tiny\color{codegray},
     stringstyle=\color{codepurple},
-    basicstyle=\ttfamily\footnotesize,
+    basicstyle=\fontsize{9}{9}\selectfont\ttfamily,
 	breaklines=true,
-	tabsize=4,
+	tabsize=2,
 	numbers=left
 }
 
 \lstdefinestyle{func}{
 	backgroundcolor=\color{white},
+	basicstyle=\ttfamily\footnotesize,
+	tabsize=4,
 	numbers=none,
 	frame=single
 }
@@ -237,7 +240,7 @@ sorting=nty,
 	licenco, ki je enaka tej.
 	Podrobnosti licence so dostopne na spletni strani \href{http://creativecommons.si}{creativecommons.si} ali na Inštitutu za
 	intelektualno lastnino, Streliška 1, 1000 Ljubljana.
-																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																								
+																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																														
 	\vspace*{1cm}
 	\begin{center}% 0.66 / 0.89 = 0.741573033707865
 		\CcImageCc{0.741573033707865}\hspace*{1ex}\CcImageBy{1}\hspace*{1ex}\CcImageSa{1}%
@@ -1734,7 +1737,7 @@ Funkciji spet vrneta eno izmed definiranih stanj:
 	\item[\texttt{WAIT\_FAILED}] funkcija se ni izvedla uspešno
 \end{description}
 
-\section{Niti}
+\section{Niti} \label{sec:threads}
 
 \subsection{Linux} \label{ssec:linux_syscalls:threads}
 
@@ -2032,7 +2035,7 @@ Pravo ročico trenutnega procesa lahko pridobimo tako, da funkciji \texttt{Dupli
 \subsubsection{\texttt{GetCurrentProcessId}, \texttt{GetProcessId}}
 
 Funkciji \texttt{GetCurrentProcessId} in \texttt{GetProcessId} nam podata identifikator trenutnega procesa in identifikator procesa, katerega ročico podamo.
-Ročica podana funkciji \texttt{GetProcessId} mora imeti pravico \texttt{PROCESS\_QUERY\_INFORMATION} ali \texttt{PROCESS\_QUERY\_LIMITED\_INFORMATION}.
+Ročica podana funkciji \texttt{GetProcessId} mora imeti pravico \texttt{PROCESS\_QUERY\_LIMITED\_INFORMATION}.
 
 \begin{lstlisting}[style=func]
  DWORD GetCurrentProcessId();
@@ -2069,7 +2072,7 @@ Za željeni tip informacije moramo podati kazalnik na ustrezno strukturo (\textt
 \subsubsection{\texttt{GetProcessTimes}}
 
 Funkcija \texttt{GetProcessTimes} nam omogoča pridobivanje časovnega zapisa procesa.
-Podana ročica mora spet imeti pravico \texttt{PROCESS\_QUERY\_INFORMATION} ali \texttt{PROCESS\_QUERY\_LIMITED\_INFORMATION}.
+Podana ročica mora spet imeti pravico \texttt{PROCESS\_QUERY\_LIMITED\_INFORMATION}.
 
 \begin{lstlisting}[style=func]
  BOOL GetProcessTimes(
@@ -2089,7 +2092,7 @@ Windows ponuja funkcijo \texttt{FileTimeToSystemTime}, ki nam omogoča pretvorbo
 
 Funkcija \texttt{GetExitCodeProcess} nam omogoča pridobivanje izhodne kode procesa.
 Spomnimo se, da je to vrednost, ki jo proces vrne ob končanju s funkcijo \texttt{ExitProcess}.
-Ročica mora spet imeti pravico \texttt{PROCESS\_QUERY\_INFORMATION} ali \texttt{PROCESS\_QUERY\_LIMITED\_INFORMATION}.
+Ročica mora spet imeti pravico \texttt{PROCESS\_QUERY\_LIMITED\_INFORMATION}.
 
 \begin{lstlisting}[style=func]
  BOOL GetExitCodeProcess(
@@ -2118,7 +2121,7 @@ Ta ročica je deležna istih omejitev kot psevdo ročica procesa.
 \subsubsection{\texttt{GetCurrentThreadId}, \texttt{GetThreadId}}
 
 Funkciji \texttt{GetCurrentThreadId} in \texttt{GetThreadId} nam omogočata pridobivanje identifikatorja trenutne niti in identifikatorja niti, ki jo določa podana ročica.
-Ročica podana funkciji \texttt{GetThreadId} mora imeti pravico \texttt{THREAD\_QUERY\_INFORMATION} ali \texttt{THREAD\_QUERY\_LIMITED\_INFORMATION}.
+Ročica podana funkciji \texttt{GetThreadId} mora imeti pravico \texttt{THREAD\_QUERY\_LIMITED\_INFORMATION}.
 
 \begin{lstlisting}[style=func]
  DWORD GetCurrentThreadId();
@@ -2155,7 +2158,7 @@ Za željeni tip informacije moramo podati kazalnik na ustrezno strukturo (\textt
 \subsubsection{\texttt{GetThreadTimes}}
 
 Funkcija \texttt{GetThreadTimes} nam omogoča pridobivanje časovnega zapisa niti.
-Podana ročica mora imeti pravico \texttt{THREAD\_QUERY\_INFORMATION} ali \texttt{THREAD\_QUERY\_LIMITED\_INFORMATION}.
+Podana ročica mora imeti pravico \texttt{THREAD\_QUERY\_LIMITED\_INFORMATION}.
 
 \begin{lstlisting}[style=func]
  BOOL GetThreadTimes(
@@ -2174,13 +2177,103 @@ Vsi časi so podani v obliki strukture tipa \texttt{FILETIME}, ki jo lahko pretv
 
 Funkcija \texttt{GetExitCodeThread} nam omogoča pridobivanje izhodne kode niti.
 To je vrednost, ki jo nit vrne ob končanju s funkcijo \texttt{ExitThread}.
-Ročica mora imeti pravico \texttt{THREAD\_QUERY\_INFORMATION} ali \texttt{THREAD\_QUERY\_LIMITED\_INFORMATION}.
+Ročica mora imeti pravico \texttt{THREAD\_QUERY\_LIMITED\_INFORMATION}.
 
 \begin{lstlisting}[style=func]
  BOOL GetExitCodeThread(HANDLE hThread, LPDWORD lpExitCode);
 \end{lstlisting}
 
-\chapter{Kantitativna primerjava}
+\chapter{Kvantitativna primerjava}
+
+\section{Metodologija}
+
+Primerjavo izvajamo na identičnih virtualnih sistemih, na Proxmox gostitelju (QEMU), s sledečo konfiguracijo:
+\begin{itemize}
+	\item i440fx sistemski emulator (UEFI BIOS)
+	\item 4 jedra procesorja (Intel\textsuperscript{\textregistered} Core\textsuperscript{\texttrademark} i7-12700H)
+	\item 8 GB pomnilnika (Corsair\textsuperscript{\textregistered} Vengeance\textsuperscript{\textregistered} LPX 64GB DDR4 3200 MHz C16)
+	\item 100 GB diska (Crucial\textsuperscript{\textregistered} P5 Plus Gen4 NVMe SSD)
+\end{itemize}
+
+Za operacijska sistema uporabljamo:
+\begin{itemize}
+	\item Windows 10 Professional, verzija 22H2, privzeto particioniranje
+	\item Ubuntu Desktop 24.04 LTS, privzeto particioniranje (brez LVM)
+\end{itemize}
+Operacijska sistema sta bila izbrana na podlagi popularnosti in razširjenosti v času pisanja, oba imata namreč največji tržni delež v svoji kategoriji.
+
+Programi za Linux so napisani v C in prevedeni s prevajalnikom C iz zbirke prevajalnikov GNU (\textit{angl. GNU Compiler Collection -- GCC}).
+Programi za Windows pa so napisani v C++ in prevedeni s prevajalnikom Microsoft Visual C++ (MSVC).
+
+Potrebno je omeniti tudi, da bomo na Windows izklopili Windows Defender, saj ta lahko drastično upočasni izvajanje programov.
+
+\section{Primerjava izvajanja sistemskih klicev}
+
+Za začetek bomo primerjali izvajalni čas individualnih sistemskih klicev.
+Primerjali bomo sistemske klice za:
+\begin{itemize}
+	\item \textbf{Ustvarjanje procesa} -- \texttt{fork} (Linux) in \texttt{CreateProcess} (Windows)
+	\item \textbf{Končanje procesa} -- \texttt{kill} (Linux) in \texttt{TerminateProcess} (Windows)
+	\item \textbf{Ustvarjanje niti} -- \texttt{clone} (Linux) in \texttt{CreateThread} (Windows)
+	\item \textbf{Končanje niti} -- \texttt{kill} (Linux) in \texttt{TerminateThread} (Windows)
+\end{itemize}
+
+Tu je potrebno posebej izpostaviti, da sistemski klic \texttt{kill} pošlje signal za končanje procesa ali niti, medtem ko funkciji \texttt{TerminateProcess} in \texttt{TerminateThread} proces oz. nit končata direktno.
+Zato tu lahko pričakujemo kar precejšnje razlike v času izvajanja.
+
+\subsection{Koda programov}
+
+Izvorna koda vseh programov je na voljo na GitHub repozitoriju \href{https://github.com/miha-meglic/diploma/tree/master/code}{miha-meglic/diploma}.
+Vseeno pa si poglejmo izseka kode, ki izvajata meritev.
+
+V Linux bomo za merjenje izvajalnega časa uporabili funkcijo \texttt{clock\_gettime}:
+\lstinputlisting[language=C]{code/linux/syscall_comparison/00_example.c}
+
+V Windows pa bomo uporabili funkcijo \texttt{QueryPerformanceCounter}:
+\lstinputlisting[language=C++]{code/windows/syscall_comparison/00_Example.cpp}
+
+Obe funkciji nam omogočata do mikrosekunde natančno merjenje časa izvajanja.
+Poleg tega bomo vsako meritev izvedli 100-krat in izračunali povprečje, da izločimo variabilnost, ki jo prinaša večopravilni sistem.
+
+Kot smo videli v poglavju \ref{sec:threads}, so niti v Linux implementirane kot t. i. ``lahkotni procesi.''
+To prinaša nekaj težav pri direktni primerjavi, saj jih Windows v celoti podpira v jedru, medtem ko Linux večji del implementacije prepušča uporabniškim knjižnicam.
+Načeloma polna implementacija končanja niti zahteva procesno komunikacijo ali druge sinhronizacijske objekte, kar je izven obsega tega dela.
+\colorbox{yellow}{TODO: Poišči zanesljiv vir!}
+Zato bomo v procesu preprosto implementirali signal \texttt{SIGUSR1}, ki bo končal vse odprte niti razen glavne.
+V našem primeru to ne bo povzročilo težav, saj ustvarimo samo eno dodatno nit.
+
+\subsection{Meritve in interpretacija}
+
+Iz tabele \ref{tab:ex1:times} hitro razberemo, da se vse štiri funkcije izvedejo hitreje v Linux kot v Windows.
+
+\begin{table}[h!]
+	\begin{center}
+		\begin{tabular}{ l|c|c }
+			                    & Linux   & Windows  \\
+			\hline
+			Ustvarjanje procesa & $44.12$ & $2565.9$ \\
+			Končanje procesa   & $3.87$  & $63.91$  \\
+			Ustvarjanje niti    & $14.81$ & $26.18$  \\
+			Končanje niti      & $6.32$  & $8.9$    \\
+		\end{tabular}
+	\end{center}
+	\caption{Povprečni časi izvajanja sistemskih klicev v mikrosekundah [\SI{}{\micro\second}]}
+	\label{tab:ex1:times}
+\end{table}
+
+Največja razlika je pri ustvarjanju procesa, kjer je Linux kar 58-krat hitrejši.
+Vendar pa, če pogledamo nazaj na opis sistemskih klicev, nas ta ugotovitev ne bi smela presenetiti.
+Videli smo, da Linux pri ustvarjanju novega procesa zelo učinkovito naredi kopijo trenutnega procesa, medtem ko Windows ustvari nov proces iz izvršilne datoteke.
+
+Ravno obratno opažamo pri nitih, kjer je razlika skoraj zanemarljiva.
+Tu bi lahko celo pričakovali, da bo Windows hitrejši, saj jih implementira kot ločene objekte, kar običajno odpira vrata mnogim optimizacijam.
+
+Nekoliko bolj nepričakovani so rezultati končanja procesa in niti.
+Kot smo že omenili, sistemski klic \texttt{kill} ni niti približno enako implementiran kot \texttt{TerminateProcess} in \texttt{TerminateThread}, zato je bilo pričakovati precejšnje razlike.
+Vseeno pa vidimo, da se pri nitih \texttt{kill} in \texttt{TerminateThread} izvedeta približno enako hitro, medtem ko je razlika pri procesih pričakovano velika.
+Presenetljivo je, da se \texttt{kill} izvede hitreje za proces kot za nit, kar je najverjetneje posledica nekoliko primitivne in ne standarne implementacije našega testnega programa programa.
+
+\section{Primerjava realističnega programa}
 
 \chapter{Zaključek}
 
