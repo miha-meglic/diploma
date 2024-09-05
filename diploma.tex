@@ -240,7 +240,7 @@ sorting=nty,
 	licenco, ki je enaka tej.
 	Podrobnosti licence so dostopne na spletni strani \href{http://creativecommons.si}{creativecommons.si} ali na Inštitutu za
 	intelektualno lastnino, Streliška 1, 1000 Ljubljana.
-																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																			
+																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																														
 	\vspace*{1cm}
 	\begin{center}% 0.66 / 0.89 = 0.741573033707865
 		\CcImageCc{0.741573033707865}\hspace*{1ex}\CcImageBy{1}\hspace*{1ex}\CcImageSa{1}%
@@ -346,6 +346,9 @@ Na tem mestu zapišite, komu se zahvaljujete za pomoč pri izdelavi diplomske na
 {\bf TCB}     & Thread Control Block                & blok za nadzor niti                        \\
 {\bf TEB}     & Thread Environment Block            & blok izvajalnega okolja niti               \\
 {\bf CoW}     & Copy on Write                       & kopiranje ob pisanju                       \\
+{\bf PID}     & Process Identifier                  & identifikator procesa                      \\
+{\bf PPID}    & Parent Process Identifier           & identifikator starša procesa               \\
+{\bf TID}     & Thread Identifier                   & identifikator niti                         \\
 \end{tabular}
 
 
@@ -609,7 +612,7 @@ Jedro Windows je sestavljeno iz več plasti, kot prikazuje slika \ref{fig:window
 \end{figure}
 
 Čisto na vrhu se nahaja uporabniška knjižnica \texttt{ntdll.dll}, ki vsebuje vmesnik sistemskih klicev.
-Več o tem v poglavju \ref{sec:windows_api}.
+Več o tem v razdelku \ref{sec:windows_api}.
 
 V srednji plasti se nahaja NTOS jedro, ki se naloži iz izvršilne datoteke \textit{ntoskrnl.exe} ob zagonu sistema.
 Sestavljata ga dve plasti: \textbf{izvršilna} (\textit{angl. executive layer}), ki vsebuje večino storitev in manjši \textbf{jedrna} (\textit{angl. kernel layer}), ki implementira časovnik, sinhronizacijo in prekinitvene rutine pasti in prekinitev \cite{Tanenbaum_Bos_2023}.
@@ -708,7 +711,7 @@ Poleg tega ima Windows še druga gnezda kot vidimo v tabeli \ref{tab:windows_reg
 \section{Programski vmesnik} \label{sec:syscalls}
 
 Sistemski klici so vmesnik do storitev, ki jih ponuja jedro operacijskega sistema, kot na primer ustvarjanje procesov, branje in pisanje datotek, komunikacijo med procesi, itd.
-Ker torej sistemski klici prehajajo med uporabniškim in jedrnim načinom procesorja (več o tem v poglavju \ref{sec:syscall_execution}), je njihova implementacija odvisna od arhitekture procesorja in njegovega nabora ukazov.
+Ker torej sistemski klici prehajajo med uporabniškim in jedrnim načinom procesorja (več o tem v razdelku \ref{sec:syscall_execution}), je njihova implementacija odvisna od arhitekture procesorja in njegovega nabora ukazov.
 
 Ker pa jih uporabniški programi potrebujejo dokaj pogosto, so v večini operacijskih sistemov izpostavljeni preko knjižnice ali programskega vmesnika (\textit{angl. Application Programming Interface -- API}).
 Najbolj pogosto uporabljena vmesnika za aplikacijske programerje sta \textbf{POSIX}, za sisteme ki sledijo standardu POSIX (npr. Unix, Linux in macOS), in \textbf{Windows API}, za sisteme Windows.
@@ -793,7 +796,6 @@ Tu lahko opazimo, da je arhitektura procesorja del poti do datoteke in če pogle
 V veliki večini procedure aplikacijskega vmesnika zahtevajo uporabo sistemskih klicev, vendar je potrebno poudariti, da povezava ni nujno ena proti ena.
 Lahko se zgodi, da je neka procedure izvedljiva v uporabniškem načinu in ne zahteva sistemskega klica, ali pa zahteva uporabo več sistemskih klicev.
 V nekaterih primerih se lahko zgodi tudi, da več procedur uporablja isti (bolj splošen) sistemski klic.
-Te specifike si bomo pobližje ogledali v naslednjem poglavju.
 
 \section{Programski vmesnik Windows -- Windows API} \label{sec:windows_api}
 
@@ -801,7 +803,7 @@ Windows je, v kontrastu z Linuxom, zaprtokodni operacijski sistem, zato je težj
 Ena izmed glavnih razlik je, da Windows omogoča dostop do sistemskih klicev izključno preko Windows API-ja.
 Torej, če smo v Linuxu lahko pokukali v tabelo sistemskih klicev in jih lahko celo poklicali direktno z zbirnim jezikom, je v Windows to zahtevno in manj zanesljivo.
 
-Še ena velika razlika, ki jo bomo srečavali v naslednjem poglavju, je število API procedur.
+Še ena velika razlika, ki jo bomo srečavali v sledečih poglavjih, je število API procedur.
 Windows API izpostavi ogromno procedur, v rangu več tisoč, medtem ko POSIX API izpostavi le nekaj sto \cite{Tanenbaum_Bos_2023}.
 To je posledica več faktorjev -- pogosto več funkcij uporablja isti sistemski klic, veliko pa je tudi funkcij, ki so v celoti implementirane v uporabniškem načinu.
 
@@ -815,7 +817,7 @@ V strokovni literaturi in celo Windows dokumentaciji zato pogosto zasledimo napa
 Ker mnogo starejših aplikacij še vedno uporablja kodiranje Windows-1252, ima večina Windows funkcij dve verziji: tako, ki sprejema Windows-1252 znake in tako, ki sprejema UTF-16 znake.
 Windows-1252 verzije funkcij so posledično rahlo počasnejše, saj se niz najprej pretvori v UTF-16.
 
-V poglavju \ref{ssec:windows:architecture} smo omenili, da jedrni program NTOS (\textit{ntoskrnl.exe}) implementira in izpostavlja vmesnik sistemskih klicev, ki jih potem iz uporabniške strani Windows API kliče preko uporabniške knjižnice \textbf{ntdll.dll}.
+V razdelku \ref{ssec:windows:architecture} smo omenili, da jedrni program NTOS (\textit{ntoskrnl.exe}) implementira in izpostavlja vmesnik sistemskih klicev, ki jih potem iz uporabniške strani Windows API kliče preko uporabniške knjižnice \textbf{ntdll.dll}.
 Kolektivno \textit{ntoskrnl.exe} in \textit{ntdll.dll} predstavljata NT API, ki je v večini nedokumentiran.
 Prav tako uporaba teh sistemskih klicev ni priporočena, saj Windows zagotavlja konsistenco in stabilnost le na nivoju WinAPI vmesnika.
 Seveda pa to ni ustavilo številnih raziskovalcev, da bi pokukali v globine sistema in spisali nekaj neuradnih dokumentacij NT vmesnika:
@@ -905,11 +907,11 @@ Novo ustvarjen Linux proces je skoraj identičen svojemu staršu.
 Prejme lastno kopijo starševega naslovnega prostora in nadaljuje z izvajanjem iste kode takoj za sistemskim klicem, ki je ustvaril nov proces.
 Če tudi pa si procesa delita kodo, imata ločeni kopiji podatkov (sklad in kopica), tako spremembe pomnilnika v otroku ne spremeni pomnilnika v staršu in obratno.
 
-Novejše verzije Linux jedra implementirajo tudi podporo za niti in večnitne procese preko t. i. lahkotnih procesov (\textit{Lightweight Process}) \cite{Bovet_Cesati_2005}.
+Novejše verzije Linux jedra implementirajo tudi podporo za niti in večnitne procese preko t. i. lahkotnih procesov (\textit{angl. Lightweight Process}) \cite{Bovet_Cesati_2005}.
 V osnovi si lahkotni procesi lahko delijo vire kot so pomnilniški prostor, odprte datoteke oz. datotečne opisnike ipd.
 Istočasno pa omogočajo neodvisno razvrščanje za izvajanje, kar jih ločuje od uporabniške implementacije, ki se je uporabljala pred jedrno podporo.
 
-Za združevanje niti Linux implementira koncept skupine niti, ki je množica lahkotnih procesov, ki se obnašajo kot celota v smislu sistemskih klicev \texttt{getpid()}, \texttt{kill()} in \texttt{exit()}.
+Za združevanje niti Linux implementira koncept skupine niti, ki je množica lahkotnih procesov, ki se obnašajo kot celota v smislu sistemskih klicev \texttt{getpid}, \texttt{kill} in \texttt{exit}.
 % TODO: Premakni pod niti!
 
 \subsection{Procesni deskriptor}
@@ -929,17 +931,17 @@ Procesni deskriptor poleg velikega števila atributov o procesu vsebuje tudi nek
 Celotna struktura \texttt{task\_struct} je precej velika (v mojem testnem okolju približno $9.5$ KiB) in vsebuje mnogo atributov.
 Točna velikost in število atributov se spreminja z verzijo jedra, CPE arhitekturo sistema in atributi ob izgradnji jedra, zato si poglejmo samo najbolj relevantne:
 \begin{description}
-	\item[state] stanje (življenjski cikel) procesa, bolje opisano v razdelku \ref{ssec:linux_process:lifecycle}
-	\item[pid] enolični numerični identifikator procesa, določen sekvenčno ob kreiranju; ta vrednost ima zgornjo mejo $32767$ in ko jo sistem doseže, prične reciklirati stare (sproščene) vrednosti
-	\item[tgid] PID vodilnega procesa skupine niti
-	\item[group\_leader] kazalnik na procesni deskriptor vodilnega procesa v skupini procesov
-	\item[parent] kazalnik na procesni deskriptor procesa, ki prejme signal \texttt{SIGCHLD}
-	\item[real\_parent] kazalnik na procesni deskriptor starša ali proces 1 (\textit{init}), če starš ne obstaja več
-	\item[children] dvojni povezan seznam kazalnikov na procesne deskriptorje otroških procesov
-	\item[sibling] dvojni povezan seznam kazalnikov na procesne deskriptorje sorodnih procesov oz. sorojencev
-	\item[exit\_code] vrednost podana funkciji \texttt{exit()}
-	\item[exit\_state] izhodno stanje procesa, bolje opisano v razdelku \ref{ssec:linux_process:lifecycle}
-	\item[cred] poverilnice procesa
+	\item[\texttt{state}] stanje (življenjski cikel) procesa, bolje opisano v razdelku \ref{ssec:linux_process:lifecycle}
+	\item[\texttt{pid}] enolični numerični identifikator procesa, določen sekvenčno ob kreiranju; ta vrednost ima zgornjo mejo $32767$ in ko jo sistem doseže, prične reciklirati stare (sproščene) vrednosti
+	\item[\texttt{tgid}] PID vodilnega procesa skupine niti
+	\item[\texttt{group\_leader}] kazalnik na procesni deskriptor vodilnega procesa v skupini procesov
+	\item[\texttt{parent}] kazalnik na procesni deskriptor procesa, ki prejme signal \texttt{SIGCHLD}
+	\item[\texttt{real\_parent}] kazalnik na procesni deskriptor starša ali proces 1 (\textit{init}), če starš ne obstaja več
+	\item[\texttt{children}] dvojni povezan seznam kazalnikov na procesne deskriptorje otroških procesov
+	\item[\texttt{sibling}] dvojni povezan seznam kazalnikov na procesne deskriptorje sorodnih procesov oz. sorojencev
+	\item[\texttt{exit\_code}] vrednost podana funkciji \texttt{exit}
+	\item[\texttt{exit\_state}] izhodno stanje procesa, bolje opisano v razdelku \ref{ssec:linux_process:lifecycle}
+	\item[\texttt{cred}] poverilnice procesa
 \end{description}
 
 Ker so procesi dinamične entitete in lahko obstajajo vse od nekaj sekund do nekaj mesecev, se procesni deskriptorji hranijo v dinamičnem pomnilniku namesto statičnem jedrnem pomnilniku.
@@ -958,10 +960,10 @@ Možna stanja za spremenljivko so \cite{Bovet_Cesati_2005}:
 	To procesno stanje je redko uporabljeno \cite{Bovet_Cesati_2005}.
 	\item[\texttt{TASK\_STOPPED}] Izvajanje procesa je zaustavljeno po prejemu signala (npr. \texttt{SIGSTOP}).
 	\item[\texttt{TASK\_TRACED}] Izvajanje procesa je zaustavljeno preko razhroščevalnika.
-	\item[\texttt{TASK\_ZOMBIE}] Proces se je končal, vendar starš še ni prevzel informacij (\texttt{wait()}, \texttt{waitpid()} \dots) o končanem procesu.
+	\item[\texttt{TASK\_ZOMBIE}] Proces se je končal, vendar starš še ni prevzel informacij (\texttt{wait}, \texttt{waitpid} \dots) o končanem procesu.
 	Jedro vedno obdrži informacije končanega procesa, saj jih bo starš morda potreboval.
 	\item[\texttt{TASK\_DEAD}] Proces je v postopku brisanja, saj je starš ravno prevzel informacije ``zombi'' procesa.
-	Sprememba statusa iz \texttt{TASK\_ZOMBIE} na \texttt{TASK\_DEAD} je pomembna za preprečevanje tveganih stanj (\textit{angl. race condition}), kjer bi lahko druge niti izvedle \texttt{wait()} ali podoben klic na istem procesu.
+	Sprememba statusa iz \texttt{TASK\_ZOMBIE} na \texttt{TASK\_DEAD} je pomembna za preprečevanje tveganih stanj (\textit{angl. race condition}), kjer bi lahko druge niti izvedle \texttt{wait} ali podoben klic na istem procesu.
 \end{description}
 
 Poleg spremenljivke \texttt{state} ima proces tudi spremenljivko \texttt{exit\_state}, ki se nastavi ob končanju procesa.
@@ -997,7 +999,7 @@ V primeru, da ima časovnik v čakalni vrsti proces z višjo prioriteto, bo zame
 Ko proces v izvajanju želi počakati na specifični dogodek v sistemu (npr. signal, sprostitev sistemskega vira \dots), preide v čakanje v enem izmed stanj \texttt{TASK\_INTERRUPTIBLE} ali \texttt{TASK\_UNINTERRUPTIBLE}.
 Ob prejetju želenega signala proces spet preide v pripravljenost in čaka na izvajanje.
 
-Ko se proces zaključi, običajno s sistemskim klicem \texttt{exit()} ali ob prejetju signala, postane ``zombi'' s prehodom v stanje \texttt{TASK\_ZOMBIE} in čaka da starš prevzame informacije o procesu preden končno preide v stanje \texttt{TASK\_DEAD}
+Ko se proces zaključi, običajno s sistemskim klicem \texttt{exit()} ali ob prejetju signala, postane zombi s prehodom v stanje \texttt{TASK\_ZOMBIE} in čaka da starš prevzame informacije o procesu preden končno preide v stanje \texttt{TASK\_DEAD}
 
 \section{Proces v Windowsih}
 
@@ -1010,7 +1012,7 @@ Na najvišjem nivoju abstrakcije, prikazano na sliki \ref{fig:windows_process}, 
 	\item[ID procesa] Unikatni identifikator procesa.
 	\item[vsaj eno nit] Medtem ko je ``prazen'' proces mogoč, to večinoma ni uporabno. 
 \end{description}
-Implementacijo teh si bomo pobližje ogledali v poglavju \ref{ssec:windows_process:eprocess}.
+Implementacijo teh si bomo pobližje ogledali v razdelku \ref{ssec:windows_process:eprocess}.
 
 \begin{figure}[h!]
 	\begin{center}
@@ -1034,7 +1036,7 @@ Zato je nit nosilka ključnih komponent za izvajanje procesa, kot so:
 	\item unikatni identifikator niti (\textit{angl. thread ID}).
 \end{itemize}
 Poleg tega imajo lahko posamezne niti svoj ločen varnostni kontekst.
-Implementacijo niti si bomo bolj podrobno ogledali v poglavju \ref{ssec:windows_process:ethread}.
+Implementacijo niti si bomo bolj podrobno ogledali v razdelku \ref{ssec:windows_process:ethread}.
 
 Windows s konceptom vlaken (\textit{angl. fiber}) ponuja še globljo delitev izvajalnega konteksta.
 Vlakna lahko ljubkovalno imenujemo tudi lahkotne niti, saj se obnašajo podobno, vendar so implementirane v celoti v uporabniškem kontekstu in se jih jedro sploh ne zaveda \cite{Yosifovich_Russinovich_Solomon_Ionescu_2017}.
@@ -1165,25 +1167,25 @@ Sistemski klici za upravljanje procesov skrbijo za:
 
 Bovet in Cesati \cite{Bovet_Cesati_2005} opisujeta, da tradicionalni Unixu podobni sistemi obravnavajo vse procese enako -- viri starša so podvojeni v otroku.
 Tak pristop je zelo neučinkovit in počasen, saj zahteva kopiranje celotnega naslovnega prostora starša.
-Otrok redko potrebuje vse ter vire in jih v mnogih primerih takoj prepiše s funkcijo \texttt{execve()}, ki naloži drug program.
+Otrok redko potrebuje vse ter vire in jih v mnogih primerih takoj prepiše s funkcijo \texttt{execve}, ki naloži drug program.
 Moderna Unixu podobna jedra ta problem rešujejo na tri različne načine:
 \begin{itemize}
 	\item \textbf{``Copy on Write''} oz. CoW mehanizem omogoča tako otroku kot staršu branje iz istega fizičnega pomnilnika.
 	      Kadar eden izmed njiju začne pisati v pomnilnik, jedro ustvari novo fizično stran, ki je namenjena pisanju.
 	\item \textbf{Lahkotni procesi} omogočajo deljenje virov med staršem in otrokom.
 	      Delita si lahko mnogo jedrnih struktur, naslovni prostor, tabele odprtih datotečnih deskriptorjev in dispozicije signalov.
-	\item Funkcija \texttt{vfork()} ustvari proces, ki si deli naslovni prostor s staršem, vendar blokira izvajanje starša dokler se otrok ne konča.
+	\item Funkcija \texttt{vfork} ustvari proces, ki si deli naslovni prostor s staršem, vendar blokira izvajanje starša dokler se otrok ne konča.
 \end{itemize}
 
-Imamo torej tri metode ustvarjanja procesa, zato imamo tudi tri sistemske klice, ki ustvarjajo procese -- \texttt{fork()}, \texttt{clone()} in \texttt{vfork()}.
+Imamo torej tri metode ustvarjanja procesa, zato imamo tudi tri sistemske klice, ki ustvarjajo procese -- \texttt{fork}, \texttt{clone} in \texttt{vfork}.
 
-Najbolj obsežna izmed njih je funkcija \texttt{clone()}, ki ustvari nov lahkotni proces in omogoča izbiranje deljenih virov.
+Najbolj obsežna izmed njih je funkcija \texttt{clone}, ki ustvari nov lahkotni proces in omogoča izbiranje deljenih virov.
 
-Tradicionalna funkcija \texttt{fork()} je v ozadju implementirana s sistemskim klicem \texttt{clone}, ki ima predefinirane zastavice za ločene vire \cite{Bovet_Cesati_2005}.
+Tradicionalna funkcija \texttt{fork} je v ozadju implementirana s sistemskim klicem \texttt{clone}, ki ima predefinirane zastavice za ločene vire \cite{Bovet_Cesati_2005}.
 Otrok in straš si takoj po izvedbi delita isti sklad, vendar se ta zaradi mehanizma CoW ob prvi spremembi kopira.
 
-Prav tako je funkcija \texttt{vfork()} implementirana s sistemskim klicem \texttt{clone}, ki ima predefinirane zastavice za deljen naslovni prostor ter izvedbo \texttt{vfork()} in isti sklad kot starš \cite{Bovet_Cesati_2005}.
-V tem primeru nič od tega ne predstavlja težave, saj je starš blokiran in se ne izvaja dokler se otrok ne zaključi ali zažene nov program (\texttt{execve()}).
+Prav tako je funkcija \texttt{vfork} implementirana s sistemskim klicem \texttt{clone}, ki ima predefinirane zastavice za deljen naslovni prostor ter izvedbo \texttt{vfork} in isti sklad kot starš \cite{Bovet_Cesati_2005}.
+V tem primeru nič od tega ne predstavlja težave, saj je starš blokiran in se ne izvaja dokler se otrok ne zaključi ali zažene nov program (\texttt{execve}).
 
 Samo izvebo teh sistemskih klicev implementira jedrna funkcija \texttt{do\_fork()}, ki izvede sledeči postopek \cite{Bovet_Cesati_2005}:
 \begin{enumerate}
@@ -1201,7 +1203,7 @@ Samo izvebo teh sistemskih klicev implementira jedrna funkcija \texttt{do\_fork(
 
 \subsubsection{Funkcija \texttt{fork}}
 
-Funkcija \texttt{fork()} ustvari nov proces, ki je duplikat trenutnega procesa.
+Funkcija \texttt{fork} ustvari nov proces, ki je duplikat trenutnega procesa.
 Nov proces prav tako postane otrok trenutnega procesa.
 
 Otroški proces je identična kopija starševskega, z izjemo nekaj ključnih točk:
@@ -1215,20 +1217,21 @@ Otroški proces je identična kopija starševskega, z izjemo nekaj ključnih to�
 	\item Otrok ne deduje obstoječih asinhronih V/I operacij ali asinhronih V/I kontekstov.
 \end{itemize}
 
+Nov proces ustvarimo s funkcijo:
 \begin{lstlisting}[style=func]
  pid_t fork(void);
 \end{lstlisting}
 
-Funkcija ne sprejme nobenih vhodnih parametrov, vrne pa \texttt{0} v otroškem procesu in PID otroškega procesa v starševskem procesu.
+\texttt{fork} ne sprejme nobenih vhodnih parametrov, vrne pa \texttt{0} v otroškem procesu in PID otroškega procesa v starševskem procesu.
 V primeru napake funkcija vrne \texttt{-1} starševskemu procesu in ne ustvari otroškega procesa.
 
 \subsubsection{Funkcija \texttt{clone}}
 
-Funkcija \texttt{clone()} je bolj fleksibilna različica funkcije \texttt{fork()}, ki jo bomo podrobno spoznali v poglavju \ref{ssec:linux_syscalls:threads}.
+Funkcija \texttt{clone} je bolj fleksibilna različica funkcije \texttt{fork}, ki jo bomo podrobno spoznali v razdelku \ref{ssec:linux_syscalls:threads}.
 
 \subsubsection{Funkcija \texttt{execve}}
 
-Ko želimo zagnati nov proces, ki izvaja drug program, takoj za klicem \texttt{fork} kličemo funkcijo \texttt{execve()}, ki zamenja programski pomnilnik trenutnega procesa z programom v podani datoteki.
+Ko želimo zagnati nov proces, ki izvaja drug program, takoj za klicem \texttt{fork} kličemo funkcijo \texttt{execve}, ki zamenja programski pomnilnik trenutnega procesa z programom v podani datoteki.
 Prav tako na novo inicializira sklad, kopico in podatkovne segmente.
 
 Če ima program (datoteka), ki ga nalagamo, nastavljen ``setuid'' bit, se efektivni uporabniški ID procesa spremeni na ID lastnika datoteke.
@@ -1243,29 +1246,34 @@ Te pravili pa imata nekaj izjem, ki se navezujejo na atribute klicoče niti.
 	\item Vse niti razen klicoče so ustavljene.
 \end{itemize}
 
+Nov program začnemo s funkcijo:
 \begin{lstlisting}[style=func]
- int execve(const char *pathname, char *const _Nullable argv[], char *const _Nullable envp[]);
+ int execve(
+	const char *pathname,
+	char *const _Nullable argv[],
+	char *const _Nullable envp[]
+ );
 \end{lstlisting}
 
-Funkcija sprejme tri argumente: pot do programa, argumente programa (opcijski) in okoljske spremenljivke programa (opcijski).
+Funkcija sprejme tri argumente: pot do programa (\texttt{pathname}), opcijsko argumente programa (\texttt{argv}) in opcijsko okoljske spremenljivke programa (\texttt{envp}).
 Ob uspešni izvedbi funkcija ne vrne ničesar, saj se začne izvajati novo naloženi program, v primeru napake pa vrne \texttt{-1}.
 
 \subsubsection{Funkcija \texttt{exit}}
 
-Ko želimo trenutni proces ukiniti, pokličemo funkcijo \texttt{exit()}, ki zaključi in uniči proces.
+Ko želimo trenutni proces ukiniti, pokličemo funkcijo \texttt{exit}, ki konča in uniči proces.
 Sistem zapre odprte dokumente, osirotene (otroške) procese podeduje začetni proces (PID 1) in staršu pošlje signal SIGCHLD.
 
+Trenutni proces končamo s funkcijo:
 \begin{lstlisting}[style=func]
  void exit(int status);
 \end{lstlisting}
 
-Funkcija sprejme argument \textit{status}, katerega spodnji oktet oz. bajt je posredovan staršu.
+Funkcija sprejme argument \textit{status}, katerega spodnji oktet oz. bajt se shrani v polju \texttt{exit\_code} v procesnem deskriiptorju in posreduje staršu.
 Funkcija v nobenem primeru ne vrne ničesar, saj se proces zaključi.
 
 Več o signalu \texttt{SIGCHLD} in posredovanju statusa staršu v razdelku \ref{ssec:linux_syscalls:waiting}.
 
 \subsection{Windows}
-
 
 Windows API ponuja več različnih funkcij za ustvarjanje procesa.
 Najbolj preprosta med njimi je \texttt{CreateProcess}, ki poskuša ustvariti nov proces z enakom dostopnim žetonom kot trenutni proces.
@@ -1293,14 +1301,13 @@ Postopek je dokaj zapleten in ga na najvišjem nivoju sestavlja sedem faz:
 	\item Ustvarjanje objekta izvršilnega procesa.
 	\item Ustvarjanje začetne niti (sklad, kontekst in objekt izvršilne niti).
 	\item Inicializacija v specifičnem podsistemu.
-	\item Začetek izvajanja začetne niti (razen kadar je podana zastavica \texttt{CREATE\_SUSPENDED}).
+	\item Začetek izvajanja začetne niti (razen kadar je podana zastavica \texttt{CREATE\-\_SUSPENDED}).
 	\item Končna inicializacija naslovnega prostora v kontekstu novega procesa in niti ter začetek izvajanja programa.
 \end{enumerate}
 
 \subsubsection{Funkcija \texttt{CreateProcess}}
 
-Kot že omenjeno za ustvarjanje novega procesa z istim varnostnim kontekstom uporabimo funkcijo \texttt{CreateProcess}.
-
+Za ustvarjanje novega procesa z istim varnostnim kontekstom uporabimo funkcijo:
 \begin{lstlisting}[style=func]
  BOOL CreateProcessW(
 	LPCWSTR               lpApplicationName,
@@ -1336,9 +1343,7 @@ Funkcija pri uspešni izvedbi vrne neničelno vrednost, v primeru napake pa \tex
 
 \subsubsection{Funkcija \texttt{CreateProcessAsUser}}
 
-Kadar pa želimo proces zagnati z drugimi poverilnicami oz. kot drug uporabnik, uprabimo \texttt{CreateProcessAsUser}.
-Funkcija je razen dodatnega prvega argumenta identična \texttt{CreateProcess}.
-
+Kadar pa želimo proces zagnati z drugimi poverilnicami oz. kot drug uporabnik, uprabimo funkcijo:
 \begin{lstlisting}[style=func]
  BOOL CreateProcessW(
 	HANDLE                hToken,   
@@ -1347,14 +1352,14 @@ Funkcija je razen dodatnega prvega argumenta identična \texttt{CreateProcess}.
  );
 \end{lstlisting}
 
+Funkcija je razen dodatnega prvega argumenta identična \texttt{CreateProcess}.
 Dodatni opcijski vhodni argument \texttt{hToken} sprejme ročico žetona pridobljenega s funkcijo \texttt{LogonUser}, ki mu preprosto podamo avtentikacijske podatke željenega uporabnika.
 Preostali argumenti in izhodi so enaki \texttt{Create\-Process}.
 
 \subsubsection{Funkcija \texttt{OpenProcess}}
 
 Kot bomo videli v mnogo sledečih funkcijah, izvajanje operacij nad procesi zahteva ročico dotičnega procesa.
-To ročico lahko pridobimo s funkcijo \texttt{OpenProcess}.
-
+To ročico lahko pridobimo s funkcijo:
 \begin{lstlisting}[style=func]
  HANDLE OpenProcess(
 	DWORD dwDesiredAccess,
@@ -1375,7 +1380,7 @@ Vsak objekt ima štiri splošne zastavice, ki definirajo dostop:
 \begin{description}
 	\item[\texttt{DELETE}] Omogoča brisanje objekta.
 	\item[\texttt{READ\_CONTROL}] Omogoča branje informacij v varnostnem deskriptorju.
-	\item[\texttt{SYNCHRONIZE}] Omogoča sinhronizacijo z objektom; sinhronizacijo z objekti Windows si bomo pogledali v poglavju \ref{ssec:windows_syscalls:waiting}.
+	\item[\texttt{SYNCHRONIZE}] Omogoča sinhronizacijo z objektom; sinhronizacijo z objekti Windows si bomo pogledali v razdelku \ref{ssec:windows_syscalls:waiting}.
 	\item[\texttt{WRITE\_DAC}] Omogoča spreminjanje diskrecijskega seznama dostopa (\textit{angl. discretionary access control list -- DACL}) v varnostnem deskriptorju.
 	\item[\texttt{WRITE\_OWNER}] Omogoča spreminjanje lastnika objekta v varnostnem deskriptorju.
 \end{description}
@@ -1397,36 +1402,35 @@ Poleg tega lahko definiramo še kar precej zastavic specifičnih za dostopne pra
 	\item[\texttt{SYNCHRONIZE}] Omogoča čakanje na končanje procesa.
 \end{description}
 
+Ob uspešnem izvajanju funkcija vrne ročico procesa, v primeru napake pa \texttt{NULL}.
+
 \subsubsection{Funkcija \texttt{ExitProcess}}
 
-Ko želimo končati trenutni proces in vse niti procesa, uporabimo funkcijo \texttt{ExitProcess}.
-Ta deluje identično funkciji \texttt{exit} v Linux.
-
+Ko želimo končati trenutni proces in vse niti procesa, uporabimo funkcijo:
 \begin{lstlisting}[style=func]
  void ExitProcess(UINT uExitCode);
 \end{lstlisting}
+Ta deluje identično funkciji \texttt{exit} v Linux.
 
 Funkcija sprejme argument \texttt{uExitCode}, ki ga lahko prevzame druga nit s funkcijo \texttt{GetExitCodeProcess}.
+Funkcija v nobenem primeru ne vrne ničesar, saj se proces zaključi.
 
 \subsubsection{Funkcija \texttt{TerminateProcess}}
 
-Ko želimo prisilno končati drug proces, uporabimo funkcijo \texttt{TerminateProcess}.
-Ta deluje podobno kot funkcija \texttt{kill} v Linux.
-
+Ko želimo prisilno končati drug proces, uporabimo funkcijo:
 \begin{lstlisting}[style=func]
  BOOL TerminateProcess(HANDLE hProcess, UINT uExitCode);
 \end{lstlisting}
+Rezultat je podoben kot pri funkciji \texttt{kill} v Linux.
 
 Funkcija sprejme ročico ciljnega procesa (\texttt{hProcess}) in izhodno kodo procesa (\texttt{uExitCode}).
 Ročica ciljnega procesa mora imeti pravico \texttt{PROCESS\-\_TERMINATE}.
 
+Ob uspešni izvedbi funkcija vrne neničelno vrednost, v primeru napake pa \texttt{0}.
+
 \section{Signali}
 
 \subsection{Linux}
-
-\subsubsection{Funkcija \texttt{kill}}
-
-Kadar pa želimo ustaviti drug proces, uporabimo funkcijo \texttt{kill}, ki želenemu procesu pošlje signal.
 
 Signali so neke vrste programske prekinitve, ki se uporabljajo za obveščanje procesa o asinhronih dogodkih. % https://faculty.cs.niu.edu/~hutchins/csci480/signals.htm
 Linux implementira 31 različnih signalov, vsakega z eno izmed petih privzetih dispozicij oz. akcij, ki se izvedejo ob prejemu signala.
@@ -1447,11 +1451,14 @@ Za naše potrebe je pomembnih le naslednjih nekaj signalov:
 	Privzeto signala sprožita končanje procesa.
 \end{description}
 
+\subsubsection{Funkcija \texttt{kill}}
+
+Kadar želimo prisilno končati drug proces ali mu poslati drug signal, uporabimo funkcijo:
 \begin{lstlisting}[style=func]
  int kill(pid_t pid, int sig);
 \end{lstlisting}
 
-Funkcija sprejme dva argumenta: identifikator ciljnega procesa in signal, ki ga želimo poslati.
+Funkcija sprejme dva argumenta: identifikator ciljnega procesa \texttt{pid} in signal, ki ga želimo poslati \texttt{sig}.
 Ob uspešni izvedbi vrne \texttt{0}, v primeru napake pa \texttt{-1}.
 
 \subsection{Windows}
@@ -1470,8 +1477,7 @@ Avtomatsko ponastavljivi dogodki se ponastavijo takoj, ko jih prva nit počaka.
 
 \subsubsection{Funkcija \texttt{CreateEvent}}
 
-Za ustvarjanje novega dogodka uporabimo funkcijo \texttt{CreateEvent}.
-
+Za ustvarjanje novega dogodka uporabimo funkcijo:
 \begin{lstlisting}[style=func]
  HANDLE CreateEventW(
 	LPSECURITY_ATTRIBUTES lpEventAttributes,
@@ -1495,8 +1501,7 @@ V primeru napake funkcija vrne \texttt{NULL}.
 
 \subsubsection{Funkcija \texttt{OpenEvent}}
 
-Kadar želimo iz drugega procesa dostopati do poimenovanega dogodka, lahko njegovo ročico pridobimo s funkcijo \texttt{OpenEvent}.
-
+Kadar želimo iz drugega procesa dostopati do poimenovanega dogodka, lahko njegovo ročico pridobimo s funkcijo:
 \begin{lstlisting}[style=func]
  HANDLE OpenEventW(
 	DWORD   dwDesiredAccess,
@@ -1519,27 +1524,25 @@ V primeru uspešne izvedbe funkcija vrne ročico, v nasprotnem primeru pa \textt
 
 \subsubsection{Funkcija \texttt{SetEvent}}
 
-Za proženje dogodka uporabimo funkcijo \texttt{SetEvent}.
-Ta zahteva ročico dogodka s pravico \texttt{EVENT\_MODIFY\_STATE}.
-
+Za proženje dogodka uporabimo funkcijo:
 \begin{lstlisting}[style=func]
  BOOL SetEvent(HANDLE hEvent);
 \end{lstlisting}
 
-V primeru uspešnega proženja funkcija vrne neničeno vrednost, v nasprotnem primeru pa \texttt{0}.
+Ta zahteva ročico dogodka (\texttt{hHandle}) s pravico \texttt{EVENT\-\_MODIFY\_STATE}.
+V primeru uspešnega proženja funkcija vrne neničelno vrednost, v nasprotnem primeru pa \texttt{0}.
 
 \subsubsection{Funkcija \texttt{ResetEvent}}
 
-Za ponastavitev dogodka uporabimo funkcijo \texttt{ResetEvent}.
-Ta zahteva ročico dogodka s pravico \texttt{EVENT\_MODIFY\_STATE}.
+Ponastavitev dogodka za avtomatsko ponastavljive dogodke običajno ni potreben.
 
-Seveda klic te funkcije za avtomatsko ponastavljive dogodke običajno ni potreben.
-
+Za ponastavitev dogodka uporabimo funkcijo:
 \begin{lstlisting}[style=func]
  BOOL ResetEvent(HANDLE hEvent);
 \end{lstlisting}
 
-V primeru uspešnega proženja funkcija vrne neničeno vrednost, v nasprotnem primeru pa \texttt{0}.
+Ta zahteva ročico dogodka (\texttt{hEvent}) s pravico \texttt{EVENT\_MODIFY\_STATE}.
+V primeru uspešnega proženja funkcija vrne neničelno vrednost, v nasprotnem primeru pa \texttt{0}.
 
 \section{Čakanje}
 
@@ -1558,6 +1561,7 @@ V primeru, da se starševski proces konča, njegove zombi procese podeduje proce
 Najbolj preprosta funkcija za čakanje, \texttt{wait}, blokira trenutno nit dokler se eden izmed otroških procesov ne konča.
 Funkcijsko je ekvivalenten klicu \verb|waitpid(-1, &wstatus, 0);|.
 
+Ko želimo preprosto počakati na končanje otroškega procesa, uporabimo funkcijo:
 \begin{lstlisting}[style=func]
  pid_t wait(int *_Nullable wstatus);
 \end{lstlisting}
@@ -1567,7 +1571,7 @@ Ob uspešni izvedbi vrne PID končanega otroškega procesa, v primeru napake pa 
 
 Status procesa vrnjen preko argumenta \texttt{wstatus}, lahko dekodiramo z uporabo sledečih makrojev:
 \begin{description}
-	\item [\texttt{WIFEXITED(wstatus)}] Vrne \texttt{true}, če je otrok zaključil običajno (klic \texttt{exit} ali \texttt{return} iz funkcije \texttt{main()}).
+	\item [\texttt{WIFEXITED(wstatus)}] Vrne \texttt{true}, če je otrok zaključil običajno (klic \texttt{exit} ali \texttt{return} iz funkcije \texttt{main}).
 	\item [\texttt{WEXITSTATUS(wstatus)}] Vrne izhodni status otroka.
 	\item [\texttt{WIFSIGNALED(wstatus)}] Vrne \texttt{true}, če se je proces zaključil zaradi signala.
 	\item [\texttt{WTERMSIG(wstatus)}] Vrne številko signala, ki je povzročil zaključek procesa.
@@ -1577,8 +1581,7 @@ Status procesa vrnjen preko argumenta \texttt{wstatus}, lahko dekodiramo z upora
 	\item [\texttt{WIFCONTINUED(wstatus)}] Vrne \texttt{true}, če proces nadaljuje izvajanje zaradi prejetega signala \texttt{SIGCONT}.
 \end{description}
 
-Bolj specifična funkcija, \texttt{waitpid}, blokira trenutno nit dokler otrok s podanim PID ne spremeni stanja.
-
+Kadar želimo počakati na končanje specifičnega otroškega procesa, uporabimo funkcijo:
 \begin{lstlisting}[style=func]
 	pid_t waitpid(pid_t pid, int *_Nullable wstatus, int options);
 \end{lstlisting}
@@ -1603,8 +1606,7 @@ Privzeto funkcija čaka samo zaključene otroške procese, vendar to lahko sprem
 
 \subsubsection{Funkcija \texttt{waitid}}
 
-Kadar potrebujemo še bolj specifičen nadzor nad čakano spremembo statusa, uporabimo funkcijo \texttt{waitid}.
-
+Kadar potrebujemo še bolj specifičen nadzor nad čakano spremembo statusa, uporabimo funkcijo:
 \begin{lstlisting}[style=func]
 	int waitid(idtype_t idtype, id_t id, siginfo_t *infop, int options);
 \end{lstlisting}
@@ -1618,7 +1620,7 @@ Argument \texttt{idtype} in \texttt{id} določata ciljne otroške procese:
 	\item [\texttt{idtype == P\_ALL}] Čaka kateri koli otroški proces in ignorira argument \texttt{id}.
 \end{description}
 
-Željeno spremembo statusa določamo z argumentom \texttt{options}, kjer lahko sledeče opcije združujemo z logično OR operacijo:
+Željeno spremembo statusa določamo z argumentom \texttt{options}, kjer lahko sledeče opcije združujemo z bitno OR operacijo:
 \begin{description}
 	\item [\texttt{WEXITED}] Čaka zaključeno stanje.
 	\item [\texttt{WSTOPPED}] Čaka zaustavitev izvajanja procesa zaradi signala.
@@ -1638,15 +1640,13 @@ Ne glede na ciljni objekt, mora za čakanje ročica imeti pravico \texttt{SYNCHR
 
 \subsubsection{Funkciji \texttt{WaitForSingleObject} in \texttt{WaitForSingleObjectEx}}
 
-Kadar želimo čakati na točno določen objekt, uporabimo funkcijo \texttt{WaitFor\-SingleObject} ali \texttt{WaitFor\-SingleObjectEx}.
-Funkciji sta praktično identični in se razlikujeta samo po dodatnem argumentu v \texttt{WaitForSingleObjectEx}.
-
+Kadar želimo čakati na točno določen objekt, uporabimo funkcijo:
 \begin{lstlisting}[style=func]
  DWORD WaitForSingleObject(HANDLE hHandle, DWORD dwMilliseconds);
 \end{lstlisting}
 
 Funkcija \texttt{WaitForSingleObject} sprejme ročico ciljnega objekta (\texttt{hHandle}) in maksimalen čas čakanja v milisekundah (\texttt{dwMilliseconds}).
-Pri vseh funkcijah v tem podpoglavju lahko za argument \texttt{dwMilliseconds} uporabimo konstanto \texttt{INFINITE}.
+Pri vseh funkcijah v tem razdelku lahko za argument \texttt{dwMilliseconds} uporabimo konstanto \texttt{INFINITE}.
 
 Funkcija \texttt{WaitForSingleObjectEx} doda še argument \texttt{bAlertable}.
 Če ga nastavimo na \texttt{TRUE}, bo čakanje prekinjeno v primeru, da se tekom čakanja zaključi asinhrona V/I operacija.
@@ -1662,9 +1662,7 @@ Funkciji vrneta eno izmed definiranih konstant:
 \subsubsection{Funkciji \texttt{WaitForMultipleObjects} in \texttt{WaitForMultipleObjectsEx}}
 
 V določenih primerih pa želimo čakati na več objektov sočasno.
-Takrat uporabimo funkcijo \texttt{WaitForMultipleObjects} ali \texttt{WaitForMultipleObjectsEx}.
-Spet se funkciji razlikujeta samo po dodatnem argumentu v \texttt{WaitFor\-Multiple\-ObjectsEx}.
-
+Takrat uporabimo funkcijo:
 \begin{lstlisting}[style=func]
  DWORD WaitForMultipleObjects(
 	DWORD        nCount,
@@ -1692,12 +1690,21 @@ Funkciji vrneta eno izmed definiranih stanj:
 
 \subsection{Linux} \label{ssec:linux_syscalls:threads}
 
+V Linuxu so niti implementirane kot lahkotni procesi, ki si delijo naslovni prostor in nekatere druge sistemske vire.
+V ta namen uporabljamo sistemska klia \texttt{clone} in \texttt{clone3}.
+
+Ti funkciji v ta namen ponujata zastavico \texttt{CLONE\_THREAD}, ki vpelje nekaj težav.
+Nova nit si namreč deli isti PID in posledično tudi PPID, kar pomeni, da trenutna nit ne prejme signala \texttt{SIGCHLD} ob končanju nove niti in moramo to sporočiti na nek drug način.
+Seveda je tu najbolj preprosta rešitev uporaba deljenega pomnilnika, vendar implementacija lahko hitro postane nepregledna.
+Zato v praksi običajno uporabljamo POSIX niti (\textit{angl. POSIX threads / pthreads}), implementirane v glibc knjižnici z uporabo sistemskih klicev \texttt{clone} in \texttt{clone3}.
+
 \subsubsection{Funkciji \texttt{clone} in \texttt{clone3}}
 
 Kreiranje niti je v osnovi enako kreiranju novega procesa.
 Glavna razlika je, da si procesa delita dele izvajalnega konteksta.
 Funkciji \texttt{clone} in \texttt{clone3} omogočata kreiranje novega procesa z nadzorom nad deljenimi konteksti kot so naslovni prostor, tabela datotečnih opisnikov, tabela prekinitvenih funkcij signalov \dots
 
+Za kreiranje novega procesa ali lahkotnega procesa uporabimo funkcijo:
 \begin{lstlisting}[style=func]
  int clone(
 	int (*fn)(void *_Nullable),
@@ -1734,10 +1741,8 @@ Ker je seznam opcij zelo obsežen in v nekaterih primerih zahteva nadalnje obraz
 \end{description}
 
 Izmed opisanih opcij sta za niti najbolj ključni \texttt{CLONE\_VM}, saj je kopiranje pomnilnika najbol časovno intenziven del ustvarjanja novega procesa, in \texttt{CLONE\_THREAD}, saj pove sistemu, da je nova nit del obstoječega procesa.
-Vidimo pa lahko manjšo težavo pri opciji \texttt{CLONE\_THREAD}.
-Nova nit si namreč deli isti PID in posledično tudi PPID, kar pomeni, da trenutna nit ne prejme signala \texttt{SIGCHLD} ob končanju nove niti in moramo to sporočiti na nek drug način.
-Seveda je tu najbolj preprosta rešitev uporaba deljenega pomnilnika, vendar implementacija lahko hitro postane nepregledna.
-Zato v praksi običajno uporabljamo POSIX niti (\textit{angl. POSIX threads / pthreads}), implementirane v glibc knjižnici z uporabo sistemskih klicev \texttt{clone} in \texttt{clone3}.
+
+Ob uspešnem izvajanju funkcija vrne TID nove niti, v nasprotnem primeru pa \texttt{-1}.
 
 \subsection{Windows}
 
@@ -1764,8 +1769,7 @@ Yosifovich in kolegi \cite{Yosifovich_Russinovich_Solomon_Ionescu_2017} opisujej
 
 \subsubsection{Funkcija \texttt{CreateThread}}
 
-Za ustvarjanje nove niti v istem navideznem uporabniškem prostoru uporabimo funkcijo \texttt{CreateThread}.
-
+Za ustvarjanje nove niti v istem navideznem uporabniškem prostoru uporabimo funkcijo:
 \begin{lstlisting}[style=func]
  HANDLE CreateThread(
 	LPSECURITY_ATTRIBUTES   lpThreadAttributes,
@@ -1792,11 +1796,7 @@ V primeru napake funkcija vrne \texttt{NULL}.
 
 \subsubsection{Funkciji \texttt{CreateRemoteThread} in \texttt{CreateRemoteThreadEx}}
 
-Kadar pa želimo ustvariti nit v navideznem pomnilniku drugega procesa, uporabimo funkcijo \texttt{CreateRemoteThread} ali \texttt{CreateRemoteThreadEx}.
-V osnovi sta funkciji enaki, vendar \texttt{CreateRemoteThreadEx} omogoča podajanje dodatnih atributov nove niti.
-
-Za klicanje teh funkcij potrebujemo ročico ciljnega procesa s pravicami \texttt{PROCESS\_CREATE\_THREAD}, \texttt{PROCESS\_QUERY\_INFORMATION}, \texttt{PROCESS\_VM\-\_OPERATION}, \texttt{PROCESS\_VM\_WRITE} in \texttt{PROCESS\_VM\_READ}.
-
+Kadar pa želimo ustvariti nit v navideznem pomnilniku drugega procesa, uporabimo funkcijo:
 \begin{lstlisting}[style=func]
  HANDLE CreateRemoteThread(
 	HANDLE                 hProcess,
@@ -1809,16 +1809,18 @@ Za klicanje teh funkcij potrebujemo ročico ciljnega procesa s pravicami \texttt
  );
 \end{lstlisting}
 
-Funkcija sprejme enake argumente kot \texttt{CreateThread}, vendar doda prvi argument, ki določa proces v katerem naj se nit ustvari.
-Poleg tega funkcija \texttt{CreateRemoteThreadEx}, dodaja argument \texttt{lpAttributeList}, preko katerega med drugim lahko določamo željeno procesorsko jedro, dedovane ročice in omogoča ustvarjanje UMS niti.
+Funkcija zahteva ročico ciljnega procesa s pravicami \texttt{PROCESS\_CREATE\-\_THREAD}, \texttt{PROCESS\_QUERY\_INFORMATION}, \texttt{PROCESS\_VM\-\_OPERATION}, \texttt{PROCESS\-\_VM\_WRITE} in \texttt{PROCESS\_VM\_READ}.
 
-Tako kot \texttt{CreateThread}, funkcija vrne ročico nove niti.
+Funkcija sprejme enake argumente kot \texttt{CreateThread}, vendar doda prvi argument, ki določa proces v katerem naj se nit ustvari.
+
+Poleg tega funkcija \texttt{CreateRemoteThreadEx}, dodaja argument \texttt{lpAttributeList}, preko katerega med drugim lahko določamo željeno procesorsko jedro, dedovane ročice in omogoča ustvarjanje uporabniško razvrščevalnih niti.
+
+Tako kot \texttt{CreateThread}, obe funkciji vrneta ročico nove niti.
 
 \subsubsection{Funkcija \texttt{OpenThread}}
 
 Kot smo že videli videli pri procesih, izvajanje operacij nad nitmi zahteva ročico dotične niti.
-To ročico lahko pridobimo s funkcijo \texttt{OpenThread}.
-
+To ročico lahko pridobimo s funkcijo:
 \begin{lstlisting}[style=func]
  HANDLE OpenThread(
 	DWORD dwDesiredAccess,
@@ -1857,8 +1859,7 @@ Funkcija pri uspešni izvedbi vrne ročico z željenim dostopom, v primeru napak
 
 \subsubsection{Funkcija \texttt{ExitThread}}
 
-Ko želimo končati trenutno nit, uporabimo funkcijo \texttt{ExitThread}.
-
+Ko želimo končati trenutno nit, uporabimo funkcijo:
 \begin{lstlisting}[style=func]
  void ExitThread(DWORD dwExitCode);
 \end{lstlisting}
@@ -1867,15 +1868,16 @@ Funkcija sprejme argument \texttt{dwExitCode}, ki ga lahko prevzame druga nit s 
 
 \subsubsection{Funkcija \texttt{TerminateThread}}
 
-Ko želimo prisilno končati drugo nit, uporabimo funkcijo \texttt{TerminateThread}.
-Ta deluje podobno kot funkcija \texttt{kill} v Linux.
-
+Ko želimo prisilno končati drugo nit, uporabimo funkcijo:
 \begin{lstlisting}[style=func]
  BOOL TerminateThread(HANDLE hThread, DWORD dwExitCode);
 \end{lstlisting}
+Rezultat je podoben kot pri funkciji \texttt{kill} v Linux.
 
 Funkcija sprejme ročico ciljne niti (\texttt{hThread}) in izhodno kodo niti (\texttt{dwExit\-Code}).
 Ročica ciljne niti mora imeti pravico \texttt{THREAD\_TERMINATE}.
+
+V primeru uspešne izvedbe funkcija vrne neničelno vrednost, v primeru napake pa \texttt{0}.
 
 \section{Spanje}
 
@@ -1883,12 +1885,14 @@ Ročica ciljne niti mora imeti pravico \texttt{THREAD\_TERMINATE}.
 
 \subsubsection{Funkcija \texttt{nanosleep}}
 
-Kadar želimo proces zaustaviti za določeno količino časa, nam Linux ponuja funkcijo \texttt{nanosleep}.
-Tako lahko ustavimo izvajanje in sprostimo procesor dokler se podani čas ne izteče ali pa je spanje prekinjeno zaradi prejema signala.
-
+Kadar želimo proces zaustaviti za določeno količino časa, nam Linux ponuja funkcijo:
 \begin{lstlisting}[style=func]
- int nanosleep(const struct timespec *duration, struct timespec *_Nullable rem);
+ int nanosleep(
+	const struct timespec *duration,
+	struct timespec *_Nullable rem
+ );
 \end{lstlisting}
+Tako lahko ustavimo izvajanje in sprostimo procesor dokler se podani čas ne izteče ali pa je spanje prekinjeno zaradi prejema signala.
 
 Funkcija sprejme dva atributa, \texttt{duration}, kjer določimo čas spanja v nanosekundah (veljavne so vrednosti od 0 do 999999999), in \texttt{rem}, kjer nam funkcija sporoči preostali čas spanja v primeru prekinitve.
 Pri uspešni izvedbi funkcija vrne \texttt{0}, v primeru prekinitve spanja s signalom ali druge napake pa \texttt{-1}.
@@ -1897,14 +1901,18 @@ Pri uspešni izvedbi funkcija vrne \texttt{0}, v primeru prekinitve spanja s sig
 
 \subsubsection{Funkciji \texttt{Sleep} in \texttt{SleepEx}}
 
-Kadar želimo izvajanje niti zaustaviti za določeno količino časa, nam Windows ponuja funkcijo \texttt{Sleep}.
-Tako lahko ustavimo izvajanje in sprostimo procesor, dokler se podani čas ne izteče.
-
+Kadar želimo izvajanje niti zaustaviti za določeno količino časa, nam Windows ponuja funkcijo:
 \begin{lstlisting}[style=func]
  void Sleep(DWORD dwMilliseconds);
 \end{lstlisting}
+Tako lahko ustavimo izvajanje in sprostimo procesor, dokler se podani čas ne izteče.
 
 Funkcija sprejme vhodni argument \texttt{dwMilliseconds}, ki določa koliko časa v milisekundah bo izvajanje zaustavljeno.
+
+Funkcija \texttt{SleepEx} sprejme dodaten argument \texttt{bAlertable}, ki omogoča prekinitev spanja ko se zaključi asinhrona V/I operacijama.
+
+Funkciji ob uspešni izvedbi vrneta \texttt{0}.
+Napaka je mogoča samo pri klicu \texttt{SleepEx}, ki v primeru prekinjenega spanja vrne \texttt{WAIT\_IO\_COMPLETION}.
 
 \section{Pridobivanje sistemskih informacij}
 
@@ -1914,8 +1922,7 @@ Linux nam za pridobivanje informacij ponuja nekaj osnovnih funkcij, ki nam podaj
 
 \subsubsection{Funkciji \texttt{getpid} in \texttt{getppid}}
 
-Najbolj osnovni informaciji o procesu sta ID procesa (PID) in ID starševskega procesa (PPID), ki jih lahko dobimo preko funkcij \texttt{getpid} in \texttt{getppid}.
-
+Najbolj osnovni informaciji o procesu sta ID procesa (PID) in ID starševskega procesa (PPID), ki jih lahko dobimo preko funkcij:
 \begin{lstlisting}[style=func]
  pid_t getpid(void);
  pid_t getppid(void);
@@ -1924,61 +1931,90 @@ Najbolj osnovni informaciji o procesu sta ID procesa (PID) in ID starševskega p
 \subsubsection{Funkciji \texttt{getpgid} in \texttt{setpgid}}
 
 Pri klicih \texttt{waitpid} in \texttt{waitid} smo na hitro omenili koncept skupine procesov, ki jo identificira ID skupine (PGID).
-Skupino procesa lahko pridobimo s funkcijo \texttt{getpgid}, ki ji podamo PID ciljnega procesa ali \texttt{0} za trenutni proces.
-Pri spreminjanju skupine pa se poslužujemo \texttt{setpgid}, ki ji spet podamo PID ciljnega procesa ter nov PGID.
-Pri tem je pogoj, da sta proces in skupina del iste seje.
 
+Skupino procesa lahko pridobimo s funkcijo:
 \begin{lstlisting}[style=func]
- int setpgid(pid_t pid, pid_t pgid);
  pid_t getpgid(pid_t pid);
 \end{lstlisting}
+Podamo ji PID ciljnega procesa ali \texttt{0} za trenutni proces.
+
+Pri spreminjanju skupine pa se poslužujemo funkcije:
+\begin{lstlisting}[style=func]
+ int setpgid(pid_t pid, pid_t pgid);
+\end{lstlisting}
+Podamo ji PID ciljnega procesa ter nov PGID.
+Pri tem je pogoj, da sta proces in skupina del iste seje.
 
 \subsubsection{Funkcija \texttt{gettid}}
 
 Kot smo videli pri \texttt{clone}, imajo niti poleg PID še ID niti (TID), ki jih razlikuje.
-TID lahko pridobimo s funkcijo \texttt{gettid}, ki v primeru procesa z eno nitjo preprosto vrne PID.
-
+TID lahko pridobimo s funkcijo:
 \begin{lstlisting}[style=func]
  pid_t gettid(void);
 \end{lstlisting}
+Ta v primeru procesa z eno nitjo preprosto vrne PID.
+
+\subsubsection{Funkcija \texttt{getrusage}}
+
+Kadar želimo pridobiti informacije o porabi virov, uporabimo funkcijo:
+\begin{lstlisting}[style=func]
+ int getrusage(int who, struct rusage *usage);
+\end{lstlisting}
+
+Funkcija sprejme vhodni argument \texttt{who}, ki določa kateri proces želimo opazovati:
+\begin{description}
+	\item[\texttt{RUSAGE\_SELF}] Opazuj trenutni proces, ki je seštevek virov, ki jih porabljajo vse niti procesa.
+	\item[\texttt{RUSAGE\_CHILDREN}] Opazuj vse otroke trenutnega procesa, ki so se zaključili in bili počakani.
+	\item[\texttt{RUSAGE\_THREAD}] Opazuj trenutno nit.
+\end{description}
+
+Drugi argument funkcije je kazalnik na strukturo tipa \texttt{rusage}, ki funkcija napolni.
+Ta struktura vsebuje informacije o porabi virov, kot so:
+\begin{itemize}
+	\item čas izvajanja v uporabniškem prostoru (\texttt{ru\_utime}),
+	\item čas izvajanja v jedru (\texttt{ru\_stime}),
+	\item število prejetih signalov (\texttt{ru\_nsignals}),
+	\item število prostovoljnih prehodov konteksta (\texttt{ru\_nvcsw}),
+	\item število ne prostovoljnih prehodov konteksta (\texttt{ru\_nivcsw}) \dots
+\end{itemize}
+
+V primeru uspešne izvedbe funkcija vrne \texttt{0}, v primeru napake pa \texttt{-1}.
 
 \subsection{Windows}
 
 \subsubsection{Funkcija \texttt{GetCurrentProcess}}
 
-Funkcija \texttt{GetCurrentProcess} nam poda psevdo ročico trenutnega procesa.
-Ta ročica se nikoli ne deduje in je trenutno posebna konstanta.
-Pravo ročico trenutnega procesa lahko pridobimo tako, da funkciji \texttt{DuplicateHandle} podamo psevdo ročico ali s funkcijo \texttt{OpenProcess}.
-
+Da pridobimo psevdo ročico trenutnega procesa, uporabimo funkcijo:
 \begin{lstlisting}[style=func]
  HANDLE GetCurrentProcess();
 \end{lstlisting}
 
+Ta ročica se nikoli ne deduje in je trenutno posebna konstanta.
+Pravo ročico trenutnega procesa lahko pridobimo tako, da funkciji \texttt{DuplicateHandle} podamo psevdo ročico ali s funkcijo \texttt{OpenProcess}.
+
 \subsubsection{Funkciji \texttt{GetCurrentProcessId} in \texttt{GetProcessId}}
 
-Funkciji \texttt{GetCurrentProcessId} in \texttt{GetProcessId} nam podata identifikator trenutnega procesa in identifikator procesa, katerega ročico podamo.
-Ročica podana funkciji \texttt{GetProcessId} mora imeti pravico \texttt{PROCESS\_QUERY\_LIMITED\-\_INFORMATION}.
-
+Identifikator trenutnega ali ciljnega procesa pridobimo s funkcijama:
 \begin{lstlisting}[style=func]
  DWORD GetCurrentProcessId();
  DWORD GetProcessId(HANDLE Process);
 \end{lstlisting}
 
+Ročica podana funkciji \texttt{GetProcessId} mora imeti pravico \texttt{PROCESS\_QUERY\-\_LIMITED\-\_INFORMATION}.
+
 \subsubsection{Funkcija \texttt{GetCurrentProcessToken}}
 
-Funkcija \texttt{GetCurrentProcessToken} nam poda psevdo ročico dosopnega žetona trenutnega procesa.
-Spet je ta ročica posebna konstanta, ki se ne deduje.
-Za razliko od ročice procesa, se ta ročica ne more uporabiti za pridobivanje prave ročice žetona.
-
+Da pridobimo psevdo ročico dosopnega žetona trenutnega procesa, uporabimo funkcijo:
 \begin{lstlisting}[style=func]
  HANDLE GetCurrentProcessToken();
 \end{lstlisting}
 
+Spet je ta ročica posebna konstanta, ki se ne deduje.
+Za razliko od ročice procesa, se ta ročica ne more uporabiti za pridobivanje prave ročice žetona.
+
 \subsubsection{Funkcija \texttt{GetProcessInformation}}
 
-Funkcija \texttt{GetProcessInformation} nam omogoča pridobivanje informacij o procesu, ki ga določa podana ročica.
-Podana ročica mora imeti pravico \texttt{PROCESS\_QUERY\_LIMITED\_INFORMATION}.
-
+Da pridobimo informacije o procesu, ki ga določa podana ročica, uporabimo funkcijo:
 \begin{lstlisting}[style=func]
  BOOL GetProcessInformation(
 	HANDLE                    hProcess,
@@ -1988,14 +2024,14 @@ Podana ročica mora imeti pravico \texttt{PROCESS\_QUERY\_LIMITED\_INFORMATION}.
  );
 \end{lstlisting}
 
+Podana ročica mora imeti pravico \texttt{PROCESS\_QUERY\_LIMITED\_INFORMATION}.
+
 Poleg ročice funkcija sprejme še argument \texttt{ProcessInformationClass}, ki določa katero informacijo želimo pridobiti.
 Za željeni tip informacije moramo podati kazalnik na ustrezno strukturo (\texttt{ProcessInformation}), ki jo funkcija nato izpolni, in velikost te strukture (\texttt{ProcessInformationSize}).
 
 \subsubsection{Funkcija \texttt{GetProcessTimes}}
 
-Funkcija \texttt{GetProcessTimes} nam omogoča pridobivanje časovnega zapisa procesa.
-Podana ročica mora spet imeti pravico \texttt{PROCESS\_QUERY\_LIMITED\-\_INFOR\-MATION}.
-
+Da pridobimo časovni zapis procesa, ki ga določa podana ročica, uporabimo funkcijo:
 \begin{lstlisting}[style=func]
  BOOL GetProcessTimes(
 	HANDLE     hProcess,
@@ -2006,16 +2042,15 @@ Podana ročica mora spet imeti pravico \texttt{PROCESS\_QUERY\_LIMITED\-\_INFOR\
  );
 \end{lstlisting}
 
+Podana ročica mora spet imeti pravico \texttt{PROCESS\_QUERY\_LIMITED\-\_INFOR\-MATION}.
+
 Funkcija v podane kazalnike zapiše čas kreacije procesa (\texttt{lpCreationTime}), čas končanja procesa (\texttt{lpExitTime}), čas porabljen v jedru (\texttt{lpKernelTime}) in čas porabljen v uporabniškem prostoru (\texttt{lpUserTime}).
 Vsi časi so podani v obliki strukture tipa \texttt{FILETIME}.
 Windows ponuja funkcijo \texttt{FileTimeToSystem\-Time}, ki nam omogoča pretvorbo tega zapisa v bolj berljiv časovni zapis.
 
 \subsubsection{Funkcija \texttt{GetExitCodeProcess}}
 
-Funkcija \texttt{GetExitCodeProcess} nam omogoča pridobivanje izhodne kode procesa.
-Spomnimo se, da je to vrednost, ki jo proces vrne ob končanju s funkcijo \texttt{ExitProcess}.
-Ročica mora spet imeti pravico \texttt{PROCESS\_QUERY\_LIMITED\-\_INFORMATION}.
-
+Da pridobimo izhodno vrednost procesa, uporabimo funkcijo:
 \begin{lstlisting}[style=func]
  BOOL GetExitCodeProcess(
 	HANDLE  hProcess,
@@ -2023,48 +2058,47 @@ Ročica mora spet imeti pravico \texttt{PROCESS\_QUERY\_LIMITED\-\_INFORMATION}.
  );
 \end{lstlisting}
 
+Spomnimo se, da je to vrednost, ki jo proces vrne ob končanju s funkcijo \texttt{ExitProcess}.
+Ročica mora spet imeti pravico \texttt{PROCESS\_QUERY\_LIMITED\-\_INFORMATION}.
+
 \subsubsection{Funkcija \texttt{GetProcessIdOfThread}}
 
-Funkcija \texttt{GetProcessIdOfThread} nam omogoča pridobivanje identifikatorja procesa, ki ga izvaja dana nit.
-
+Da pridobimo identifikator procesa, ki ga izvaja dana nit, uporabimo funkcijo:
 \begin{lstlisting}[style=func]
  DWORD GetProcessIdOfThread(HANDLE Thread);
 \end{lstlisting}
 
 \subsubsection{Funkcija \texttt{GetCurrentThread}}
 
-Funkcija \texttt{GetCurrentThread} nam poda psevdo ročico trenutne niti.
-Ta ročica je deležna istih omejitev kot psevdo ročica procesa.
-
+Da pridobimo psevdo ročico trenutne niti, uporabimo funkcijo:
 \begin{lstlisting}[style=func]
  HANDLE GetCurrentThread();
 \end{lstlisting}
+Ta ročica je deležna istih omejitev kot psevdo ročica procesa.
 
 \subsubsection{Funkciji \texttt{GetCurrentThreadId} in \texttt{GetThreadId}}
 
-Funkciji \texttt{GetCurrentThreadId} in \texttt{GetThreadId} nam omogočata pridobivanje identifikatorja trenutne niti in identifikatorja niti, ki jo določa podana ročica.
-Ročica podana funkciji \texttt{GetThreadId} mora imeti pravico \texttt{THREAD\_QUERY\-\_LIMITED\-\_INFORMATION}.
-
+Identifikator trenutne ali ciljne niti pridobimo s funkcijama:
 \begin{lstlisting}[style=func]
  DWORD GetCurrentThreadId();
  DWORD GetThreadId(HANDLE Thread);
 \end{lstlisting}
 
+Ročica podana funkciji \texttt{GetThreadId} mora imeti pravico \texttt{THREAD\_QUERY\-\_LIMITED\-\_INFORMATION}.
+
 \subsubsection{Funkciji \texttt{GetCurrentThreadToken} in \texttt{GetCurrentThreadEffectiveToken}}
 
-Funkciji \texttt{GetCurrentThreadToken} in \texttt{GetCurrentThreadEffectiveToken} nam omogočata pridobivanje psevdo ročice žetona trenutne niti in ročice efektivnega žetona trenutne niti.
-Ta ročica je deležna istih omejitev kot psevdo ročica žetona procesa.
-
+Da pridobimo psevdo ročico dosopnega žetona in efektivnega dostopnega žetona trenutne niti, uporabimo funkciji:
 \begin{lstlisting}[style=func]
  HANDLE GetCurrentThreadToken();
  HANDLE GetCurrentThreadEffectiveToken();
 \end{lstlisting}
 
+Ta ročica je deležna istih omejitev kot psevdo ročica žetona procesa.
+
 \subsubsection{Funkcija \texttt{GetThreadInformation}}
 
-Funkcija \texttt{GetThreadInformation} nam omogoča pridobivanje informacij o niti, ki jo določa podana ročica.
-Podana ročica mora imeti pravico \texttt{THREAD\-\_QUERY\_INFORMATION}.
-
+Da pridobimo informacije o niti, ki jo določa podana ročica, uporabimo funkcijo:
 \begin{lstlisting}[style=func]
  BOOL GetThreadInformation(
 	HANDLE                   hThread,
@@ -2074,14 +2108,14 @@ Podana ročica mora imeti pravico \texttt{THREAD\-\_QUERY\_INFORMATION}.
  );
 \end{lstlisting}
 
+Podana ročica mora imeti pravico \texttt{THREAD\-\_QUERY\_INFORMATION}.
+
 Analogno \texttt{GetProcessInformation}, poleg ročice funkcija sprejme še argument \texttt{ThreadInformationClass}, ki določa katero informacijo želimo pridobiti.
 Za željeni tip informacije moramo podati kazalnik na ustrezno strukturo (\texttt{ThreadInformation}), ki jo funkcija nato izpolni, in velikost te strukture (\texttt{ThreadInformationSize}).
 
 \subsubsection{Funkcija \texttt{GetThreadTimes}}
 
-Funkcija \texttt{GetThreadTimes} nam omogoča pridobivanje časovnega zapisa niti.
-Podana ročica mora imeti pravico \texttt{THREAD\_QUERY\_LIMITED\_INFORMATION}.
-
+Da pridobimo časovni zapis niti, ki jo določa podana ročica, uporabimo funkcijo:
 \begin{lstlisting}[style=func]
  BOOL GetThreadTimes(
 	HANDLE     hThread,
@@ -2092,18 +2126,20 @@ Podana ročica mora imeti pravico \texttt{THREAD\_QUERY\_LIMITED\_INFORMATION}.
  );
 \end{lstlisting}
 
+Podana ročica mora imeti pravico \texttt{THREAD\_QUERY\_LIMITED\_INFORMATION}.
+
 Funkcija v podane kazalnike zapiše čas kreacije niti (\texttt{lpCreationTime}), čas končanja niti (\texttt{lpExitTime}), čas porabljen v jedru (\texttt{lpKernelTime}) in čas porabljen v uporabniškem prostoru (\texttt{lpUserTime}).
 Vsi časi so podani v obliki strukture tipa \texttt{FILETIME}, ki jo lahko pretvorimo v bolj berljiv časovni zapis s funkcijo \texttt{FileTimeToSystemTime}.
 
 \subsubsection{Funkcija \texttt{GetExitCodeThread}}
 
-Funkcija \texttt{GetExitCodeThread} nam omogoča pridobivanje izhodne kode niti.
-To je vrednost, ki jo nit vrne ob končanju s funkcijo \texttt{ExitThread}.
-Ročica mora imeti pravico \texttt{THREAD\_QUERY\_LIMITED\_INFORMATION}.
-
+Da pridobimo izhodno vrednost procesa, uporabimo funkcijo:
 \begin{lstlisting}[style=func]
  BOOL GetExitCodeThread(HANDLE hThread, LPDWORD lpExitCode);
 \end{lstlisting}
+
+To je vrednost, ki jo nit vrne ob končanju s funkcijo \texttt{ExitThread}.
+Ročica mora imeti pravico \texttt{THREAD\_QUERY\_LIMITED\_INFORMATION}.
 
 \chapter{Kvantitativna primerjava}
 
@@ -2157,7 +2193,7 @@ V Windows pa bomo uporabili funkcijo \texttt{QueryPerformanceCounter}:
 Obe funkciji nam omogočata do mikrosekunde natančno merjenje časa izvajanja.
 Poleg tega bomo vsako meritev izvedli 100-krat in izračunali povprečje, da izločimo variabilnost, ki jo prinaša večopravilni sistem.
 
-Kot smo videli v poglavju \ref{sec:threads}, so niti v Linux implementirane kot t. i. ``lahkotni procesi.''
+Kot smo videli v razdelku \ref{sec:threads}, so niti v Linux implementirane kot t. i. ``lahkotni procesi.''
 To prinaša nekaj težav pri direktni primerjavi, saj jih Windows v celoti podpira v jedru, medtem ko Linux večji del implementacije prepušča uporabniškim knjižnicam.
 Načeloma polna implementacija končanja niti zahteva procesno komunikacijo ali druge sinhronizacijske objekte, kar je izven obsega tega dela.
 \colorbox{yellow}{TODO: Poišči zanesljiv vir!}
