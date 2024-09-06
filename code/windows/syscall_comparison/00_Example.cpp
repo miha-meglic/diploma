@@ -34,5 +34,5 @@ int wmain(int argc, wchar_t *argv[]) {
 	// Izpisemo rezultat
 	std::cout << "System call time: " << interval.QuadPart << " us"
 			  << std::endl;
-	ExitProcess(1);
+	ExitProcess(0);
 }

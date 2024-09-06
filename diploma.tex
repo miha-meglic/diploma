@@ -240,7 +240,7 @@ sorting=nty,
 	licenco, ki je enaka tej.
 	Podrobnosti licence so dostopne na spletni strani \href{http://creativecommons.si}{creativecommons.si} ali na Inštitutu za
 	intelektualno lastnino, Streliška 1, 1000 Ljubljana.
-																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																														
+																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																							
 	\vspace*{1cm}
 	\begin{center}% 0.66 / 0.89 = 0.741573033707865
 		\CcImageCc{0.741573033707865}\hspace*{1ex}\CcImageBy{1}\hspace*{1ex}\CcImageSa{1}%
@@ -728,7 +728,7 @@ Ker je sistemskih klicev ogromno, jih bomo v nadaljevanju razdelili na šest kat
 	\item[Zaščita] upravljanje pravic procesov, datotek in naprav
 \end{description}
 
-\section{Izvedba sistemskega klica --> to 2.1} \label{sec:syscall_execution}
+\section{Izvedba sistemskega klica} \label{sec:syscall_execution}
 
 Moderne procesorske arhitekture definirajo več privilegijskih nivojev.
 Vzemimo za primer arhitekturo x86 \cite{Intel_2024}, ki implementira 4 nivoje oz. obroče (številčene od 0 do 3) kot prikazuje slika \ref{fig:privilege_levels_x86}.
@@ -1228,6 +1228,19 @@ V primeru napake funkcija vrne \texttt{-1} starševskemu procesu in ne ustvari o
 \subsubsection{Funkcija \texttt{clone}}
 
 Funkcija \texttt{clone} je bolj fleksibilna različica funkcije \texttt{fork}, ki jo bomo podrobno spoznali v razdelku \ref{ssec:linux_syscalls:threads}.
+
+\subsubsection{Funkcija \texttt{vfork}}
+
+Funkcija \texttt{vfork} ustvari nov proces, ki si s staršem deli naslovni prostor in večino drugih virov.
+Za razliko od \texttt{fork}, je starš blokiran dokler se otrok ne konča (\texttt{\_exit}) ali zažene nov program (\texttt{execve}).
+Namen in najpogostejša uporaba funkcije \texttt{vfork} je ustvarjanje otroškega procesa, ki takoj zažene nov program.
+
+Nov proces ustvarimo s funkcijo:
+\begin{lstlisting}[style=func]
+ pid_t vfork(void);
+\end{lstlisting}
+
+Izhod funkcije je enak kot pri funkciji \texttt{fork}.
 
 \subsubsection{Funkcija \texttt{execve}}
 
@@ -2193,31 +2206,23 @@ V Windows pa bomo uporabili funkcijo \texttt{QueryPerformanceCounter}:
 Obe funkciji nam omogočata do mikrosekunde natančno merjenje časa izvajanja.
 Poleg tega bomo vsako meritev izvedli 100-krat in izračunali povprečje, da izločimo variabilnost, ki jo prinaša večopravilni sistem.
 
-Kot smo videli v razdelku \ref{sec:threads}, so niti v Linux implementirane kot t. i. ``lahkotni procesi.''
+Kot smo videli v razdelku \ref{sec:threads}, so niti v Linux implementirane kot lahkotni procesi.
 To prinaša nekaj težav pri direktni primerjavi, saj jih Windows v celoti podpira v jedru, medtem ko Linux večji del implementacije prepušča uporabniškim knjižnicam.
-Načeloma polna implementacija končanja niti zahteva procesno komunikacijo ali druge sinhronizacijske objekte, kar je izven obsega tega dela.
-\colorbox{yellow}{TODO: Poišči zanesljiv vir!}
+Načeloma polna implementacija prisilnega končanja niti zahteva signalizacijo preko sinhronizacijskih objektov ali deljenega pomnilnika \cite{Mueller_1993}, kar pa je izven obsega tega dela.
 Zato bomo v procesu preprosto implementirali signal \texttt{SIGUSR1}, ki bo končal vse odprte niti razen glavne.
 V našem primeru to ne bo povzročilo težav, saj ustvarimo samo eno dodatno nit.
 
 \subsection{Meritve in interpretacija}
 
-Iz tabele \ref{tab:ex1:times} hitro razberemo, da se vse štiri funkcije izvedejo hitreje v Linux kot v Windows.
+Iz grafa \ref{fig:syscall_comparison:times} hitro razberemo, da se vse štiri funkcije izvedejo hitreje v Linux kot v Windows.
 
-\begin{table}[h!]
+\begin{figure}[h!]
 	\begin{center}
-		\begin{tabular}{ l|c|c }
-			                    & Linux   & Windows  \\
-			\hline
-			Ustvarjanje procesa & $44.12$ & $2565.9$ \\
-			Končanje procesa   & $3.87$  & $63.91$  \\
-			Ustvarjanje niti    & $14.81$ & $26.18$  \\
-			Končanje niti      & $6.32$  & $8.9$    \\
-		\end{tabular}
+		\includegraphics[width=0.9\textwidth]{images/syscall_comparison.png}
 	\end{center}
 	\caption{Povprečni časi izvajanja sistemskih klicev v mikrosekundah [\SI{}{\micro\second}]}
-	\label{tab:ex1:times}
-\end{table}
+	\label{fig:syscall_comparison:times}
+\end{figure}
 
 Največja razlika je pri ustvarjanju procesa, kjer je Linux kar 58-krat hitrejši.
 Vendar pa, če pogledamo nazaj na opis sistemskih klicev, nas ta ugotovitev ne bi smela presenetiti.
