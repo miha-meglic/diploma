@@ -240,7 +240,7 @@ sorting=nty,
 	licenco, ki je enaka tej.
 	Podrobnosti licence so dostopne na spletni strani \href{http://creativecommons.si}{creativecommons.si} ali na Inštitutu za
 	intelektualno lastnino, Streliška 1, 1000 Ljubljana.
-																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																															
+																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																		
 	\vspace*{1cm}
 	\begin{center}% 0.66 / 0.89 = 0.741573033707865
 		\CcImageCc{0.741573033707865}\hspace*{1ex}\CcImageBy{1}\hspace*{1ex}\CcImageSa{1}%
@@ -1329,7 +1329,7 @@ V primeru, da želimo ustvariti proces z drugimi poverilnicami, uporabimo \textt
 Iz slike \ref{fig:windows_createprocess_functions} vidimo, da funkcije za ustvajanje procesa implementira več različnih knjižnic.
 Dotično \texttt{Kernel32.dll}, ki predstavlja uporabniško implementacijo jedrnih funkcij in \texttt{Advapi32.dll}, ki je razširitev \texttt{Kernel32.dll} in na neki točki tudi kliče funkcije iz \texttt{Kernel32.dll}.
 Na neki točki vse klicne poti funkcij za ustvarjanje procesa pripeljejo do funkcije \texttt{CreateProcess\-Internal}, ki dejansko začne postopek ustvarjanja procesa v uporabniškem načinu.
-Nazadnje \texttt{CreateProcessInternal} kliče \texttt{NtCreateUserProcess} v \texttt{Ntdll.dll}, ki izvede sistemski klic in s tem prehod v jedrni način.
+Nazadnje \texttt{CreateProcessInternal} kliče \texttt{NtCreateUserProcess} v \texttt{ntdll.dll}, ki izvede sistemski klic in s tem prehod v jedrni način.
 V jedru funkcija z istim imenom (\texttt{NtCreateUserProcess}) nadaljuje jedrni del ustvarjanja procesa \cite{Yosifovich_Russinovich_Solomon_Ionescu_2017}.
 
 \begin{figure}[h!]
@@ -1803,8 +1803,8 @@ Yosifovich in kolegi \cite{Yosifovich_Russinovich_Solomon_Ionescu_2017} opisujej
 	\item Izgradnja seznama atributov z dvema vnosoma: ID odjemalca in TEB (blok izvajalnega okolja niti) naslov.
 	\item Določanje procesa, v katerem se bo nit ustvarila (to je lahko trenutni ali nek drug proces). 
 	      Določiti je treba namreč, če je podana ročica samo psevdo ročica trenutnega procesa (taka kot jo vrne \texttt{GetCurrentProcess}), veljavna ročica trenutnega procesa ali ročica nekega drugega procesa.
-	      V ta manen se kliče funkcija \texttt{NtQueryInformationProcess} v \texttt{Ntdll.dll}.
-	\item Klic \texttt{NtCreateThreadEx} v \texttt{Ntdll.dll}, ki izvede sistemski klic in s tem preda ustvarjanje niti jedru.
+	      V ta manen se kliče funkcija \texttt{NtQueryInformationProcess} v \texttt{ntdll.dll}.
+	\item Klic \texttt{NtCreateThreadEx} v \texttt{ntdll.dll}, ki izvede sistemski klic in s tem preda ustvarjanje niti jedru.
 	\item Funkcija z istim imenom (\texttt{NtCreateThreadEx}) v jedru ustvari in inicializira uporabniški kontekst niti in kliče \texttt{PspCreateThread}, da ustvari zaustavljen izvršilni objekt niti.
 	      Ta korak zrcali fazi 3 in 5 iz postopka ustvarjanja procesa.
 	\item \texttt{CreateRemoteThreadEx} rezervira aktivacijski kontekst niti in aktivira sklad.
@@ -1816,7 +1816,7 @@ Yosifovich in kolegi \cite{Yosifovich_Russinovich_Solomon_Ionescu_2017} opisujej
 
 \subsubsection{Funkcija \texttt{CreateThread}}
 
-Za ustvarjanje nove niti v istem navideznem uporabniškem prostoru uporabimo funkcijo:
+Za ustvarjanje nove niti v istem navideznem uporabniškem naslovnem prostoru uporabimo funkcijo:
 \begin{lstlisting}[style=func]
  HANDLE CreateThread(
 	LPSECURITY_ATTRIBUTES   lpThreadAttributes,
@@ -2018,8 +2018,8 @@ Funkcija sprejme vhodni argument \texttt{who}, ki določa kateri proces želimo 
 Drugi argument funkcije je kazalnik na strukturo tipa \texttt{rusage}, ki funkcija napolni.
 Ta struktura vsebuje informacije o porabi virov, kot so:
 \begin{itemize}
-	\item čas izvajanja v uporabniškem prostoru (\texttt{ru\_utime}),
-	\item čas izvajanja v jedru (\texttt{ru\_stime}),
+	\item čas izvajanja v uporabniškem načinu (\texttt{ru\_utime}),
+	\item čas izvajanja v jerdnem načinu (\texttt{ru\_stime}),
 	\item število prejetih signalov (\texttt{ru\_nsignals}),
 	\item število prostovoljnih prehodov konteksta (\texttt{ru\_nvcsw}),
 	\item število ne prostovoljnih prehodov konteksta (\texttt{ru\_nivcsw}) \dots
@@ -2091,7 +2091,7 @@ Da pridobimo časovni zapis procesa, ki ga določa podana ročica, uporabimo fun
 
 Podana ročica mora spet imeti pravico \texttt{PROCESS\_QUERY\_LIMITED\-\_INFOR\-MATION}.
 
-Funkcija v podane kazalnike zapiše čas kreacije procesa (\texttt{lpCreationTime}), čas končanja procesa (\texttt{lpExitTime}), čas porabljen v jedru (\texttt{lpKernelTime}) in čas porabljen v uporabniškem prostoru (\texttt{lpUserTime}).
+Funkcija v podane kazalnike zapiše čas kreacije procesa (\texttt{lpCreationTime}), čas končanja procesa (\texttt{lpExitTime}), čas porabljen v jedrnem (\texttt{lpKernelTime}) in čas porabljen v uporabniškem načinu (\texttt{lpUserTime}).
 Vsi časi so podani v obliki strukture tipa \texttt{FILETIME}.
 Windows ponuja funkcijo \texttt{FileTimeToSystem\-Time}, ki nam omogoča pretvorbo tega zapisa v bolj berljiv časovni zapis.
 
@@ -2175,7 +2175,7 @@ Da pridobimo časovni zapis niti, ki jo določa podana ročica, uporabimo funkci
 
 Podana ročica mora imeti pravico \texttt{THREAD\_QUERY\_LIMITED\_INFORMATION}.
 
-Funkcija v podane kazalnike zapiše čas kreacije niti (\texttt{lpCreationTime}), čas končanja niti (\texttt{lpExitTime}), čas porabljen v jedru (\texttt{lpKernelTime}) in čas porabljen v uporabniškem prostoru (\texttt{lpUserTime}).
+Funkcija v podane kazalnike zapiše čas kreacije niti (\texttt{lpCreationTime}), čas končanja niti (\texttt{lpExitTime}), čas porabljen v jedrnem (\texttt{lpKernelTime}) in čas porabljen v uporabniškem načinu (\texttt{lpUserTime}).
 Vsi časi so podani v obliki strukture tipa \texttt{FILETIME}, ki jo lahko pretvorimo v bolj berljiv časovni zapis s funkcijo \texttt{FileTimeToSystemTime}.
 
 \subsubsection{Funkcija \texttt{GetExitCodeThread}}
@@ -2270,9 +2270,80 @@ Kot smo že omenili, sistemski klic \texttt{kill} ni niti približno enako imple
 Vseeno pa vidimo, da se pri nitih \texttt{kill} in \texttt{TerminateThread} izvedeta približno enako hitro, medtem ko je razlika pri procesih pričakovano velika.
 Presenetljivo je, da se \texttt{kill} izvede hitreje za proces kot za nit, kar je najverjetneje posledica nekoliko primitivne in ne standarne implementacije našega testnega programa programa.
 
-\section{Primerjava realističnega programa}
+\section{Primerjava programa}
+
+Da dobimo bolj celovito sliko o izvajalnih časih, bomo primerjali tudi celotno izvajanje programa.
+Za ta namen bomo napisali program, ki bo:
+\begin{enumerate}
+	\item Ustvaril 2 grafična procesa -- na Linux bomo uporabili GNOME Text Editor, na Windows pa Notepad
+	\item Izpisal PID obeh procesov
+	\item Ustvaril 10 niti, ki bodo neodvisno izračunale 40. število Fibonaccijevega zaporedja in zapisale rezultat v pomnilnik
+	\item Izpisal TID vseh ustvarjenih niti
+	\item Počakal na zaključek niti
+	\item Izpisal rezultat izračuna
+	\item Prisilno končal prej ustvarjena procesa
+\end{enumerate}
+
+\subsection{Koda programa}
+
+Kot prej je izvorna koda obeh programov in pomožnega programa GitHub repozitoriju miha-meglic/diploma\footnote{\url{https://github.com/miha-meglic/diploma/tree/master/code}}.
+
+Ker oba programa vsebujeta kar nekaj uporabniške kode, ju bomo prevedli najprej brez in nato z optimizacijskimi zastavicami \texttt{-O3} (Linux) in \texttt{/O2} (Windows).
+To bo posebej zanimivo v Linuxu, saj funkcija \texttt{clone} pričakuje pripravljen sklad, kar pomeni več dela v uporabniškem prostoru.
+Prav tako bomo niti v Linuxu ustvarili brez zastavice \texttt{CLONE\_THREAD}, saj drugače ne moremo počakati na zaključek niti, ker bi bil signal poslan staršu našega programa.
+
+Čas izvajanja programa bomo merili z enako metodo kot prej.
+Poleg tega pa bomo izmerili čas, ki ga program porabi v uporabniškem in jedrnem načinu.
+Linux nam za to ponuja progam \texttt{time}, Windows pa tega ne omogoča, zato bomo uporabili pomožni program, ki bo čas pridobil s funkcijo \texttt{GetProcessTimes}.
+
+Da dobimo bolj natančne rezultate, bomo celoten algoritem merili čez 100 iteracij in izračunali povprečje.
+
+\subsection{Meritve in interpretacija}
+
+Na grafu \ref{fig:program_comparison:times}, vidimo povprečne čase izvajanja programa prevedenega brez optimizacij.
+
+\begin{figure}[h!]
+	\begin{center}
+		\includegraphics[width=0.9\textwidth]{images/program_comparison.png}
+	\end{center}
+	\caption{Povprečni časi izvajanja programa v milisekundah [\SI{}{\milli\second}]}
+	\label{fig:program_comparison:times}
+\end{figure}
+
+Windows odločno premaga Linux, kar je presenetljivo, saj smo pri prejšnjih primerjavah videli, da so dotični sistemski klici v Linuxu hitrejši.
+Če se osredotočimo na časa porabljena v posameznih izvajalnih kontekstih, vidimo, da je Linux porabi približno 1.5x toliko časa v uporabniškem načinu in skoraj 9x toliko v jedrnem načinu kot Windows.
+Ker je čas porabljen v uporabniškem načinu proporcionalno veliko večji kot čas porabljen v jedru, lahko pričakujemo znatno izboljšanje z vključenimi optimizacijami.
+
+Na grafu \ref{fig:program_comparison:optimized_times} si pogledamo še povprečne čase izvajanja programa prevedenega z optimizacijami, in vidimo, da se je situacija skoraj popolnoma obrnila.
+
+\begin{figure}[h!]
+	\begin{center}
+		\includegraphics[width=0.9\textwidth]{images/program_comparison_optimized.png}
+	\end{center}
+	\caption{Povprečni časi izvajanja programa (prevedenega z optimizacijami) v milisekundah [\SI{}{\milli\second}]}
+	\label{fig:program_comparison:optimized_times}
+\end{figure}
+
+Tokrat Linux premaga Windows, kar je bolj v skladu z našimi pričakovanji iz prejšnjega razdelka.
+Optimizacije so v Linuxu za kar 5 sekund zmanjšale čas v uporabniškem načinu, medtem ko je v Windowsu razlika le 1 sekunda.
+Prav tako se je v obeh sistemih čas porabljen v jedru razpolovil, vendar Linux še vedno porabi več časa v jedru kot Windows.
+
+Ti rezultati namigujejo, da je razliko v hitrosti izvajanja programov prevedenih brez optimizacij najverjetneje povzročalo dodatno delo v uporabniškem načinu.
+
+Če povežemo rezultate iz obeh primerjav, lahko sklepamo, da Windows API in uporabniška stran knjižnice \textit{ntdll.dll} opravita kar nekaj dela pred prehodom v jedro, medtem ko Linux API to delo skoraj v celoti prepusti jedru.
 
 \chapter{Zaključek}
+
+V tem delu smo se osredotočili na primerjavo sistemskih klicev in izvajanja programov v operacijskih sistemih Linux in Windows.
+Odkrili smo, da je sistem Windows arhitekturno dokaj bolj kompleksen kot Linux.
+To se kaže predvsem v višjem nivoju abstrakcije in bolj obširnih vmesnikih.
+Ugotovili smo namreč, da Windows ponuja veliko število specifičnih sistemskih klicev, medtem ko Linux ponuja manjše število univerzalnih sistemskih klicev, ki jih lahko uporabimo za različne namene.
+Prav tako Windows API ponuja veliko več uporabniških funkcionalnosti in je bolj osredotočen na zaščitne mehanizme, kar je verjetno posledica tega, da je Windows poln operacijski sistem in ne samo jedro.
+
+Na koncu smo v kvantitativni primerjavi ugotovili, da je izvajanje sistemskih klicev precej bolj učinkovito v Linuxu kot v Windowsu.
+To je pričakovan stranski učinek kompleksnejšega sistema.
+Seveda po drugi strani Windows ponuja veliko več funkcionalnosti, ki jih Linux ne, zato se poraja vprašanje, kaj je bolj pomembno -- hitrost ali vgrajena funkcionalnost.
+Oba sistema sta namreč enako zmogljiva in imata svoje prednosti in slabosti, zato je odločitev odvisna od specifičnih potreb uporabnika.
 
 %\cleardoublepage
 %\addcontentsline{toc}{chapter}{Literatura}
