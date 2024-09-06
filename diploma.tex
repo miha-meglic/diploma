@@ -240,7 +240,7 @@ sorting=nty,
 	licenco, ki je enaka tej.
 	Podrobnosti licence so dostopne na spletni strani \href{http://creativecommons.si}{creativecommons.si} ali na Inštitutu za
 	intelektualno lastnino, Streliška 1, 1000 Ljubljana.
-																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																							
+																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																															
 	\vspace*{1cm}
 	\begin{center}% 0.66 / 0.89 = 0.741573033707865
 		\CcImageCc{0.741573033707865}\hspace*{1ex}\CcImageBy{1}\hspace*{1ex}\CcImageSa{1}%
@@ -306,7 +306,8 @@ Focus on interfaces related to process management, such as process creation and 
 % zahvala
 \thispagestyle{empty}\mbox{}\vfill\null\it%
 \noindent
-Na tem mestu zapišite, komu se zahvaljujete za pomoč pri izdelavi diplomske naloge oziroma pri vašem študiju nasploh. Pazite, da ne boste koga pozabili. Utegnil vam bo zameriti. Temu se da izogniti tako, da celotno zahvalo izpustite.
+Zahvaljujem se mentorju izr. prof. dr. Juriju Miheliču za strokovno pomoč in nasvete pri izdelavi diplomske naloge.
+Prav tako se zahvaljujem družini in prijateljem za podporo in spodbudo pri študiju ter mir pri pisanju.
 \rm\normalfont
 
 % prazna stran
@@ -366,9 +367,16 @@ Na tem mestu zapišite, komu se zahvaljujete za pomoč pri izdelavi diplomske na
 \noindent\textbf{Avtor:} \tauthor
 \bigskip
 
-%\noindent\textbf{Povzetek:} 
-\noindent V vzorcu je predstavljen postopek priprave diplomskega dela z uporabo okolja \LaTeX. Vaš povzetek mora sicer vsebovati približno 100 besed, ta tukaj je odločno prekratek.
-Dober povzetek vključuje: (1) kratek opis obravnavanega problema, (2) kratek opis vašega pristopa za reševanje tega problema in (3) (najbolj uspešen) rezultat ali prispevek diplomske naloge.
+\noindent V diplomskem delu je predstavljeno področje sistemskih klicev operacijskih sistemov Linux in Windows.
+Opisane so zgodovina, arhitektura, struktura jedra in programski vmesnik obeh sistemov.
+Poudarek je na sistemskih klicih, ki so ključni za upravljanje procesov.
+Razloženi so koncepti sistemskih klicev in procesa.
+Ker operacijska sistema izhajata iz različnih družin operacijskih sistemov, so njuni vmesniki precej različni.
+Linux namreč uporablja standard POSIX, medtem ko Windows uporablja lasten vmesnik -- Windows API.
+Zato sta najprej predstavljeni implementaciji procesa ter niti in njune interne strukture v vsakem sistemu.
+Nato so predstavljeni sistemski klici za ustvarjanje in končanje procesov, signalizacijo, čakanje, spanje, ustvarjanje in manipulacijo niti ter pridobivanje sistemskih informacij o procesih in nitih.
+Za vsak sistemski klic je opisana funkcionalnost in namen ter argumenti, ki jih sprejema in vrača.
+Nazadnje so pomembnejši sistemski klici primerjani po izvajalnem času.
 
 \bigskip
 
@@ -389,8 +397,17 @@ Dober povzetek vključuje: (1) kratek opis obravnavanega problema, (2) kratek op
 \bigskip
 
 %\noindent\textbf{Abstract:} 
-\noindent This sample document presents an approach to typesetting your BSc thesis using \LaTeX. 
-A proper abstract should contain around 100 words which makes this one way too short.
+\noindent In this thesis we present the field of system calls of the Linux and Windows operating systems.
+We describe the history, architecture, structure of the kernel and programming interface of both systems.
+The focus is on system calls, which are crucial for process management.
+We explain the concepts of system calls and processes.
+Since the operating systems belong to different operating system families, their interfaces are quite different.
+Linux utilize the POSIX standard, while Windows uses its own interface -- Windows API.
+Therefore, we first present the process and thread implementations and their internal structures in each system.
+Then we present system calls for process creation and termination, signaling, waiting, sleeping, thread creation and manipulation, and obtaining system information about processes and threads.
+For each system call, we describe its functionality and purpose, as well as the arguments it accepts and returns.
+Finally, the most important system calls are compared by execution time.
+
 \bigskip
 
 \noindent\textbf{Keywords:} \tkeywordsEn.
@@ -405,6 +422,23 @@ A proper abstract should contain around 100 words which makes this one way too s
 
 \chapter{Uvod}
 
+S pojavom prvih splošno namenskih računalnikov je postalo jasno, da za učinkovito uporabo računalniških virov potrebujemo programsko opremo, ki bo uporabnikom omogočala enostaven in poenoten dostop do strojne opreme.
+Sprva so bili to preprosti programi, ki se imenujejo rezidentni monitorji (\textit{angl. resident monitor}).
+Ti so uporabnikom omogočali preprosto nalaganje in izvajanje programov.
+Kmalu pa so se ti programi razvili v operacijske sisteme, ki uporabnikom omogočajo enostavno upravljanje z viri računalnika in abstrahirajo dostop do strojne opreme.
+
+Še danes eden najbolj vplivnih operacijskih sistemov je bil Unix, ki ga je razvilo podjetje Bell Laboratories v zgodnjih sedemdesetih letih prejšnjega stoletja.
+Ta se je kasneje razvil v številne različice, med katerimi so najbolj poznane Berkeley Software Distribution, SunOS, Solaris in HP-UX.
+V zgodnjih devetdesetih letih je bil razvit tudi Linux, ki je postal eden izmed najbolj priljubljenih Unixu podobnih operacijskih sistemov, predvsem zaradi svoje odprtokodne narave in širokega izbora podprte strojne opreme.
+
+Skoraj vzporedno pa je podjetje Microsoft v osemdesetih letih razvilo svoj operacijski sistem, ki je kasneje postal eden izmed najbolj razširjenih operacijskih sistemov na svetu -- Windows.
+Ta je bil prvotno zasnovan kot grafični vmesnik za operacijski sistem MS-DOS, vendar je sčasoma postal samostojen operacijski sistem, ki je bil zasnovan za uporabo na osebnih računalnikih.
+
+Danes si v svetu osebnih računalnikov večino trga delijo Windows, macOS in Linux \cite{Statcounter_OS_2024}.
+Tako Linux kot macOS sta Unixu podobna sistema in uporabljata podobne koncepte in arhitekturo, medtem ko je Windows v mnogih pogledih ubral lastno pot.
+
+V tem delu si bomo pobližje pogledali mejo med operacijskim sistemom in uporabniško programsko opremo, ki jo predstavlja sistemski vmesnik oz. sistemski klici.
+Pogledali si bomo kako se primerjata sistemska vmesnika operacijskih sistemov Linux in Windows, pri čemer se bomo osredotočili na vmesnike, povezane z upravljanjem procesov.
 
 \chapter{Pregled področja}
 
