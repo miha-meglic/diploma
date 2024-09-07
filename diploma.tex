@@ -69,8 +69,8 @@ sorting=nty,
 \newcommand{\tsubject}{\ttitle}
 \newcommand{\tsubjectEn}{\ttitleEn}
 \newcommand{\tauthor}{Miha Meglič}
-\newcommand{\tkeywords}{sistemski klic, linux, windows, operacijski sistem}
-\newcommand{\tkeywordsEn}{system call, linux, windows, operating system}
+\newcommand{\tkeywords}{sistemski klic, upravljanje procesov, linux, windows, operacijski sistem}
+\newcommand{\tkeywordsEn}{system call, process management, linux, windows, operating system}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %	HYPERREF SETUP
@@ -587,8 +587,8 @@ Danes je Windows najbolj popularen operacijski sistem za namizne raču\-nalnike,
 
 \subsection{Zgodovina}
 
-Razvoj Windows se je začel leta 1988 pod okriljem Microsoft in IBM.
-Cilj je bil razviti NT (\textit{``New Technology''}) operacijski sistem s podporo za OS/2 in POSIX aplikacijska vmesnika, vendar je tekom razvoja nastal ločen 32-bitni Windows aplikacijski vmesnik pod imenom Win32 \cite{Silberschatz_Galvin_Gagne_2018}.
+Razvoj Windowsa se je začel leta 1988 pod okriljem Microsoft in IBM.
+Cilj je bil razviti NT (\textit{``New Technology''}) operacijski sistem s podporo za OS/2 in POSIX aplikacijska vmesnika, vendar je tekom razvoja nastal ločen 32-bitni aplikacijski vmesnik pod imenom Win32 \cite{Silberschatz_Galvin_Gagne_2018}.
 
 V NT različici 4.0, ki se je uporabljala v Windows 95, je jedro vsebovalo spletni strežnik in brskalnik, skupaj z vso grafično logiko in uporabniškim vmesnikom.
 Te spremembe so bile uvedene z namenom izboljšanja učinkovitosti, stranski učinek pa je bila zmanjšana zanesljivost sistema.
@@ -656,7 +656,7 @@ Pod NTOS jedrom vidimo sloj abstrakcije strojne opreme (\textit{Hardware Abstrac
 
 Še nižje vidimo še plast hipervizorja (\textit{angl. hypervisor}), ki omogoča izvajanje virtualnih strojev.
 Ta je jedro virtualizacijskega sklada Windows, ki se imenuje Hyper-V.
-Za nas ni pomemben, vendar je vredno omeniti da modernejše verzije Windows (od Windows 8 naprej) vsebujejo hipervizor tipa 1.
+Za nas ni pomemben, vendar je vredno omeniti da modernejše verzije Windowsa (od Windows 8 naprej) vsebujejo hipervizor tipa 1.
 
 \subsection{Podsistemi Windows} \label{ssec:windows:subsystems}
 
@@ -674,7 +674,7 @@ Proces podsistema je storitev, ki jo zažene upravljalnik sej (\textit{smss.exe}
 Kljub temu, da je Win32 sedaj edini konvencionalni podsistem, se Windows drži modela podsistemov za potencialne prihodnje razširitve.
 Omenili pa smo seveda podsistem za Linux, ki je implementiran nekonvencionalno in v večini ne sledi zgodnjemu modelu.
 
-Danes so vse Windows aplikacije napisane z uporabo Win32 API, ki ga izpostavlja Win32 podsistem.
+Danes so vse Windows aplikacije napisane z uporabo Win32 API, ki ga izpostavlja podsistem Win32.
 Microsoft preko Github projekta\footnote{\url{https://github.com/microsoft/win32metadata}} objavlja opis celotne Win32 API površine v standardiziranem formatu (ECMA-335) na tak način, da omogoča izgradnjo projekcij v več programskih jezikov.
 To omogoča pisanje Windows aplikacij tako v privzetem C/C++ kot tudi v drugih jezikih.
 
@@ -682,12 +682,12 @@ To omogoča pisanje Windows aplikacij tako v privzetem C/C++ kot tudi v drugih j
 
 Win32 funkcijski klici se kolektivno imenujejo Win32 API.
 To so polno dokumentirani javno objavljeni vmesniki, implementirani kot procedure, ki kličejo sistemske klice NT ali, v nekaterih primerih, opravijo delo v uporabniškem načinu \cite{Tanenbaum_Bos_2023}.
-Za ohranjanje aplikacijske kompatibilnosti se obstoječi klici Win32 API ne spreminjajo z novimi izdajami Windows, se pa dodajajo nove funkcije.
+Za ohranjanje aplikacijske kompatibilnosti se obstoječi klici Win32 API ne spreminjajo z novimi izdajami Windowsa, se pa dodajajo nove funkcije.
 
 Programi napisani za starejše verzije Win32, bi teoretično morali delovati v novejših verzijah sistema, saj se je Win32 API zelo malo spreminjal.
 V imenu kompatibilnosti Windows podpira dve posebni izvajalni okolji imenovani WoW oz. Windows-on-Windows:
 \begin{description}
-	\item[WoW32] se uporablja na 32-bitnih x86 sistemih za izvajanje 16-bitnih Windows aplikacij. Zadnja izdaja sistema, ki podpira WoW32 je bil Windows 10.
+	\item[WoW32] se uporablja na 32-bitnih x86 sistemih za izvajanje 16-bitnih Windows aplikacij. Zadnja izdaja sistema, ki podpira WoW32 je Windows 10.
 	\item[WoW64] pa omogoča izvajanje 32-bitnih aplikacij na 64-bitnem sistemu.
 	V Windows 10 je bila ta funkcionalnost še razširjena za izvajanje 32-bitnih x86 aplikacij na sistemih arm64.
 	V Windows 11 pa ta emulacija podpira tudi izvajanje 64-bitnih x86 aplikacij na sistemih arm64.
@@ -834,7 +834,7 @@ V nekaterih primerih se lahko zgodi tudi, da več procedur uporablja isti (bolj 
 
 Windows je, v kontrastu z Linuxom, zaprtokodni operacijski sistem, zato je težje najti dokumentacijo o njegovi implementaciji.
 Ena izmed glavnih razlik je, da Windows omogoča dostop do sistemskih klicev izključno preko Windows API-ja.
-Torej, če smo v Linuxu lahko pokukali v tabelo sistemskih klicev in jih lahko celo poklicali direktno z zbirnim jezikom, je v Windows to zahtevno in manj zanesljivo.
+Torej, če smo v Linuxu lahko pokukali v tabelo sistemskih klicev in jih lahko celo poklicali direktno z zbirnim jezikom, je v Windowsu to zahtevno in manj zanesljivo.
 
 Še ena velika razlika, ki jo bomo srečavali v sledečih poglavjih, je število API procedur.
 Windows API izpostavi ogromno procedur, v rangu več tisoč, medtem ko POSIX API izpostavi le nekaj sto \cite{Tanenbaum_Bos_2023}.
@@ -885,7 +885,7 @@ Prav tako je naloga Win32 API klicev, da pretvorijo znakovne nize iz ANSI v Unic
 
 \chapter{Procesi}
 
-V tem poglavju bomo spoznali, kaj so procesi, kako so ustvarjeni in končani ter kakšne so razlike med njihovo implementacijo v Linux in Windows.
+V tem poglavju bomo spoznali, kaj so procesi, kako so ustvarjeni in končani ter kakšne so razlike med njihovo implementacijo v Linuxu in Windowsu.
 
 \section{Proces}
 
@@ -900,7 +900,7 @@ Jedro operacijskega sistema beleži status procesa preko jedrnih podatkovnih str
 	\item identifikator procesa in starša,
 	\item stanje (življenjski cikel),
 	\item programski števec,
-	\item kazalnik na sklad,
+	\item kazalec na sklad,
 	\item pomnilniške dodelitve,
 	\item tabelo odprtih sistemskih objektov (datoteke, ključavnice, semaforji ...),
 	\item informacije o izvajanju (uporabniški čas, jedrni čas ...),
@@ -951,7 +951,7 @@ Za združevanje niti Linux implementira koncept skupine niti, ki je množica lah
 
 Kot smo že omenili, jedro beleži vse relevantne informacije procesa v posebni podatkovni strukturi.
 V sistemih Linux se ta podatkovna struktura imenuje procesni deskriptor (\textit{angl. process descriptor}) -- struktura tipa \texttt{task\_struct}.
-Procesni deskriptor poleg velikega števila atributov o procesu vsebuje tudi nekaj kazalnikov na druge podatkovne strukture, ki vsebujejo kazalnike na druge podatkovne strukture in tako dalje kot prikazuje slika \ref{fig:linux_process_descriptor}.
+Procesni deskriptor poleg velikega števila atributov o procesu vsebuje tudi nekaj kazalcev na druge podatkovne strukture, ki vsebujejo kazalce na druge podatkovne strukture in tako dalje kot prikazuje slika \ref{fig:linux_process_descriptor}.
 
 \begin{figure}[h!]
 	\begin{center}
@@ -967,18 +967,18 @@ Točna velikost in število atributov se spreminja z verzijo jedra, CPE arhitekt
 	\item[\texttt{state}] stanje (življenjski cikel) procesa, bolje opisano v razdelku \ref{ssec:linux_process:lifecycle}
 	\item[\texttt{pid}] enolični numerični identifikator procesa, določen sekvenčno ob kreiranju; ta vrednost ima zgornjo mejo $32767$ in ko jo sistem doseže, prične reciklirati stare (sproščene) vrednosti
 	\item[\texttt{tgid}] PID vodilnega procesa skupine niti
-	\item[\texttt{group\_leader}] kazalnik na procesni deskriptor vodilnega procesa v skupini procesov
-	\item[\texttt{parent}] kazalnik na procesni deskriptor procesa, ki prejme signal \texttt{SIGCHLD}
-	\item[\texttt{real\_parent}] kazalnik na procesni deskriptor starša ali proces 1 (\textit{init}), če starš ne obstaja več
-	\item[\texttt{children}] dvojni povezan seznam kazalnikov na procesne deskriptorje otroških procesov
-	\item[\texttt{sibling}] dvojni povezan seznam kazalnikov na procesne deskriptorje sorodnih procesov oz. sorojencev
+	\item[\texttt{group\_leader}] kazalec na procesni deskriptor vodilnega procesa v skupini procesov
+	\item[\texttt{parent}] kazalec na procesni deskriptor procesa, ki prejme signal \texttt{SIGCHLD}
+	\item[\texttt{real\_parent}] kazalec na procesni deskriptor starša ali proces 1 (\textit{init}), če starš ne obstaja več
+	\item[\texttt{children}] dvojni povezan seznam kazalcev na procesne deskriptorje otroških procesov
+	\item[\texttt{sibling}] dvojni povezan seznam kazalcev na procesne deskriptorje sorodnih procesov oz. sorojencev
 	\item[\texttt{exit\_code}] vrednost podana funkciji \texttt{exit}
 	\item[\texttt{exit\_state}] izhodno stanje procesa, bolje opisano v razdelku \ref{ssec:linux_process:lifecycle}
 	\item[\texttt{cred}] poverilnice procesa
 \end{description}
 
 Ker so procesi dinamične entitete in lahko obstajajo vse od nekaj sekund do nekaj mesecev, se procesni deskriptorji hranijo v dinamičnem pomnilniku namesto statičnem jedrnem pomnilniku.
-Vsak proces v tem dinamičnem pomnilniku hrani dve podatkovni strukturi -- majhno podatkovno strukturo (\texttt{thread\_info}), ki vsebuje kazalnik na procesni deskriptor in procesni sklad, ki se uporablja v jedrnem načinu.
+Vsak proces v tem dinamičnem pomnilniku hrani dve podatkovni strukturi -- majhno podatkovno strukturo (\texttt{thread\_info}), ki vsebuje kazalec na procesni deskriptor in procesni sklad, ki se uporablja v jedrnem načinu.
 
 Za naključne vpoglede in poizvedbe procesnih deskriptorjev Linux prav tako vzdržuje zgoščene tabele za polja \texttt{pid}, \texttt{tgid}, \texttt{pgrp} in \texttt{session} \cite{Bovet_Cesati_2005}.
 
@@ -1034,9 +1034,9 @@ Ob prejetju želenega signala proces spet preide v pripravljenost in čaka na iz
 
 Ko se proces zaključi, običajno s sistemskim klicem \texttt{exit()} ali ob prejetju signala, postane zombi s prehodom v stanje \texttt{TASK\_ZOMBIE} in čaka da starš prevzame informacije o procesu preden končno preide v stanje \texttt{TASK\_DEAD}
 
-\section{Proces v Windowsih}
+\section{Proces v Windowsu}
 
-Na najvišjem nivoju abstrakcije, prikazano na sliki \ref{fig:windows_process}, ima vsak proces v Windows \cite{Yosifovich_Russinovich_Solomon_Ionescu_2017}:
+Na najvišjem nivoju abstrakcije, prikazano na sliki \ref{fig:windows_process}, ima vsak proces v Windowsu \cite{Yosifovich_Russinovich_Solomon_Ionescu_2017}:
 \begin{description}
 	\item[privatni navidezni naslovni prostor] (\textit{angl. private virtual address space -- VAD}) To je nabor naslovov, ki jih proces uporablja za dostop do pomnilnika.
 	\item[izvršilni program] Ta definira začetni podatkovni in programski segment procesa in je preslikana v navidezni naslovni prostor.
@@ -1051,11 +1051,11 @@ Implementacijo teh si bomo pobližje ogledali v razdelku \ref{ssec:windows_proce
 	\begin{center}
 		\includegraphics[width=0.9\textwidth]{images/windows_process.png}
 	\end{center}
-	\caption{Proces v Windows \cite{Yosifovich_Russinovich_Solomon_Ionescu_2017}}
+	\caption{Proces v Windowsu \cite{Yosifovich_Russinovich_Solomon_Ionescu_2017}}
 	\label{fig:windows_process}
 \end{figure}
 
-Kot smo videli pri Linuxu, ima tudi v proces v Windowsu kazalnik na starša.
+Kot smo videli pri Linuxu, ima tudi v proces v Windowsu kazalec na starša.
 Če starš ne obstaja več, se ta informacija ne posodobi, zato je mogoče da se ta informacija nanaša na neobstoječ proces.
 Za razliko od Linuxa pa to ni problem, saj se nič ne zanaša na to informacijo.
 % TODO: Drugi tipi procesov
@@ -1074,7 +1074,7 @@ Implementacijo niti si bomo bolj podrobno ogledali v razdelku \ref{ssec:windows_
 Windows s konceptom vlaken (\textit{angl. fiber}) ponuja še globljo delitev izvajalnega konteksta.
 Vlakna lahko ljubkovalno imenujemo tudi lahkotne niti, saj se obnašajo podobno, vendar so implementirane v celoti v uporabniškem kontekstu in se jih jedro sploh ne zaveda \cite{Yosifovich_Russinovich_Solomon_Ionescu_2017}.
 Uporabljajo se takrat, ko želi aplikacija sama nadzirati izvajanje niti.
-Podobno funkcionalnost lahko vidimo pri starejših implementacijah niti v Linux sistemih.
+Podobno funkcionalnost lahko vidimo pri starejših implementacijah niti v Linuxu.
 Ker vlakna niso implementirana v jedru, za naše namene niso zanimiva, vendar je vredno izpostaviti prvorazredno podporo za to funkcionalnost.
 
 Poleg vlaken Windows ponuja tudi uporabniško razvrščevalne niti (\textit{angl. user-mode scheduling thread}).
@@ -1087,11 +1087,11 @@ Posli nekoliko kompenzirajo pomanjkanje strukturiranega procesnega drevesa in so
 
 \subsection{Strukturi EPROCESS in KPROCESS} \label{ssec:windows_process:eprocess}
 
-Podobno kot Linux procesni deskriptor ima tudi Windows jedro podatkovne strukture, ki predstavljajo izvajalni proces.
+Podobno kot Linuxov procesni deskriptor ima tudi jedro Windows podatkovne strukture, ki predstavljajo izvršilni proces.
 Windows v ta namen uporablja dve strukturi -- \texttt{EPROCESS} in \texttt{KPROCESS} \cite{Yosifovich_Russinovich_Solomon_Ionescu_2017}.
 \texttt{EPROCESS} je višje nivojska in se uporablja v izvajalnem kontekstu, torej za spremljanje izvajanja procesa.
 \texttt{KPROCESS} pa je jedrna struktura, ki se uporablja v časovniku ter prekinitveni in računovodski kodi jedra.
-Strukturi sta povezani preko polja ``blok za nadzor procesa'' (\textit{angl. Process Control Block -- PCB}) v \texttt{EPROCESS}, ki je kazalnik na strukturo tipa \texttt{KPROCESS} \cite{Yosifovich_Russinovich_Solomon_Ionescu_2017}.
+Strukturi sta povezani preko polja ``blok za nadzor procesa'' (\textit{angl. Process Control Block -- PCB}) v \texttt{EPROCESS}, ki je kazalec na strukturo tipa \texttt{KPROCESS} \cite{Yosifovich_Russinovich_Solomon_Ionescu_2017}.
 
 \texttt{EPROCESS}, prikazana na sliki \ref{fig:windows_ethread}, in nanjo vezane podatkovne strukture se hranijo v jedrnem naslovnem prostoru.
 Izjema temu pravilu je blok izvajalnega okolja procesa (\textit{angl. Process Environment Block -- PEB}), ki se hrani v uporabniškem naslovnem prostoru, saj vsebuje informacije potrebne za izvajanje uporabniške kode \cite{Yosifovich_Russinovich_Solomon_Ionescu_2017}.
@@ -1128,16 +1128,12 @@ Iz slik \ref{fig:windows_eprocess} in \ref{fig:windows_kprocess} vidimo, da Wind
 	\item sejo v kateri proces nastopa ...
 \end{itemize}
 
-% Poleg tega proces podsistema Windows (\textit{Client/Server Runtime Subsystem} -- \texttt{csrss.exe}) vzdržuje vzporedno strukturo \texttt{CSR_PROCESS} za vsak proces, ki izvaja Windows program \cite{Yosifovich_Russinovich_Solomon_Ionescu_2017}.
-% Prav tako jedrni del podsistema Windows vzdržuje podatkovno strukturo \texttt{W32PROCESS}, ki se ustvari prvič ko nit pokliče katero koli jedrno Windows USER ali GDI funkcijo.
-% To se zgodi takoj ko naložimo \texttt{User32.dll} knjižnico, ki jo potrebujejo funkcije kot \texttt{CreateWindow} in \texttt{GetMessage}.
-
 \subsection{Strukturi ETHREAD in KTHREAD} \label{ssec:windows_process:ethread}
 
-Kot že omenjeno Windows, za razliko od Linux, sledi nitim z ločenimi podatkovnimi strukturami.
+Kot že omenjeno Windows, za razliko od Linuxa, sledi nitim z ločenimi podatkovnimi strukturami.
 Tako kot pri procesih se uporabljata dve strukturi -- \texttt{ETHREAD} in \texttt{KTHREAD} \cite{Yosifovich_Russinovich_Solomon_Ionescu_2017}
 Njuni vlogi sta analogni strukturama \texttt{EPROCESS} in \texttt{KPROCESS}, kjer se \texttt{ETHREAD} uporablja v izvajalnem kontekstu in \texttt{KTHREAD} v jedrnem kontekstu za časovno razvrščanje in prekinitve.
-Spet je polje ``blok za nadzor niti'' (\textit{angl. Thread Control Block -- TCB}) v \texttt{ETHREAD} kazalnik na strukturo tipa \texttt{KTHREAD} \cite{Yosifovich_Russinovich_Solomon_Ionescu_2017}.
+Spet je polje ``blok za nadzor niti'' (\textit{angl. Thread Control Block -- TCB}) v \texttt{ETHREAD} kazalec na strukturo tipa \texttt{KTHREAD} \cite{Yosifovich_Russinovich_Solomon_Ionescu_2017}.
 
 \texttt{ETHREAD}, prikazana na sliki \ref{fig:windows_ethread}, in nanjo vezane podatkovne strukture se hranijo v jedrnem naslovnem prostoru.
 Spet pa je temu pravilu ena izjema -- blok izvajalnega okolja niti (\textit{angl. Thread Environment Block -- TEB}), ki se hrani v uporabniškem naslovnem prostoru, podobno kot PEB za \texttt{EPROCESS}.
@@ -1150,7 +1146,7 @@ Spet pa je temu pravilu ena izjema -- blok izvajalnega okolja niti (\textit{angl
 	\label{fig:windows_ethread}
 \end{figure}
 
-Na sliki \ref{fig:windows_ethread_tib} si pobližje pogledamo vsebino TEB in vidimo, da med drugim vsebuje najpomembnejše informacije za izvajanje programa kot so kazalnik na sklad, mejo sklada, lokalno shrambo niti in seveda informacije o starševskem procesu.
+Na sliki \ref{fig:windows_ethread_tib} si pobližje pogledamo vsebino TEB in vidimo, da med drugim vsebuje najpomembnejše informacije za izvajanje programa kot so kazalec na sklad, mejo sklada, lokalno shrambo niti in seveda informacije o starševskem procesu.
 
 \begin{figure}[h!]
 	\begin{center}
@@ -1176,7 +1172,7 @@ Poleg \texttt{ETHREAD} in \texttt{KTHREAD} različni podsistemi in njihovi proce
 Iz slik \ref{fig:windows_ethread}, \ref{fig:windows_ethread_tib} in \ref{fig:windows_kthread} vidimo, da jedro Windows vzdržuje podobne informacije o nitih kot o procesih:
 \begin{itemize}
 	\item unikatni identifikator niti,
-	\item unikatni identifikator in kazalnik na proces kateremu pripada,
+	\item unikatni identifikator in kazalec na proces kateremu pripada,
 	\item varnostni kontekst oz. žeton,
 	\item informacije ključne za izvajanje ...
 \end{itemize}
@@ -1331,7 +1327,7 @@ V jedru funkcija z istim imenom (\texttt{NtCreateUserProcess}) nadaljuje jedrni 
 	\begin{center}
 		\includegraphics[width=0.98\textwidth]{images/windows_createprocess_functions.png}
 	\end{center}
-	\caption{Funkcije za kreiranje procesa v Windows \cite{Yosifovich_Russinovich_Solomon_Ionescu_2017}}
+	\caption{Funkcije za kreiranje procesa v Windowsu \cite{Yosifovich_Russinovich_Solomon_Ionescu_2017}}
 	\label{fig:windows_createprocess_functions}
 \end{figure}
 
@@ -1370,14 +1366,14 @@ Pa si jih oglejmo kar po vrsti:
 \begin{description}
 	\item[\texttt{lpApplicationName}] Opcijski vhodni argument; absolutna ali relativna pot aplikacije, ki jo želimo zagnati; če podamo \texttt{NULL} bo ime aplikacije razbrano iz \texttt{lpCommandLine}.
 	\item[\texttt{lpCommandLine}] Opcijski vhodno-izhodni argument; ukaz za zagon aplikacije (t. j. pot in argumente); če podamo \texttt{NULL} bo sistem uporabil \texttt{lpApplicationName} kar pomeni, da mora vsaj en od prvih dveh parametrov vsebovati pot do izvedljive aplikacije; kadar sta določena oba argumenta sistem pričakuje, da \texttt{lpApplicationName} vsebuje pot in \texttt{lpCommandLine} argumente.
-	\item[\texttt{lpProcessAttributes}] Opcijski vhodni argument; kazalnik na strukturo tipa \texttt{SECURITY\_ATTRIBUTES}, ki specificira lastnosti dedovanja ročice procesa vrnjene po izvedbi funkcije; če podamo \texttt{NULL}, ročica ne mora biti dedovana.
+	\item[\texttt{lpProcessAttributes}] Opcijski vhodni argument; kazalec na strukturo tipa \texttt{SECURITY\_ATTRIBUTES}, ki specificira lastnosti dedovanja ročice procesa vrnjene po izvedbi funkcije; če podamo \texttt{NULL}, ročica ne mora biti dedovana.
 	\item[\texttt{lpThreadAttributes}] Opcijski vhodni argument; kot \texttt{lpProcessAttributes} določa lastnosti dedovanja ročice niti vrnejne po izvedbi funkcije.
 	\item[\texttt{bInheritHandles}] Obvezni vhodni argument; če podamo \texttt{TRUE}, novo ustvarjeni proces podeduje vse odprte ročice trenutnega procesa, ki dovoljujejo dedovanje.
 	\item[\texttt{dwCreationFlags}] Obvezni vhodni argument; zastavice, ki določajo ustvarjanje procesa in prioritetni razred novo ustvarjenega procesa.
-	\item[\texttt{lpEnvironment}] Opcijski vhodni argument; kazalnik na blok izvajalnega okolja novega procesa, ki je sestavljen iz ničelno terminiranega bloka ničelno terminiranih nizov formata ``ime=vrednost''; če podamo \texttt{NULL}, bo uporabljeno izvajalno okolje trenutnega procesa.
+	\item[\texttt{lpEnvironment}] Opcijski vhodni argument; kazalec na blok izvajalnega okolja novega procesa, ki je sestavljen iz ničelno terminiranega bloka ničelno terminiranih nizov formata ``ime=vrednost''; če podamo \texttt{NULL}, bo uporabljeno izvajalno okolje trenutnega procesa.
 	\item[\texttt{lpCurrentDirectory}] Opcijski vhodni argument; pot do imenika v katerem se bo proces začel izvajati; če podamo \texttt{NULL}, bo uporabljen trenutni imenik trenutnega procesa.
-	\item[\texttt{lpStartupInfo}] Obvezni vhodni argument; kazalnik na strukturo tipa \texttt{STARTUP\-INFO} ali \texttt{STARTUPINFOEX}, ki določa pozicijo okna, namizje, standardne ročice in atribute novega procesa.
-	\item[\texttt{lpProcessInformation}] Obvezni izhodni argument; kazalnik na strukturo tipa \texttt{PROCESS\-\_INFORMATION}, ki vsebuje ročici in identifikatorja procesa ter niti; ročice v strukturi je potrebno zapreti ko niso več potrebne.
+	\item[\texttt{lpStartupInfo}] Obvezni vhodni argument; kazalec na strukturo tipa \texttt{STARTUP\-INFO} ali \texttt{STARTUPINFOEX}, ki določa pozicijo okna, namizje, standardne ročice in atribute novega procesa.
+	\item[\texttt{lpProcessInformation}] Obvezni izhodni argument; kazalec na strukturo tipa \texttt{PROCESS\-\_INFORMATION}, ki vsebuje ročici in identifikatorja procesa ter niti; ročice v strukturi je potrebno zapreti ko niso več potrebne.
 \end{description}
 % TODO: dwCreationFlags, .exe is appended if no extension is provided, varnostna opomba pri prvih dveh argumentih
 
@@ -1452,7 +1448,7 @@ Ko želimo končati trenutni proces in vse niti procesa, uporabimo funkcijo:
 \begin{lstlisting}[style=func]
  void ExitProcess(UINT uExitCode);
 \end{lstlisting}
-Ta deluje podobno funkciji \texttt{exit} v Linux.
+Ta deluje podobno funkciji \texttt{exit} v Linuxu.
 
 Funkcija sprejme argument \texttt{uExitCode}, ki ga lahko prevzame druga nit s funkcijo \texttt{GetExitCodeProcess}.
 Funkcija v nobenem primeru ne vrne ničesar, saj se proces zaključi.
@@ -1463,7 +1459,7 @@ Ko želimo prisilno končati drug proces, uporabimo funkcijo:
 \begin{lstlisting}[style=func]
  BOOL TerminateProcess(HANDLE hProcess, UINT uExitCode);
 \end{lstlisting}
-Rezultat je podoben kot pri funkciji \texttt{kill} v Linux.
+Rezultat je podoben kot pri funkciji \texttt{kill} v Linuxu.
 
 Funkcija sprejme ročico ciljnega procesa (\texttt{hProcess}) in izhodno kodo procesa (\texttt{uExitCode}).
 Ročica ciljnega procesa mora imeti pravico \texttt{PROCESS\-\_TERMINATE}.
@@ -1530,7 +1526,7 @@ Za ustvarjanje novega dogodka uporabimo funkcijo:
 
 Funkcija sprejme štiri argumente:
 \begin{description}
-	\item[\texttt{lpEventAttributes}] Opcijski vhodni atribut; kazalnik na strukturo tipa \texttt{SE\-CURITY\_ATTRIBUTES}, ki določa varnostni desktiptor novega dogodka.
+	\item[\texttt{lpEventAttributes}] Opcijski vhodni atribut; kazalec na strukturo tipa \texttt{SE\-CURITY\_ATTRIBUTES}, ki določa varnostni desktiptor novega dogodka.
 	\item[\texttt{bManualReset}] Obvezni vhodni atribut; če podamo \texttt{TRUE}, bo objekt ročno ponastavljiv, v nasprotnem primeru se bo ponastavil avtomatsko, ko ga prva nit počaka.
 	\item[\texttt{bInitialState}] Obvezni vhodni atribut; začetno stanje.
 	\item[\texttt{lpName}] Opcijski vhodni atribut; ime novega objekta ali \texttt{NULL}; če objekt z istim imenom že obstaja, bo funkcija zahtevala dostop do obstočega objekta in ignorira ostale atribute.
@@ -1710,7 +1706,7 @@ Takrat uporabimo funkcijo:
  );
 \end{lstlisting}
 
-Funkcija \texttt{WaitForMultipleObjects} namesto ene ročice sprejme število objektov (\texttt{nCount}) in kazalnik na seznam ročic objektov (\texttt{*lpHandles}).
+Funkcija \texttt{WaitForMultipleObjects} namesto ene ročice sprejme število objektov (\texttt{nCount}) in kazalec na seznam ročic objektov (\texttt{*lpHandles}).
 Prav tako ima dodaten argument \texttt{bWaitAll}, ki ga lahko nastavimo na \texttt{TRUE}, če želimo počakati na vse objekte, ali na \texttt{FALSE}, da počakamo na prvi objekt, ki javi ``signalizirano stanje''.
 Spet imamo argument za maksimalni čas čakanja (\texttt{dwMilliseconds}).
 
@@ -2005,7 +2001,7 @@ Funkcija sprejme vhodni argument \texttt{who}, ki določa kateri proces želimo 
 	\item[\texttt{RUSAGE\_THREAD}] Opazuj trenutno nit.
 \end{description}
 
-Drugi argument funkcije je kazalnik na strukturo tipa \texttt{rusage}, ki funkcija napolni.
+Drugi argument funkcije je kazalec na strukturo tipa \texttt{rusage}, ki funkcija napolni.
 Ta struktura vsebuje informacije o porabi virov, kot so:
 \begin{itemize}
 	\item čas izvajanja v uporabniškem načinu (\texttt{ru\_utime}),
@@ -2147,7 +2143,7 @@ Da pridobimo informacije o niti, ki jo določa podana ročica, uporabimo funkcij
 
 Podana ročica mora imeti pravico \texttt{THREAD\-\_QUERY\_INFORMATION}.
 Analogno \texttt{GetProcessInformation}, poleg ročice funkcija sprejme še argument \texttt{ThreadInformationClass}, ki določa katero informacijo želimo pridobiti.
-Za željeni tip informacije moramo podati kazalnik na ustrezno strukturo (\texttt{ThreadInformation}), ki jo funkcija nato izpolni, in velikost te strukture (\texttt{ThreadInformationSize}).
+Za željeni tip informacije moramo podati kazalec na ustrezno strukturo (\texttt{ThreadInformation}), ki jo funkcija nato izpolni, in velikost te strukture (\texttt{ThreadInformationSize}).
 
 \subsubsection{Funkcija \texttt{GetThreadTimes}}
 
@@ -2163,7 +2159,7 @@ Da pridobimo časovni zapis niti, ki jo določa podana ročica, uporabimo funkci
 \end{lstlisting}
 
 Podana ročica mora imeti pravico \texttt{THREAD\_QUERY\_LIMITED\_INFORMATION}.
-Funkcija v podane kazalnike zapiše čas kreacije niti (\texttt{lpCreationTime}), čas končanja niti (\texttt{lpExitTime}), čas porabljen v jedrnem (\texttt{lpKernelTime}) in čas porabljen v uporabniškem načinu (\texttt{lpUserTime}).
+Funkcija v podane kazalce zapiše čas kreacije niti (\texttt{lpCreationTime}), čas končanja niti (\texttt{lpExitTime}), čas porabljen v jedrnem (\texttt{lpKernelTime}) in čas porabljen v uporabniškem načinu (\texttt{lpUserTime}).
 Vsi časi so podani v obliki strukture tipa \texttt{FILETIME}, ki jo lahko pretvorimo v bolj berljiv časovni zapis s funkcijo \texttt{FileTimeToSystemTime}.
 
 \subsubsection{Funkcija \texttt{GetExitCodeThread}}
@@ -2197,7 +2193,7 @@ Operacijska sistema sta bila izbrana na podlagi popularnosti in razširjenosti v
 Programi za Linux so napisani v C in prevedeni s prevajalnikom C iz zbirke prevajalnikov GNU (\textit{angl. GNU Compiler Collection -- GCC}).
 Programi za Windows pa so napisani v C++ in prevedeni s prevajalnikom Microsoft Visual C++ (MSVC).
 
-Potrebno je omeniti tudi, da bomo na Windows izklopili Windows Defender, saj ta lahko drastično upočasni izvajanje programov.
+Potrebno je omeniti tudi, da bomo na Windowsu izklopili Windows Defender, saj ta lahko drastično upočasni izvajanje programov.
 
 Izvorna koda vseh programov je na voljo na GitHub repozitoriju\footnote{\url{https://github.com/miha-meglic/diploma/tree/master/code}}.
 
@@ -2219,16 +2215,16 @@ Zato tu lahko pričakujemo kar precejšnje razlike v času izvajanja.
 
 Programi se med sabo ne razlikujejo preveč, zato si poglejmo samo izseka kode, ki izvajata meritev.
 
-V Linux bomo za merjenje izvajalnega časa uporabili funkcijo \texttt{clock\_gettime}:
+V Linuxu bomo za merjenje izvajalnega časa uporabili funkcijo \texttt{clock\_gettime}:
 \lstinputlisting[language=C]{code/linux/syscall_comparison/00_example.c}
 
-V Windows pa bomo uporabili funkcijo \texttt{QueryPerformanceCounter}:
+V Windowsu pa bomo uporabili funkcijo \texttt{QueryPerformanceCounter}:
 \lstinputlisting[language=C++]{code/windows/syscall_comparison/00_Example.cpp}
 
 Obe funkciji nam omogočata do mikrosekunde natančno merjenje časa izvajanja.
 Poleg tega bomo vsako meritev izvedli 100-krat in izračunali povprečje, da izločimo variabilnost, ki jo prinaša večopravilni sistem.
 
-Kot smo videli v razdelku \ref{sec:threads}, so niti v Linux implementirane kot lahkotni procesi.
+Kot smo videli v razdelku \ref{sec:threads}, so niti v Linuxu implementirane kot lahkotni procesi.
 To prinaša nekaj težav pri direktni primerjavi, saj jih Windows v celoti podpira v jedru, medtem ko Linux večji del implementacije prepušča uporabniškim knjižnicam.
 Načeloma polna implementacija prisilnega končanja niti zahteva signalizacijo preko sinhronizacijskih objektov ali deljenega pomnilnika \cite{Mueller_1993}, kar pa je izven obsega tega dela.
 Zato bomo v procesu preprosto implementirali signal \texttt{SIGUSR1}, ki bo končal vse odprte niti razen glavne.
@@ -2236,7 +2232,7 @@ V našem primeru to ne bo povzročilo težav, saj ustvarimo samo eno dodatno nit
 
 \subsection{Meritve in interpretacija}
 
-Iz grafa \ref{fig:syscall_comparison:times} hitro razberemo, da se vse štiri funkcije izvedejo hitreje v Linux kot v Windows.
+Iz grafa \ref{fig:syscall_comparison:times} hitro razberemo, da se vse štiri funkcije izvedejo hitreje v Linuxu kot v Windowsu.
 
 \begin{figure}[h!]
 	\begin{center}
@@ -2263,7 +2259,7 @@ Presenetljivo je, da se \texttt{kill} izvede hitreje za proces kot za nit, kar j
 Da dobimo bolj celovito sliko o izvajalnih časih, bomo primerjali tudi celotno izvajanje programa.
 Za ta namen bomo napisali program, ki bo:
 \begin{enumerate}
-	\item Ustvaril 2 grafična procesa -- na Linux bomo uporabili GNOME Text Editor, na Windows pa Notepad
+	\item Ustvaril 2 grafična procesa -- na Linuxu bomo uporabili GNOME Text Editor, na Windowsu pa Notepad
 	\item Izpisal PID obeh procesov
 	\item Ustvaril 10 niti, ki bodo neodvisno izračunale 40. število Fibonaccijevega zaporedja in zapisale rezultat v pomnilnik
 	\item Izpisal TID vseh ustvarjenih niti
@@ -2297,7 +2293,7 @@ Na grafu \ref{fig:program_comparison:times}, vidimo povprečne čase izvajanja p
 \end{figure}
 
 Windows odločno premaga Linux, kar je presenetljivo, saj smo pri prejšnjih primerjavah videli, da so dotični sistemski klici v Linuxu hitrejši.
-Če se osredotočimo na časa porabljena v posameznih izvajalnih kontekstih, vidimo, da je Linux porabi približno 1.5x toliko časa v uporabniškem načinu in skoraj 9x toliko v jedrnem načinu kot Windows.
+Če se osredotočimo na časa porabljena v posameznih izvajalnih kontekstih, vidimo, da je Linux porabil približno 1.5x toliko časa v uporabniškem in skoraj 9x toliko časa v jedrnem načinu kot Windows.
 Ker je čas porabljen v uporabniškem načinu proporcionalno veliko večji kot čas porabljen v jedru, lahko pričakujemo znatno izboljšanje z vključenimi optimizacijami.
 
 Na grafu \ref{fig:program_comparison:optimized_times} si pogledamo še povprečne čase izvajanja programa prevedenega z optimizacijami, in vidimo, da se je situacija skoraj popolnoma obrnila.
