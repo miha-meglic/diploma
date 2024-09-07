@@ -240,7 +240,7 @@ sorting=nty,
 	licenco, ki je enaka tej.
 	Podrobnosti licence so dostopne na spletni strani \href{http://creativecommons.si}{creativecommons.si} ali na Inštitutu za
 	intelektualno lastnino, Streliška 1, 1000 Ljubljana.
-																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																						
+																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																	
 	\vspace*{1cm}
 	\begin{center}% 0.66 / 0.89 = 0.741573033707865
 		\CcImageCc{0.741573033707865}\hspace*{1ex}\CcImageBy{1}\hspace*{1ex}\CcImageSa{1}%
@@ -350,6 +350,7 @@ Prav tako se zahvaljujem družini in prijateljem za podporo in spodbudo pri štu
 {\bf PID}     & Process Identifier                  & identifikator procesa                      \\
 {\bf PPID}    & Parent Process Identifier           & identifikator starša procesa               \\
 {\bf TID}     & Thread Identifier                   & identifikator niti                         \\
+{\bf TGID}    & Thread Group Identifier             & identifikator skupine niti                 \\
 \end{tabular}
 
 
@@ -562,7 +563,6 @@ Na najnižjem nivoju jedro implementira prekinitvene rutine (\textit{angl. Inter
 
 Na višjem nivoju ločujemo razne jedrne podsisteme v tri komponente: V/I komponenta, komponenta za upravljanje s pomnilnikom in komponenta za upravljanje procesov.
 
-%Vhodno-izhodna komponenta vsebuje vse sisteme za interakcijo z napravami sistema \cite{Tanenbaum_Bos_2023}.
 Vhodno-izhodna komponenta na najvišjem nivoju združuje vse V/I operacije pod navideznim datotečnim sistemom (\textit{angl. Virtual File System -- VFS}), ki omogoča uporabniškim programom uniformen dostop do različnih datotečnih sistemov.
 Vidimo, da so pod njim zbrane vse vrste različnih navideznih kot tudi fizičnih naprav.
 Temu je tako, ker VFS implementira UNIX koncept ``everything is a file'' \cite{Garrels_2008} oz. bolj specifično ``everything is a file descriptor'' \cite{LWN_Brown_2010}, kjer je osnovna ideja, da se vsi sistemski resursi (npr. naprave, procesi, omrežje) predstavijo kot datoteke.
@@ -574,7 +574,7 @@ V diagramu so gonilniki omrežnih naprav zapisani posebej, ker so implementirani
 
 Komponenta za upravljanje pomnilnika skrbi za povezavo virtualnega in fizičnega pomnilnika, povezane strani v pomnilniku, predpomnilnik in prenašanje novih strani v pomnilnik \cite{Tanenbaum_Bos_2023}.
 
-Komponenta za upravljanje procesov pa skrbi za življenjske cikle in razvrščanje procesov \cite{Tanenbaum_Bos_2023}.
+Komponenta za upravljanje procesov pa skrbi za življenjske cikle in razvr\-ščanje procesov \cite{Tanenbaum_Bos_2023}.
 
 Čisto na vrhu vidimo vmesnik sistemskih klicev, ki ga uporabljajo uporabniški programi za komunikacijo z jedrom.
 
@@ -604,7 +604,6 @@ Leta 2006 je bil izdan Windows Vista, ki kljub mnogim izboljšavam, zaradi teža
 Med najbolj ključnimi izboljšavami je bil premik grafične implementacije v upravljalnik oken (\textit{angl. desktop window manager}), ki se je izvajal kot uporabniški proces.
 
 Naslednji večji skok je nastopil z Windows 7, ki je bil izdan leta 2009, in je odpravil večino težav svojega predhodnika.
-% TODO: Win 8, 10, 11
 
 \subsection{Arhitektura} \label{ssec:windows:architecture}
 
@@ -736,10 +735,6 @@ Poleg tega ima Windows še druga gnezda kot vidimo v tabeli \ref{tab:windows_reg
 
 
 \chapter{Programski vmesniki}
-
-% Preden pa se podamo v primerjave posameznih sistemskih klicev, si poglejmo še, kakšne so implementacijske razlike med sistemskimi klici v Linuxu in Windowsu.
-% Tu še enkrat poudarjam, da so razlike med sistemskimi klici odvisne od arhitekture procesorja.
-% V vseh konkretnih primerih bom uporabljal ukazni nabor in imena registrov arhitekture \textbf{x86}.
 
 \section{Programski vmesnik} \label{sec:syscalls}
 
@@ -944,9 +939,6 @@ Novejše verzije jedra Linux implementirajo tudi podporo za niti in večnitne pr
 V osnovi si lahkotni procesi lahko delijo vire kot so pomnilniški prostor, odprte datoteke oz. datotečne opisnike ipd.
 Istočasno pa omogočajo neodvisno razvrščanje za izvajanje, kar jih ločuje od uporabniške implementacije, ki se je uporabljala pred jedrno podporo.
 
-Za združevanje niti Linux implementira koncept skupine niti, ki je množica lahkotnih procesov, ki se obnašajo kot celota v smislu sistemskih klicev \texttt{getpid}, \texttt{kill} in \texttt{exit}.
-% TODO: Premakni pod niti!
-
 \subsection{Procesni deskriptor}
 
 Kot smo že omenili, jedro beleži vse relevantne informacije procesa v posebni podatkovni strukturi.
@@ -982,7 +974,7 @@ Vsak proces v tem dinamičnem pomnilniku hrani dve podatkovni strukturi -- majhn
 
 Za naključne vpoglede in poizvedbe procesnih deskriptorjev Linux prav tako vzdržuje zgoščene tabele za polja \texttt{pid}, \texttt{tgid}, \texttt{pgrp} in \texttt{session} \cite{Bovet_Cesati_2005}.
 
-\subsection{Življenjski cikel} \label{ssec:linux_process:lifecycle} % AKA stanje procesa
+\subsection{Življenjski cikel} \label{ssec:linux_process:lifecycle}
 
 Omenili smo, da imajo procesi v Linuxu specifično polje \texttt{state}, ki nam pove v katerem stanju življenjskega cikla je proces.
 Možna stanja za spremenljivko so \cite{Bovet_Cesati_2005}:
@@ -1058,7 +1050,6 @@ Implementacijo teh si bomo pobližje ogledali v razdelku \ref{ssec:windows_proce
 Kot smo videli pri Linuxu, ima tudi v proces v Windowsu kazalec na starša.
 Če starš ne obstaja več, se ta informacija ne posodobi, zato je mogoče da se ta informacija nanaša na neobstoječ proces.
 Za razliko od Linuxa pa to ni problem, saj se nič ne zanaša na to informacijo.
-% TODO: Drugi tipi procesov
 
 Podobno kot pri Linuxu tudi Windows implementira koncept niti, vendar so le-te ločena entiteta od procesa.
 Zato je nit nosilka ključnih komponent za izvajanje procesa, kot so:
@@ -1083,7 +1074,6 @@ Za razliko od vlaken pa se jedro zaveda uporabniško razvrščevalnih niti in ra
 
 Če pa se pomaknemo nivo višje od procesa, Windows implementira koncept poslov (\textit{angl. job}), ki omogočajo upravljanje in manipulacijo skupine procesov kot enoto.
 Posli nekoliko kompenzirajo pomanjkanje strukturiranega procesnega drevesa in so lahko v mnogih pogledih celo bolj zmogljivi kot procesna drevesa Unixu podobnih sistemov \cite{Yosifovich_Russinovich_Solomon_Ionescu_2017}.
-% TODO: Dopolni Ch.3-Jobs
 
 \subsection{Strukturi EPROCESS in KPROCESS} \label{ssec:windows_process:eprocess}
 
@@ -1375,7 +1365,6 @@ Pa si jih oglejmo kar po vrsti:
 	\item[\texttt{lpStartupInfo}] Obvezni vhodni argument; kazalec na strukturo tipa \texttt{STARTUP\-INFO} ali \texttt{STARTUPINFOEX}, ki določa pozicijo okna, namizje, standardne ročice in atribute novega procesa.
 	\item[\texttt{lpProcessInformation}] Obvezni izhodni argument; kazalec na strukturo tipa \texttt{PROCESS\-\_INFORMATION}, ki vsebuje ročici in identifikatorja procesa ter niti; ročice v strukturi je potrebno zapreti ko niso več potrebne.
 \end{description}
-% TODO: dwCreationFlags, .exe is appended if no extension is provided, varnostna opomba pri prvih dveh argumentih
 
 Funkcija pri uspešni izvedbi vrne neničelno vrednost, v primeru napake pa \texttt{0}.
 
@@ -1478,6 +1467,9 @@ Nova nit oz. lahkotni proces si namreč deli PID in posledično tudi PPID s star
 To pomeni, da je signal \texttt{SIGCHLD} ob končanju niti poslan staršu procesa, ki jo je ustvarila.
 Zato moramo ročno implementirati sinhronizacijo niti, kjer je najbolj preprosta rešitev uporaba deljenega pomnilnika, vendar implementacija lahko hitro postane nepregledna.
 Zato v praksi običajno uporabljamo POSIX niti (\textit{angl. POSIX threads / pthreads}), implementirane v knjižnici glibc.
+
+Pomembno je omeniti tudi, da Linux združuje niti v skupine, ki se obnašajo kot celota v smislu sistemskih klicev \texttt{getpid}, \texttt{kill} in \texttt{exit}.
+Niti, ki so ustvarjene z zastavico \texttt{CLONE\_THREAD}, so del iste skupine niti in si delijo identifikator procesa oz. identifikator skupine niti (\textit{angl. Thread Group ID -- TGID}).
 
 \subsubsection{Funkciji \texttt{clone} in \texttt{clone3}}
 
@@ -1594,7 +1586,7 @@ Funkcija zahteva ročico ciljnega procesa s pravicami \texttt{PROCESS\_CREATE\-\
 
 Funkcija sprejme enake argumente kot \texttt{CreateThread}, vendar doda prvi argument, ki določa proces, v katerem naj se nit ustvari.
 
-Poleg tega funkcija \texttt{CreateRemoteThreadEx}, dodaja argument \texttt{lpAttributeList}, preko katerega med drugim lahko določamo željeno procesorsko jedro, dedovane ročice in omogoča ustvarjanje uporabniško razvrščevalnih niti.
+Poleg tega funkcija \texttt{CreateRemoteThreadEx}, dodaja argument \texttt{lpAttri\-buteList}, preko katerega med drugim lahko določamo željeno procesorsko jedro, dedovane ročice in omogoča ustvarjanje uporabniško razvrščevalnih niti.
 
 Tako kot \texttt{CreateThread}, obe funkciji vrneta ročico nove niti.
 
@@ -1629,7 +1621,7 @@ Poleg teh pa imajo tudi niti nabor specifičnih zastavic:
 	\item[\texttt{THREAD\_QUERY\_INFORMATION}] Omogoča pridobivanje nekaterih informacij niti.
 	\item[\texttt{THREAD\_QUERY\_LIMITED\_INFORMATION}] Omogoča pridobivanja podmnožice informacij nitita pravica je avtomatsko omogočena, če je podana zastavica \texttt{THREAD\_QUERY\_INFORMATION}.
 	\item[\texttt{THREAD\_SET\_CONTEXT}] Omogoča spreminjanje konteksta niti.
-	\item[\texttt{THREAD\_SET\_INFORMATION}] Omogoča nastavljanje določenih informacij v objektu niti.
+	\item[\texttt{THREAD\_SET\_INFORMATION}] Omogoča nastavljanje določenih informacij v obje\-ktu niti.
 	\item[\texttt{THREAD\_SET\_LIMITED\_INFORMATION}] Omogoča nastavljanje podmnožice informacij niti; ta pravica je avtomatsko omogočena, če je podana zastavica \texttt{THREAD\_SET\_INFORMATION}.
 	\item[\texttt{THREAD\_SET\_THREAD\_TOKEN}] Omogoča nastavljanje imitacijskega žetona niti.
 	\item[\texttt{THREAD\_SUSPEND\_RESUME}] Omogoča zaustavitev in nadaljevanje izvajanja niti.
@@ -2077,9 +2069,9 @@ Da pridobimo časovni zapis procesa, ki ga določa podana ročica, uporabimo fun
 \end{lstlisting}
 
 Podana ročica mora spet imeti pravico \texttt{PROCESS\_QUERY\_LIMITED\-\_INFOR\-MATION}.
-Funkcija v podane kazalce zapiše čas kreacije procesa (\texttt{lpCreationTime}), čas končanja procesa (\texttt{lpExitTime}), čas porabljen v jedrnem (\texttt{lpKernelTime}) in čas porabljen v uporabniškem načinu (\texttt{lpUserTime}).
+Funkcija v podane kazalce zapiše čas kreacije procesa (\texttt{lpCreation\-Time}), čas končanja procesa (\texttt{lpExitTime}), čas porabljen v jedrnem (\texttt{lpKer\-nelTime}) in čas porabljen v uporabniškem načinu (\texttt{lpUserTime}).
 Vsi časi so podani v obliki strukture tipa \texttt{FILETIME}.
-Windows ponuja funkcijo \texttt{FileTimeToSystem\-Time}, ki nam omogoča pretvorbo tega zapisa v bolj berljiv časovni zapis.
+Windows ponuja funkcijo \texttt{FileTime\-ToSystemTime}, ki nam omogoča pretvorbo tega zapisa v bolj berljiv časovni zapis.
 
 \subsubsection{Funkcija \texttt{GetExitCodeProcess}}
 
@@ -2143,7 +2135,7 @@ Da pridobimo informacije o niti, ki jo določa podana ročica, uporabimo funkcij
 
 Podana ročica mora imeti pravico \texttt{THREAD\-\_QUERY\_INFORMATION}.
 Analogno \texttt{GetProcessInformation}, poleg ročice funkcija sprejme še argument \texttt{ThreadInformationClass}, ki določa katero informacijo želimo pridobiti.
-Za željeni tip informacije moramo podati kazalec na ustrezno strukturo (\texttt{ThreadInformation}), ki jo funkcija nato izpolni, in velikost te strukture (\texttt{ThreadInformationSize}).
+Za željeni tip informacije moramo podati kazalec na ustrezno strukturo (\texttt{Thread\-Information}), ki jo funkcija nato izpolni, in velikost te strukture (\texttt{Thread\-InformationSize}).
 
 \subsubsection{Funkcija \texttt{GetThreadTimes}}
 
